@@ -1,0 +1,8 @@
+route_id,direction_id,direction_name
+439,0,No direction
+441,0,No direction
+442,0,No direction
+440,0,No direction
+443,0,No direction
+1380,0,No direction
+633,0,No direction

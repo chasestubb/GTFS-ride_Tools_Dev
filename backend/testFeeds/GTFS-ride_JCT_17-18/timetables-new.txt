@@ -1,0 +1,8 @@
+timetable_id,route_id,direction_id,start_date,end_date,monday,tuesday,wednesday,thursday,friday,saturday,sunday,route_label,service_notes,direction_label,orientation
+1,439,0,20130101,20180101,1,1,1,1,1,0,0,6th-7th St - RCC,Year round,No direction,horizontal
+2,441,0,20130101,20180101,1,1,1,1,1,0,0,Bridge Street,Year round,No direction,horizontal
+3,442,0,20130101,20180101,1,1,1,1,1,0,0,Cave Junction,Year round,No direction,horizontal
+4,440,0,20130101,20180101,1,1,1,1,1,0,0,Fruitdale Ave,Year round,No direction,horizontal
+5,443,0,20130101,20180101,1,1,1,1,1,0,0,"Merlin, Sunny Valley and Wolf Creek",Year round,No direction,horizontal
+6,1380,0,20140902,20180101,1,1,1,1,1,0,0,Rogue Valley Commuter Line,Year Round Service,No direction,horizontal
+7,633,0,20130101,20180101,1,1,1,1,1,0,0,Walmart - GPHS,Year round,No direction,horizontal

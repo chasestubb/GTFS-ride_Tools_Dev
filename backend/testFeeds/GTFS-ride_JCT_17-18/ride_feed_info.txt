@@ -1,0 +1,2 @@
+ride_files,ride_start_date,ride_end_date,gtfs_feed_date,default_currency_type,ride_feed_version
+2,20170701,20170731,,,USA-Pacific: 13-Dec-2016 17:28

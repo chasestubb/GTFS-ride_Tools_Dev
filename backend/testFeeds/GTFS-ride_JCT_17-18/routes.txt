@@ -1,0 +1,8 @@
+agency_id,route_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color
+94,439,10,6th/7th St - RCC,,3,http://www.co.josephine.or.us/Page.asp?NavID=628,0367DF,FFFFFF
+94,440,20,Fruitdale Ave,,3,http://www.co.josephine.or.us/Page.asp?NavID=628,7A34A6,FFFFFF
+94,633,35,Walmart / GPHS,,3,http://www.co.josephine.or.us/Page.asp?NavID=628,7ADB35,000000
+94,441,40,Bridge Street,,3,http://www.co.josephine.or.us/Page.asp?NavID=628,EFA74B,FFFFFF
+94,442,50,Cave Junction,,3,http://www.co.josephine.or.us/Page.asp?NavID=628,B303D7,FFFFFF
+94,443,80,"Merlin, Sunny Valley and Wolf Creek",,3,http://www.co.josephine.or.us/Page.asp?NavID=628,00FFFF,000000
+225,1380,,Rogue Valley Commuter Line,Connects Grants Pass to Medford,3,http://www.co.josephine.or.us/Page.asp?NavID=1718,9F5F47,FFFFFF
