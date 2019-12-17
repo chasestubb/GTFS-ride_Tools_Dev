@@ -15,7 +15,7 @@ function App() {
 					{/* Sidebar - Brand */}
 					<a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
 						<div class="sidebar-brand-icon rotate-n-15">
-							<i class="fas fa-laugh-wink"></i>
+							<i class="fa fa-laugh-wink"></i>
 						</div>
 						<div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
 					</a>
@@ -26,7 +26,7 @@ function App() {
 					{/* Nav Item - Dashboard */}
 					<li class="nav-item active">
 						<a class="nav-link" href="index.html">
-							<i class="fas fa-fw fa-tachometer-alt"></i>
+							<i class="fa fa-fw fa-tachometer-alt"></i>
 							<span>Dashboard</span></a>
 					</li>
 		
@@ -41,7 +41,7 @@ function App() {
 					{/* Nav Item - Pages Collapse Menu */}
 					<li class="nav-item">
 						<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-							<i class="fas fa-fw fa-cog"></i>
+							<i class="fa fa-fw fa-cog"></i>
 							<span>Components</span>
 						</a>
 						<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -56,7 +56,7 @@ function App() {
 					{/* Nav Item - Utilities Collapse Menu */}
 					<li class="nav-item">
 						<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-							<i class="fas fa-fw fa-wrench"></i>
+							<i class="fa fa-fw fa-wrench"></i>
 							<span>Utilities</span>
 						</a>
 						<div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
@@ -81,7 +81,7 @@ function App() {
 					{/* Nav Item - Pages Collapse Menu */}
 					<li class="nav-item">
 						<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-							<i class="fas fa-fw fa-folder"></i>
+							<i class="fa fa-fw fa-folder"></i>
 							<span>Pages</span>
 						</a>
 						<div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
@@ -101,14 +101,14 @@ function App() {
 					{/* Nav Item - Charts */}
 					<li class="nav-item">
 						<a class="nav-link" href="charts.html">
-							<i class="fas fa-fw fa-chart-area"></i>
+							<i class="fa fa-fw fa-chart-area"></i>
 							<span>Charts</span></a>
 					</li>
 		
 					{/* Nav Item - Tables */}
 					<li class="nav-item">
 						<a class="nav-link" href="tables.html">
-							<i class="fas fa-fw fa-table"></i>
+							<i class="fa fa-fw fa-table"></i>
 							<span>Tables</span></a>
 					</li>
 		
@@ -143,7 +143,7 @@ function App() {
 									<input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" />
 									<div class="input-group-append">
 										<button class="btn btn-primary" type="button">
-											<i class="fas fa-search fa-sm"></i>
+											<i class="fa fa-search fa-sm"></i>
 										</button>
 									</div>
 								</div>
@@ -155,7 +155,7 @@ function App() {
 								{/* Nav Item - Search Dropdown (Visible Only XS) */}
 								<li class="nav-item dropdown no-arrow d-sm-none">
 									<a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="fas fa-search fa-fw"></i>
+										<i class="fa fa-search fa-fw"></i>
 									</a>
 									{/* Dropdown - Messages */}
 									<div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
@@ -164,7 +164,7 @@ function App() {
 												<input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" />
 												<div class="input-group-append">
 													<button class="btn btn-primary" type="button">
-														<i class="fas fa-search fa-sm"></i>
+														<i class="fa fa-search fa-sm"></i>
 													</button>
 												</div>
 											</div>
@@ -175,7 +175,7 @@ function App() {
 								{/* Nav Item - Alerts */}
 								<li class="nav-item dropdown no-arrow mx-1">
 									<a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="fas fa-bell fa-fw"></i>
+										<i class="fa fa-bell fa-fw"></i>
 										{/* Counter - Alerts */}
 										<span class="badge badge-danger badge-counter">3+</span>
 									</a>
@@ -187,7 +187,7 @@ function App() {
 										<a class="dropdown-item d-flex align-items-center" href="#">
 											<div class="mr-3">
 												<div class="icon-circle bg-primary">
-													<i class="fas fa-file-alt text-white"></i>
+													<i class="fa fa-file-alt text-white"></i>
 												</div>
 											</div>
 											<div>
@@ -198,7 +198,7 @@ function App() {
 										<a class="dropdown-item d-flex align-items-center" href="#">
 											<div class="mr-3">
 												<div class="icon-circle bg-success">
-													<i class="fas fa-donate text-white"></i>
+													<i class="fa fa-donate text-white"></i>
 												</div>
 											</div>
 											<div>
@@ -209,7 +209,7 @@ function App() {
 										<a class="dropdown-item d-flex align-items-center" href="#">
 											<div class="mr-3">
 												<div class="icon-circle bg-warning">
-													<i class="fas fa-exclamation-triangle text-white"></i>
+													<i class="fa fa-exclamation-triangle text-white"></i>
 												</div>
 											</div>
 											<div>
@@ -224,7 +224,7 @@ function App() {
 								{/* Nav Item - Messages */}
 								<li class="nav-item dropdown no-arrow mx-1">
 									<a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="fas fa-envelope fa-fw"></i>
+										<i class="fa fa-envelope fa-fw"></i>
 										{/* Counter - Messages */}
 										<span class="badge badge-danger badge-counter">7</span>
 									</a>
@@ -288,20 +288,20 @@ function App() {
 									{/* Dropdown - User Information */}
 									<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
 										<a class="dropdown-item" href="#">
-											<i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+											<i class="fa fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
 											Profile
 										</a>
 										<a class="dropdown-item" href="#">
-											<i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+											<i class="fa fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
 											Settings
 										</a>
 										<a class="dropdown-item" href="#">
-											<i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+											<i class="fa fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
 											Activity Log
 										</a>
 										<div class="dropdown-divider"></div>
 										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-											<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+											<i class="fa fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
 											Logout
 										</a>
 									</div>
@@ -318,7 +318,7 @@ function App() {
 							{/* Page Heading */}
 							<div class="d-sm-flex align-items-center justify-content-between mb-4">
 								<h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-								<a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+								<a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fa fa-download fa-sm text-white-50"></i> Generate Report</a>
 							</div>
 		
 							{/* Content Row */}
@@ -334,7 +334,7 @@ function App() {
 													<div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
 												</div>
 												<div class="col-auto">
-													<i class="fas fa-calendar fa-2x text-gray-300"></i>
+													<i class="fa fa-calendar fa-2x text-gray-300"></i>
 												</div>
 											</div>
 										</div>
@@ -351,7 +351,7 @@ function App() {
 													<div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
 												</div>
 												<div class="col-auto">
-													<i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+													<i class="fa fa-dollar-sign fa-2x text-gray-300"></i>
 												</div>
 											</div>
 										</div>
@@ -377,7 +377,7 @@ function App() {
 													</div>
 												</div>
 												<div class="col-auto">
-													<i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+													<i class="fa fa-clipboard-list fa-2x text-gray-300"></i>
 												</div>
 											</div>
 										</div>
@@ -394,7 +394,7 @@ function App() {
 													<div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
 												</div>
 												<div class="col-auto">
-													<i class="fas fa-comments fa-2x text-gray-300"></i>
+													<i class="fa fa-comments fa-2x text-gray-300"></i>
 												</div>
 											</div>
 										</div>
@@ -414,7 +414,7 @@ function App() {
 											<h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
 											<div class="dropdown no-arrow">
 												<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+													<i class="fa fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
 												</a>
 												<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
 													<div class="dropdown-header">Dropdown Header:</div>
@@ -442,7 +442,7 @@ function App() {
 											<h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
 											<div class="dropdown no-arrow">
 												<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-													<i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+													<i class="fa fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
 												</a>
 												<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
 													<div class="dropdown-header">Dropdown Header:</div>
@@ -460,13 +460,13 @@ function App() {
 											</div>
 											<div class="mt-4 text-center small">
 												<span class="mr-2">
-													<i class="fas fa-circle text-primary"></i> Direct
+													<i class="fa fa-circle text-primary"></i> Direct
 												</span>
 												<span class="mr-2">
-													<i class="fas fa-circle text-success"></i> Social
+													<i class="fa fa-circle text-success"></i> Social
 												</span>
 												<span class="mr-2">
-													<i class="fas fa-circle text-info"></i> Referral
+													<i class="fa fa-circle text-info"></i> Referral
 												</span>
 											</div>
 										</div>
@@ -617,7 +617,7 @@ function App() {
 		
 			{/* Scroll to Top Button*/}
 			<a class="scroll-to-top rounded" href="#page-top">
-				<i class="fas fa-angle-up"></i>
+				<i class="fa fa-angle-up"></i>
 			</a>
 		
 			{/* Logout Modal*/}
