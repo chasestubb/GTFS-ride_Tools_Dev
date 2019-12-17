@@ -1,5 +1,4 @@
 import React from 'react'
-//import logo_white from "img/isolated-monochrome-white.svg"
 
 export default () => {
 	return (
@@ -10,19 +9,20 @@ export default () => {
 						<div className="sidebar-brand-icon sidebar-logo">
 							<img src="img/isolated-monochrome-white.svg" alt="GTFS-ride logo" />
 						</div>
-						<div className="sidebar-brand-text mx-3">GTFS-ride</div>
+						<div className="sidebar-brand-text mx-3">GTFS-ride Tools</div>
 					</a>
 		
 					{/* Divider */}
 					<hr className="sidebar-divider my-0" />
 		
-					{/* Nav Item - Dashboard */}
+					{/* Nav Item - Home */}
 					<li className="nav-item active">
 						<a className="nav-link" href="index.html">
-							<i className="fa fa-fw fa-tachometer-alt"></i>
-							<span>Dashboard</span></a>
+						<i class="fas fa-home"></i>
+							<span>Home</span></a>
 					</li>
-		
+
+					
 					{/* Divider */}
 					<hr className="sidebar-divider" />
 
