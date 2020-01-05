@@ -10286,6 +10286,7 @@ a:focus {
     font-size: 2rem;
   }
   .sidebar .sidebar-brand .sidebar-brand-text {
+    color: #fff;
     display: inline;
   }
   .sidebar .sidebar-heading {
