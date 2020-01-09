@@ -10,7 +10,8 @@ class Sidebar extends React.Component{
 	// handles sending navigation data to App.js
 	navigate(item){
 		this.setState({nav: item}); // locally sets the nav state for the sidebar
-		this.props.onNavChange(item); // sends the above to the App.js
+		this.props.onNavChange(item); // invokes the onNavChange property on <Sidebar> element in App.js
+		                              // (sends this.state.nav to App.js)
 	}
 
 	render(){

@@ -17,17 +17,19 @@ class App extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {nav: "home", title: "GTFS-ride Tools"};
-		this.navChange = this.navChange.bind(this);
+		this.navChange = this.navChange.bind(this); // required to make onNavChange={this.navChange} work
 	}
 
 	// handles receiving data from the sidebar
 	// selectedNav is where the item from sidebar.jsx -> Sidebar -> navigate(item) received
 	navChange(selectedNav) {
+
+		// set the navigation state of the page
 		this.setState({nav: selectedNav});
+
+		// dynamically change the page title on the topbar
+		// selectedNav and this.state.nav use the same naming convention as the sidebar nav buttons
 		switch (selectedNav){
-			case "home":
-				this.setState({title: "GTFS-ride Tools"});
-				break;
 			case "info":
 				this.setState({title: "GTFS-ride Info"});
 				break;
@@ -61,7 +63,7 @@ class App extends React.Component{
 			case "sc":
 				this.setState({title: "GTFS-ride Service Changes"});
 				break;
-			default:
+			default: // home, 404, etc.
 				this.setState({title: "GTFS-ride Tools"});
 				break;
 		}
@@ -85,6 +87,7 @@ class App extends React.Component{
 
 					{/* see explanation on sidebar.jsx */}
 					<Sidebar onNavChange={this.navChange}></Sidebar>
+					{/* onNavChange also exists in sidebar.jsx -> Sidebar -> navigate(item)*/}
 			
 					{/* Content Wrapper */}
 					<div id="content-wrapper" className="d-flex flex-column">
