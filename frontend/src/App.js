@@ -31,7 +31,7 @@ class App extends React.Component{
 		// selectedNav and this.state.nav use the same naming convention as the sidebar nav buttons
 		switch (selectedNav){
 			case "info":
-				this.setState({title: "GTFS-ride Info"});
+				this.setState({title: "GTFS-ride Feed Info"});
 				break;
 			case "fc":
 				this.setState({title: "GTFS-ride Feed Creation"});

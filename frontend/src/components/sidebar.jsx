@@ -27,7 +27,7 @@ class Sidebar extends React.Component{
 			homebtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-home"></i>
+					<i className="fas fa-home"></i>
 						<span>Home/About</span></a>
 				</li>
 			)
@@ -35,7 +35,7 @@ class Sidebar extends React.Component{
 			homebtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.navigate("home")}>
-					<i class="fas fa-home"></i>
+					<i className="fas fa-home"></i>
 						<span>Home/About</span></a>
 				</li>
 			)
@@ -46,16 +46,16 @@ class Sidebar extends React.Component{
 			infobtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-info-circle"></i>
-						<span>Info</span></a>
+					<i className="fas fa-info-circle"></i>
+						<span>Feed Info</span></a>
 				</li>
 			)
 		} else {
 			infobtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.navigate("info")}>
-					<i class="fas fa-info-circle"></i>
-						<span>Info</span></a>
+					<i className="fas fa-info-circle"></i>
+						<span>Feed Info</span></a>
 				</li>
 			)
 		}
@@ -65,7 +65,7 @@ class Sidebar extends React.Component{
 			fcbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-file-archive"></i>
+					<i className="fas fa-file-archive"></i>
 						<span>Feed Creation</span></a>
 				</li>
 			)
@@ -73,7 +73,7 @@ class Sidebar extends React.Component{
 			fcbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "fc"})}>
-					<i class="fas fa-file-archive"></i>
+					<i className="fas fa-file-archive"></i>
 						<span>Feed Creation</span></a>
 				</li>
 			)
@@ -84,7 +84,7 @@ class Sidebar extends React.Component{
 			nsbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-project-diagram"></i>
+					<i className="fas fa-project-diagram"></i>
 						<span>Network State</span></a>
 				</li>
 			)
@@ -92,7 +92,7 @@ class Sidebar extends React.Component{
 			nsbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ns"})}>
-					<i class="fas fa-project-diagram"></i>
+					<i className="fas fa-project-diagram"></i>
 						<span>Network State</span></a>
 				</li>
 			)
@@ -103,7 +103,7 @@ class Sidebar extends React.Component{
 			diffbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-not-equal"></i>
+					<i className="fas fa-not-equal"></i>
 						<span>Diff</span></a>
 				</li>
 			)
@@ -111,7 +111,7 @@ class Sidebar extends React.Component{
 			diffbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "diff"})}>
-					<i class="fas fa-not-equal"></i>
+					<i className="fas fa-not-equal"></i>
 						<span>Diff</span></a>
 				</li>
 			)
@@ -122,7 +122,7 @@ class Sidebar extends React.Component{
 			cleanbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-broom"></i>
+					<i className="fas fa-broom"></i>
 							<span>Clean</span></a>
 				</li>
 			)
@@ -130,7 +130,7 @@ class Sidebar extends React.Component{
 			cleanbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "clean"})}>
-					<i class="fas fa-broom"></i>
+					<i className="fas fa-broom"></i>
 							<span>Clean</span></a>
 				</li>
 			)
@@ -141,7 +141,7 @@ class Sidebar extends React.Component{
 			tsbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-calendar-day"></i>
+					<i className="fas fa-calendar-day"></i>
 						<span>Time Split</span></a>
 				</li>
 			)
@@ -149,7 +149,7 @@ class Sidebar extends React.Component{
 			tsbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ts"})}>
-					<i class="fas fa-calendar-day"></i>
+					<i className="fas fa-calendar-day"></i>
 						<span>Time Split</span></a>
 				</li>
 			)
@@ -160,7 +160,7 @@ class Sidebar extends React.Component{
 			tmbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-calendar-alt"></i>
+					<i className="fas fa-calendar-alt"></i>
 						<span>Time Merge</span></a>
 				</li>
 			)
@@ -168,7 +168,7 @@ class Sidebar extends React.Component{
 			tmbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "tm"})}>
-					<i class="fas fa-calendar-alt"></i>
+					<i className="fas fa-calendar-alt"></i>
 						<span>Time Merge</span></a>
 				</li>
 			)
@@ -179,7 +179,7 @@ class Sidebar extends React.Component{
 			rmbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-object-group"></i>
+					<i className="fas fa-object-group"></i>
 						<span>Ridership Merge</span></a>
 				</li>
 			)
@@ -187,7 +187,7 @@ class Sidebar extends React.Component{
 			rmbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "rm"})}>
-					<i class="fas fa-object-group"></i>
+					<i className="fas fa-object-group"></i>
 						<span>Ridership Merge</span></a>
 				</li>
 			)
@@ -198,7 +198,7 @@ class Sidebar extends React.Component{
 			asbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-landmark"></i>
+					<i className="fas fa-landmark"></i>
 						<span>Agency Split</span></a>
 				</li>
 			)
@@ -206,7 +206,7 @@ class Sidebar extends React.Component{
 			asbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "as"})}>
-					<i class="fas fa-landmark"></i>
+					<i className="fas fa-landmark"></i>
 						<span>Agency Split</span></a>
 				</li>
 			)
@@ -217,7 +217,7 @@ class Sidebar extends React.Component{
 			rabtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-search"></i>
+					<i className="fas fa-search"></i>
 						<span>Ridership Anomaly</span></a>
 				</li>
 			)
@@ -225,7 +225,7 @@ class Sidebar extends React.Component{
 			rabtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ra"})}>
-					<i class="fas fa-search"></i>
+					<i className="fas fa-search"></i>
 						<span>Ridership Anomaly</span></a>
 				</li>
 			)
@@ -236,7 +236,7 @@ class Sidebar extends React.Component{
 			scbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i class="fas fa-edit"></i>
+					<i className="fas fa-edit"></i>
 						<span>Service Changes</span></a>
 				</li>
 			)
@@ -244,7 +244,7 @@ class Sidebar extends React.Component{
 			scbtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.setState({nav: "sc"})}>
-					<i class="fas fa-edit"></i>
+					<i className="fas fa-edit"></i>
 						<span>Service Changes</span></a>
 				</li>
 			)
