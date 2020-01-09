@@ -6,7 +6,7 @@ import HomeAbout from "./components/home-about"
 import Info from "./components/info"
 
 class App extends React.Component{
-	constructor(props){
+	constructor(props){ 
 		super(props);
 		this.state = {nav: ""};
 	}
@@ -52,7 +52,7 @@ class App extends React.Component{
 						<footer className="sticky-footer bg-white">
 							<div className="container my-auto">
 								<div className="copyright text-center my-auto">
-									<span>Copyright &copy; Your Website 2019</span>
+									<span>Copyright &copy; GTFS-ride 2020</span>
 								</div>
 							</div>
 						</footer>
