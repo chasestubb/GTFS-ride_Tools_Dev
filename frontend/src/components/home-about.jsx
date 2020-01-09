@@ -4,9 +4,9 @@ export default () => {
 	return (
 		<div>
 			{/* Page Heading */}
-			<div className="d-sm-flex align-items-center justify-content-between mb-4">
+			{/*<div className="d-sm-flex align-items-center justify-content-between mb-4">
 				<h1 className="h3 mb-0 text-gray-800"><br />GTFS-ride Tools</h1>
-			</div>
+			</div>*/}
 			
 			{/* Content Row */}
 			<div className="row">

@@ -34,7 +34,7 @@ class App extends React.Component{
 						{/* Main Content */}
 						<div id="content">
 			
-							{/*<Topbar></Topbar>*/}
+							<Topbar title="GTFS-ride Tools"></Topbar>
 			
 							{/* Begin Page Content */}
 							<div className="container-fluid">
