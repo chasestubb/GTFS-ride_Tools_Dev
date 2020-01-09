@@ -1,15 +1,52 @@
 import React from 'react';
 import './App.css';
+
+// the general elements
 import Sidebar from "./components/sidebar"
 import Topbar from "./components/topbar"
+
+// the contents
 import HomeAbout from "./components/home-about"
 import Info from "./components/info"
+import FC from "./components/fc"
+import NS from "./components/ns"
+import Diff from "./components/diff"
+import Clean from "./components/clean"
+import TS from "./components/ts"
+import TM from "./components/tm"
+import RM from "./components/rm"
+import AS from "./components/as"
+import RA from "./components/ra"
+import SC from "./components/sc"
+
 
 function content(nav){
 	if (nav === "home"){
 		return (<HomeAbout></HomeAbout>);
 	} else if (nav === "info") {
 		return (<Info></Info>);
+	} else if (nav === "fc") {
+		return (<FC></FC>);
+	} else if (nav === "ns") {
+		return (<NS></NS>);
+	} else if (nav === "diff") {
+		return (<Diff></Diff>);
+	} else if (nav === "clean") {
+		return (<Clean></Clean>);
+	} else if (nav === "ts") {
+		return (<TS></TS>);
+	} else if (nav === "tm") {
+		return (<TM></TM>);
+	} else if (nav === "rm") {
+		return (<RM></RM>);
+	} else if (nav === "as") {
+		return (<AS></AS>);
+	} else if (nav === "ra") {
+		return (<RA></RA>);
+	} else if (nav === "sc") {
+		return (<SC></SC>);
+	} else {
+		return (<HomeAbout></HomeAbout>);
 	}
 }
 

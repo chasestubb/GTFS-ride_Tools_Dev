@@ -9,7 +9,7 @@ class Sidebar extends React.Component{
 
 	// handles sending navigation data to App.js
 	navigate(item){
-		this.setState({nav: item}); // locally sets the nav state for the sidebar
+		this.setState({nav:item}); // locally sets the nav state for the sidebar
 		this.props.onNavChange(item); // invokes the onNavChange property on <Sidebar> element in App.js
 		                              // (sends this.state.nav to App.js)
 	}
@@ -72,7 +72,7 @@ class Sidebar extends React.Component{
 		} else {
 			fcbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "fc"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("fc")}>
 					<i className="fas fa-file-archive"></i>
 						<span>Feed Creation</span></a>
 				</li>
@@ -91,7 +91,7 @@ class Sidebar extends React.Component{
 		} else {
 			nsbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ns"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("ns")}>
 					<i className="fas fa-project-diagram"></i>
 						<span>Network State</span></a>
 				</li>
@@ -110,7 +110,7 @@ class Sidebar extends React.Component{
 		} else {
 			diffbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "diff"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("diff")}>
 					<i className="fas fa-not-equal"></i>
 						<span>Diff</span></a>
 				</li>
@@ -129,7 +129,7 @@ class Sidebar extends React.Component{
 		} else {
 			cleanbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "clean"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("clean")}>
 					<i className="fas fa-broom"></i>
 							<span>Clean</span></a>
 				</li>
@@ -148,7 +148,7 @@ class Sidebar extends React.Component{
 		} else {
 			tsbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ts"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("ts")}>
 					<i className="fas fa-calendar-day"></i>
 						<span>Time Split</span></a>
 				</li>
@@ -167,7 +167,7 @@ class Sidebar extends React.Component{
 		} else {
 			tmbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "tm"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("tm")}>
 					<i className="fas fa-calendar-alt"></i>
 						<span>Time Merge</span></a>
 				</li>
@@ -186,7 +186,7 @@ class Sidebar extends React.Component{
 		} else {
 			rmbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "rm"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("rm")}>
 					<i className="fas fa-object-group"></i>
 						<span>Ridership Merge</span></a>
 				</li>
@@ -205,7 +205,7 @@ class Sidebar extends React.Component{
 		} else {
 			asbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "as"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("as")}>
 					<i className="fas fa-landmark"></i>
 						<span>Agency Split</span></a>
 				</li>
@@ -224,7 +224,7 @@ class Sidebar extends React.Component{
 		} else {
 			rabtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ra"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("ra")}>
 					<i className="fas fa-search"></i>
 						<span>Ridership Anomaly</span></a>
 				</li>
@@ -243,7 +243,7 @@ class Sidebar extends React.Component{
 		} else {
 			scbtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "sc"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("sc")}>
 					<i className="fas fa-edit"></i>
 						<span>Service Changes</span></a>
 				</li>
@@ -255,7 +255,7 @@ class Sidebar extends React.Component{
 				<ul className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 				
 					{/* the "GTFS-ride Tools" brand (with the logo) - should go to home on click */}
-					<a className="sidebar-brand d-flex align-items-center justify-content-center" onClick = {() => this.setState({nav: "home"})}>
+					<a className="sidebar-brand d-flex align-items-center justify-content-center" onClick = {() => this.navigate("home")}>
 						<div className="sidebar-brand-icon sidebar-logo">
 							<img src="img/isolated-monochrome-white.svg" alt="GTFS-ride logo" />
 						</div>
