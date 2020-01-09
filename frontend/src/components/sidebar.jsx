@@ -5,16 +5,24 @@ class Sidebar extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {nav: "home", sidebar_enabled: true};
-		//this.props = {functionalities: []}
+	}
+
+	// handles sending navigation data to App.js
+	navigate(item){
+		this.setState({nav: item}); // locally sets the nav state for the sidebar
+		this.props.onNavChange(item); // sends the above to the App.js
 	}
 
 	render(){
 
-		// Nav items definitions
+		// Nav items definitions, each defines how the nav buttons look and work
 		let homebtn, infobtn, fcbtn, nsbtn, diffbtn, cleanbtn, tsbtn, tmbtn, rmbtn, asbtn, rabtn, scbtn;
 
+		// these if statements change how the buttons look and behave based on this.state.nav
+		// highlight and disable them when active, dim and enable them when inactive
+
 		// Home
-		if (this.state.nav === "home"){
+		if (this.state.nav === "home"){ // if user is currently at home
 			homebtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -22,10 +30,10 @@ class Sidebar extends React.Component{
 						<span>Home/About</span></a>
 				</li>
 			)
-		} else {
+		} else { // if user is currently NOT at home
 			homebtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "home"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("home")}>
 					<i class="fas fa-home"></i>
 						<span>Home/About</span></a>
 				</li>
@@ -44,7 +52,7 @@ class Sidebar extends React.Component{
 		} else {
 			infobtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.setState({nav: "info"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("info")}>
 					<i class="fas fa-info-circle"></i>
 						<span>Info</span></a>
 				</li>
@@ -285,7 +293,7 @@ class Sidebar extends React.Component{
 		
 				</ul>
 			)
-		} else {
+		} else { // currently unreachable, intended for hiding the sidebar (feature currently disabled)
 			return(
 				<div className="text-center d-none d-md-inline" onClick={() => {this.setState({sidebar_enabled: true})}}>
 					<button className="rounded-circle border-0" id="sidebarToggle"></button>

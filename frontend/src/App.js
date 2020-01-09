@@ -5,28 +5,86 @@ import Topbar from "./components/topbar"
 import HomeAbout from "./components/home-about"
 import Info from "./components/info"
 
+function content(nav){
+	if (nav === "home"){
+		return (<HomeAbout></HomeAbout>);
+	} else if (nav === "info") {
+		return (<Info></Info>);
+	}
+}
+
 class App extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {nav: ""};
+		this.state = {nav: "home", title: "GTFS-ride Tools"};
+		this.navChange = this.navChange.bind(this);
+	}
+
+	// handles receiving data from the sidebar
+	// selectedNav is where the item from sidebar.jsx -> Sidebar -> navigate(item) received
+	navChange(selectedNav) {
+		this.setState({nav: selectedNav});
+		switch (selectedNav){
+			case "home":
+				this.setState({title: "GTFS-ride Tools"});
+				break;
+			case "info":
+				this.setState({title: "GTFS-ride Info"});
+				break;
+			case "fc":
+				this.setState({title: "GTFS-ride Feed Creation"});
+				break;
+			case "ns":
+				this.setState({title: "GTFS-ride Network State"});
+				break;
+			case "diff":
+				this.setState({title: "GTFS-ride Diff"});
+				break;
+			case "clean":
+				this.setState({title: "GTFS-ride Clean"});
+				break;
+			case "ts":
+				this.setState({title: "GTFS-ride Time Split"});
+				break;
+			case "tm":
+				this.setState({title: "GTFS-ride Time Merge"});
+				break;
+			case "rm":
+				this.setState({title: "GTFS-ride Ridership Merge"});
+				break;
+			case "as":
+				this.setState({title: "GTFS-ride Agency Split"});
+				break;
+			case "ra":
+				this.setState({title: "GTFS-ride Ridership Anomaly"});
+				break;
+			case "sc":
+				this.setState({title: "GTFS-ride Service Changes"});
+				break;
+			default:
+				this.setState({title: "GTFS-ride Tools"});
+				break;
+		}
 	}
 
 	render(){
 
-		let content;
-		if (this.state.nav == "info"){
-			content = <Info></Info>;
-		} else {
+		/*let content;
+		if (this.state.nav === "home"){
 			content = <HomeAbout></HomeAbout>;
-		}
+		} else if (this.state.nav === "info") {
+			content = <Info></Info>;
+		}*/
+		let contentPreview = content(this.state.nav);
 
 		return (
 			<div id="page-top">
 
 				{/* Page Wrapper */}
 				<div id="wrapper">
-			
-					<Sidebar></Sidebar>
+
+					{/* see explanation on sidebar.jsx */}
+					<Sidebar onNavChange={this.navChange}></Sidebar>
 			
 					{/* Content Wrapper */}
 					<div id="content-wrapper" className="d-flex flex-column">
@@ -34,12 +92,12 @@ class App extends React.Component{
 						{/* Main Content */}
 						<div id="content">
 			
-							<Topbar title="GTFS-ride Tools"></Topbar>
+							<Topbar title={this.state.title}></Topbar>
 			
 							{/* Begin Page Content */}
 							<div className="container-fluid">
 			
-								{content}
+								{contentPreview}
 								
 								
 							</div>
