@@ -7,32 +7,42 @@ class Sidebar extends React.Component{
 		this.state = {nav: "home", sidebar_enabled: true};
 	}
 
+	// handles sending navigation data to App.js
+	navigate(item){
+		this.setState({nav: item}); // locally sets the nav state for the sidebar
+		this.props.onNavChange(item); // invokes the onNavChange property on <Sidebar> element in App.js
+		                              // (sends this.state.nav to App.js)
+	}
+
 	render(){
 
-		// Nav items definitions
+		// Nav items definitions, each defines how the nav buttons look and work
 		let homebtn, infobtn, fcbtn, nsbtn, diffbtn, cleanbtn, tsbtn, tmbtn, rmbtn, asbtn, rabtn, scbtn;
 
+		// these if statements change how the buttons look and behave based on this.state.nav
+		// highlight and disable them when active, dim and enable them when inactive
+
 		// Home
-		if (this.state.nav == "home"){
+		if (this.state.nav === "home"){ // if user is currently at home
 			homebtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
 					<i class="fas fa-home"></i>
-						<span>Home</span></a>
+						<span>Home/About</span></a>
 				</li>
 			)
-		} else {
+		} else { // if user is currently NOT at home
 			homebtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "home"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("home")}>
 					<i class="fas fa-home"></i>
-						<span>Home</span></a>
+						<span>Home/About</span></a>
 				</li>
 			)
 		}
 
 		// Info
-		if (this.state.nav == "info"){
+		if (this.state.nav === "info"){
 			infobtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -43,7 +53,7 @@ class Sidebar extends React.Component{
 		} else {
 			infobtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "info"})}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("info")}>
 					<i class="fas fa-info-circle"></i>
 						<span>Info</span></a>
 				</li>
@@ -51,7 +61,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Feed Creation
-		if (this.state.nav == "fc"){
+		if (this.state.nav === "fc"){
 			fcbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -62,7 +72,7 @@ class Sidebar extends React.Component{
 		} else {
 			fcbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "fc"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "fc"})}>
 					<i class="fas fa-file-archive"></i>
 						<span>Feed Creation</span></a>
 				</li>
@@ -70,7 +80,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Network State
-		if (this.state.nav == "ns"){
+		if (this.state.nav === "ns"){
 			nsbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -81,7 +91,7 @@ class Sidebar extends React.Component{
 		} else {
 			nsbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "ns"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ns"})}>
 					<i class="fas fa-project-diagram"></i>
 						<span>Network State</span></a>
 				</li>
@@ -89,7 +99,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Diff
-		if (this.state.nav == "diff"){
+		if (this.state.nav === "diff"){
 			diffbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -100,7 +110,7 @@ class Sidebar extends React.Component{
 		} else {
 			diffbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "diff"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "diff"})}>
 					<i class="fas fa-not-equal"></i>
 						<span>Diff</span></a>
 				</li>
@@ -108,7 +118,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Clean
-		if (this.state.nav == "clean"){
+		if (this.state.nav === "clean"){
 			cleanbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -119,7 +129,7 @@ class Sidebar extends React.Component{
 		} else {
 			cleanbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "clean"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "clean"})}>
 					<i class="fas fa-broom"></i>
 							<span>Clean</span></a>
 				</li>
@@ -127,7 +137,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Time Split
-		if (this.state.nav == "ts"){
+		if (this.state.nav === "ts"){
 			tsbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -138,7 +148,7 @@ class Sidebar extends React.Component{
 		} else {
 			tsbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "ts"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ts"})}>
 					<i class="fas fa-calendar-day"></i>
 						<span>Time Split</span></a>
 				</li>
@@ -146,7 +156,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Time Merge
-		if (this.state.nav == "tm"){
+		if (this.state.nav === "tm"){
 			tmbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -157,7 +167,7 @@ class Sidebar extends React.Component{
 		} else {
 			tmbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "tm"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "tm"})}>
 					<i class="fas fa-calendar-alt"></i>
 						<span>Time Merge</span></a>
 				</li>
@@ -165,7 +175,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Ridership Merge
-		if (this.state.nav == "rm"){
+		if (this.state.nav === "rm"){
 			rmbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -176,7 +186,7 @@ class Sidebar extends React.Component{
 		} else {
 			rmbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "rm"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "rm"})}>
 					<i class="fas fa-object-group"></i>
 						<span>Ridership Merge</span></a>
 				</li>
@@ -184,7 +194,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Agency Split
-		if (this.state.nav == "as"){
+		if (this.state.nav === "as"){
 			asbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -195,7 +205,7 @@ class Sidebar extends React.Component{
 		} else {
 			asbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "as"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "as"})}>
 					<i class="fas fa-landmark"></i>
 						<span>Agency Split</span></a>
 				</li>
@@ -203,7 +213,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Ridership Anomaly
-		if (this.state.nav == "ra"){
+		if (this.state.nav === "ra"){
 			rabtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -214,7 +224,7 @@ class Sidebar extends React.Component{
 		} else {
 			rabtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "ra"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "ra"})}>
 					<i class="fas fa-search"></i>
 						<span>Ridership Anomaly</span></a>
 				</li>
@@ -222,7 +232,7 @@ class Sidebar extends React.Component{
 		}
 
 		// Service Changes
-		if (this.state.nav == "sc"){
+		if (this.state.nav === "sc"){
 			scbtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
@@ -233,7 +243,7 @@ class Sidebar extends React.Component{
 		} else {
 			scbtn = (
 				<li className="nav-item">
-					<a className="nav-link" onClick = {() => this.setState({nav: "sc"})}>
+					<a className="nav-link" href="" onClick = {() => this.setState({nav: "sc"})}>
 					<i class="fas fa-edit"></i>
 						<span>Service Changes</span></a>
 				</li>
@@ -278,13 +288,13 @@ class Sidebar extends React.Component{
 					<hr className="sidebar-divider d-none d-md-block" />
 		
 					{/* Sidebar Toggler*/}
-					<div className="text-center d-none d-md-inline" onClick={() => {this.setState({sidebar_enabled: false})}}>
+					{/*<div className="text-center d-none d-md-inline" onClick={() => {this.setState({sidebar_enabled: false})}}>
 						<button className="rounded-circle border-0" id="sidebarToggle"></button>
-					</div>
+					</div>*/}
 		
 				</ul>
 			)
-		} else {
+		} else { // currently unreachable, intended for hiding the sidebar (feature currently disabled)
 			return(
 				<div className="text-center d-none d-md-inline" onClick={() => {this.setState({sidebar_enabled: true})}}>
 					<button className="rounded-circle border-0" id="sidebarToggle"></button>
