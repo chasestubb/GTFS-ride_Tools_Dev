@@ -5,19 +5,20 @@ import './App.css';
 import Sidebar from "./components/sidebar"
 import Topbar from "./components/topbar"
 
-// the contents
+// the contents & the naming conventions
 import HomeAbout from "./components/home-about"
-import Info from "./components/info"
-import FC from "./components/fc"
-import NS from "./components/ns"
-import Diff from "./components/diff"
-import Clean from "./components/clean"
-import TS from "./components/ts"
-import TM from "./components/tm"
-import RM from "./components/rm"
-import AS from "./components/as"
-import RA from "./components/ra"
-import SC from "./components/sc"
+import Info from "./components/info"   // feed info (formerly just "info")
+import FC from "./components/fc"       // feed creation
+import NS from "./components/ns"       // network state
+import Diff from "./components/diff"   // diff
+import Clean from "./components/clean" // clean
+import TS from "./components/ts"       // time split
+import TM from "./components/tm"       // time merge
+import RM from "./components/rm"       // ridership merge
+import AS from "./components/as"       // agency split
+import RA from "./components/ra"       // ridership anomaly
+import SC from "./components/sc"       // service changes
+import Error404 from "./components/404"
 
 
 function content(nav){
@@ -46,7 +47,7 @@ function content(nav){
 	} else if (nav === "sc") {
 		return (<SC></SC>);
 	} else {
-		return (<HomeAbout></HomeAbout>);
+		return (<Error404></Error404>);
 	}
 }
 
@@ -123,7 +124,7 @@ class App extends React.Component{
 				<div id="wrapper">
 
 					{/* see explanation on sidebar.jsx */}
-					<Sidebar onNavChange={this.navChange}></Sidebar>
+					<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}></Sidebar>
 					{/* onNavChange also exists in sidebar.jsx -> Sidebar -> navigate(item)*/}
 			
 					{/* Content Wrapper */}
@@ -168,7 +169,7 @@ class App extends React.Component{
 				</a>
 			
 				{/* Logout Modal*/}
-				<div className="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div className="modal fade" id="logoutModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 					<div className="modal-dialog" role="document">
 						<div className="modal-content">
 							<div className="modal-header">
