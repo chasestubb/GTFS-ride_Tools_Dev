@@ -142,6 +142,8 @@ class GTFS{
             void populateCalendarDates(vector<struct calendar_dates>&);
             void populateCalendar(vector<struct calendar>&);
             void populateAgency(vector<struct agency>&);
+            void populateStops(vector<struct stops>&);
+            void populateStopTimes(vector<struct stop_times>&);
          
 };
 
@@ -154,7 +156,10 @@ class GTFS_ride:public GTFS{
             vector<struct ride_feed_info> rfi;
             vector<struct board_alight> ba;
     public:
-       //
+            void populateTripCapacity(vector<struct trip_capacity>&);
+            void populateRidership(vector<struct ridership>&);
+            void populateRiderTrip(vector<struct rider_trip>&);
+            void populateRideFeedInfo(vector<struct ride_feed_info>&);
         
            
 };

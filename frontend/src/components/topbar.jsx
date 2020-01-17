@@ -11,7 +11,7 @@ class Topbar extends React.Component{
 				<i className="fa fa-bars"></i>
 			</button>
 
-			<h1 className="h3 mb-0 text-gray-800">{this.props.title}</h1>
+			<h5 className="h5 mb-0 text-gray-800">{this.props.title}</h5>
 
 			{/* Topbar Navbar */}
 			<ul className="navbar-nav ml-auto">

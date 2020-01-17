@@ -1,15 +1,52 @@
 import React from 'react';
 import './App.css';
+
+// the general elements
 import Sidebar from "./components/sidebar"
 import Topbar from "./components/topbar"
+
+// the contents & the naming conventions
 import Home from "./components/home"
-import Info from "./components/info"
+import Info from "./components/info"   // feed info (formerly just "info")
+import FC from "./components/fc"       // feed creation
+import NS from "./components/ns"       // network state
+import Diff from "./components/diff"   // diff
+import Clean from "./components/clean" // clean
+import TS from "./components/ts"       // time split
+import TM from "./components/tm"       // time merge
+import RM from "./components/rm"       // ridership merge
+import AS from "./components/as"       // agency split
+import RA from "./components/ra"       // ridership anomaly
+import SC from "./components/sc"       // service changes
+import Error404 from "./components/404"
 
 function content(nav){
 	if (nav === "home"){
 		return (<Home></Home>);
 	} else if (nav === "info") {
 		return (<Info></Info>);
+	} else if (nav === "fc") {
+		return (<FC></FC>);
+	} else if (nav === "ns") {
+		return (<NS></NS>);
+	} else if (nav === "diff") {
+		return (<Diff></Diff>);
+	} else if (nav === "clean") {
+		return (<Clean></Clean>);
+	} else if (nav === "ts") {
+		return (<TS></TS>);
+	} else if (nav === "tm") {
+		return (<TM></TM>);
+	} else if (nav === "rm") {
+		return (<RM></RM>);
+	} else if (nav === "as") {
+		return (<AS></AS>);
+	} else if (nav === "ra") {
+		return (<RA></RA>);
+	} else if (nav === "sc") {
+		return (<SC></SC>);
+	} else {
+		return (<Error404></Error404>);
 	}
 }
 
@@ -31,7 +68,7 @@ class App extends React.Component{
 		// selectedNav and this.state.nav use the same naming convention as the sidebar nav buttons
 		switch (selectedNav){
 			case "info":
-				this.setState({title: "GTFS-ride Info"});
+				this.setState({title: "GTFS-ride Feed Info"});
 				break;
 			case "fc":
 				this.setState({title: "GTFS-ride Feed Creation"});
@@ -86,7 +123,7 @@ class App extends React.Component{
 				<div id="wrapper">
 
 					{/* see explanation on sidebar.jsx */}
-					<Sidebar onNavChange={this.navChange}></Sidebar>
+					<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}></Sidebar>
 					{/* onNavChange also exists in sidebar.jsx -> Sidebar -> navigate(item)*/}
 			
 					{/* Content Wrapper */}
@@ -131,7 +168,7 @@ class App extends React.Component{
 				</a>
 			
 				{/* Logout Modal*/}
-				<div className="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div className="modal fade" id="logoutModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 					<div className="modal-dialog" role="document">
 						<div className="modal-content">
 							<div className="modal-header">
