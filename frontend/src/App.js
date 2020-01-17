@@ -2,12 +2,12 @@ import React from 'react';
 import './App.css';
 import Sidebar from "./components/sidebar"
 import Topbar from "./components/topbar"
-import HomeAbout from "./components/home-about"
+import Home from "./components/home"
 import Info from "./components/info"
 
 function content(nav){
 	if (nav === "home"){
-		return (<HomeAbout></HomeAbout>);
+		return (<Home></Home>);
 	} else if (nav === "info") {
 		return (<Info></Info>);
 	}
@@ -73,7 +73,7 @@ class App extends React.Component{
 
 		/*let content;
 		if (this.state.nav === "home"){
-			content = <HomeAbout></HomeAbout>;
+			content = <Home></Home>;
 		} else if (this.state.nav === "info") {
 			content = <Info></Info>;
 		}*/

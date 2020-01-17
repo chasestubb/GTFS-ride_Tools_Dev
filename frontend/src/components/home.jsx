@@ -40,6 +40,12 @@ export default () => {
 							<h5 className="font-weight-bold">Time Merge</h5>
 							Merges two feeds. Needs further definition. Similar open-source tools may already exist.
 							<br /><br />
+							<h5 className="font-weight-bold">Ridership Merge</h5>
+							Merges two feeds. Needs further definition. Uses a user-defined weight to each source.
+							<br /><br />
+							<h5 className="font-weight-bold">Agency Split</h5>
+							Filters a GTFS or GTFS-ride feed based on agencies included.
+							<br /><br />
 						</div>
 					</div>
 				</div>
