@@ -6,7 +6,7 @@ import Sidebar from "./components/sidebar"
 import Topbar from "./components/topbar"
 
 // the contents & the naming conventions
-import HomeAbout from "./components/home-about"
+import Home from "./components/home"
 import Info from "./components/info"   // feed info (formerly just "info")
 import FC from "./components/fc"       // feed creation
 import NS from "./components/ns"       // network state
@@ -20,10 +20,9 @@ import RA from "./components/ra"       // ridership anomaly
 import SC from "./components/sc"       // service changes
 import Error404 from "./components/404"
 
-
 function content(nav){
 	if (nav === "home"){
-		return (<HomeAbout></HomeAbout>);
+		return (<Home></Home>);
 	} else if (nav === "info") {
 		return (<Info></Info>);
 	} else if (nav === "fc") {
@@ -52,7 +51,7 @@ function content(nav){
 }
 
 class App extends React.Component{
-	constructor(props){
+	constructor(props){ 
 		super(props);
 		this.state = {nav: "home", title: "GTFS-ride Tools"};
 		this.navChange = this.navChange.bind(this); // required to make onNavChange={this.navChange} work
@@ -111,7 +110,7 @@ class App extends React.Component{
 
 		/*let content;
 		if (this.state.nav === "home"){
-			content = <HomeAbout></HomeAbout>;
+			content = <Home></Home>;
 		} else if (this.state.nav === "info") {
 			content = <Info></Info>;
 		}*/
@@ -151,7 +150,7 @@ class App extends React.Component{
 						<footer className="sticky-footer bg-white">
 							<div className="container my-auto">
 								<div className="copyright text-center my-auto">
-									<span>Copyright &copy; Your Website 2019</span>
+									<span>Copyright &copy; GTFS-ride 2020</span>
 								</div>
 							</div>
 						</footer>

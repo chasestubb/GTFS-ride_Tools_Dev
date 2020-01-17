@@ -27,16 +27,16 @@ class Sidebar extends React.Component{
 			homebtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
-					<i className="fas fa-home"></i>
-						<span>Home/About</span></a>
+					<i class="fas fa-home"></i>
+						<span>Home</span></a>
 				</li>
 			)
 		} else { // if user is currently NOT at home
 			homebtn = (
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.navigate("home")}>
-					<i className="fas fa-home"></i>
-						<span>Home/About</span></a>
+					<i class="fas fa-home"></i>
+						<span>Home</span></a>
 				</li>
 			)
 		}
