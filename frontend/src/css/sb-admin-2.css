@@ -9426,6 +9426,14 @@ a.text-dark:hover, a.text-dark:focus {
   color: #373840 !important;
 }
 
+.text-accent {
+  color: #ff784f !important;
+}
+
+a.text-accent:hover, a.text-accent:focus {
+  color: #fa3a00 !important;
+}
+
 .text-body {
   color: #858796 !important;
 }
@@ -9869,6 +9877,14 @@ a:focus {
 
 .border-bottom-dark {
   border-bottom: 0.25rem solid #5a5c69 !important;
+}
+
+.border-left-accent {
+  border-left: 0.25rem solid #ff784f !important;
+}
+
+.border-bottom-accent {
+  border-bottom: 0.25rem solid #ff784f !important;
 }
 
 .progress-sm {
