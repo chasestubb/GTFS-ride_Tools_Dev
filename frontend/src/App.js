@@ -13,8 +13,8 @@ import NS from "./components/ns"       // network state
 import Diff from "./components/diff"   // diff
 import Clean from "./components/clean" // clean
 import TS from "./components/ts"       // time split
-import TM from "./components/tm"       // time merge
-import RM from "./components/rm"       // ridership merge
+//import TM from "./components/tm"     // time merge -- combined with "ridership merge" to create "merge"
+import Merge from "./components/merge" // merge (formerly "ridership merge")
 import AS from "./components/as"       // agency split
 import RA from "./components/ra"       // ridership anomaly
 import SC from "./components/sc"       // service changes
@@ -24,31 +24,29 @@ import Error404 from "./components/404"
 
 function content(nav){
 	if (nav === "home"){
-		return (<Home></Home>);
+		return (<Home/>);
 	} else if (nav === "info") {
-		return (<Info></Info>);
+		return (<Info/>);
 	} else if (nav === "fc") {
-		return (<FC></FC>);
+		return (<FC/>);
 	} else if (nav === "ns") {
-		return (<NS></NS>);
+		return (<NS/>);
 	} else if (nav === "diff") {
-		return (<Diff></Diff>);
+		return (<Diff/>);
 	} else if (nav === "clean") {
-		return (<Clean></Clean>);
+		return (<Clean/>);
 	} else if (nav === "ts") {
-		return (<TS></TS>);
-	} else if (nav === "tm") {
-		return (<TM></TM>);
-	} else if (nav === "rm") {
-		return (<RM></RM>);
+		return (<TS/>);
+	} else if (nav === "merge") {
+		return (<Merge/>);
 	} else if (nav === "as") {
-		return (<AS></AS>);
+		return (<AS/>);
 	} else if (nav === "ra") {
-		return (<RA></RA>);
+		return (<RA/>);
 	} else if (nav === "sc") {
-		return (<SC></SC>);
+		return (<SC/>);
 	} else {
-		return (<Error404></Error404>);
+		return (<Error404/>);
 	}
 }
 
@@ -87,11 +85,11 @@ class App extends React.Component{
 			case "ts":
 				this.setState({title: "GTFS-ride Time Split"});
 				break;
-			case "tm":
+			/*case "tm":
 				this.setState({title: "GTFS-ride Time Merge"});
-				break;
-			case "rm":
-				this.setState({title: "GTFS-ride Ridership Merge"});
+				break;*/
+			case "merge":
+				this.setState({title: "GTFS-ride Merge"});
 				break;
 			case "as":
 				this.setState({title: "GTFS-ride Agency Split"});
@@ -125,7 +123,7 @@ class App extends React.Component{
 				<div id="wrapper">
 
 					{/* see explanation on sidebar.jsx */}
-					<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}></Sidebar>
+					<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}/>
 					{/* onNavChange also exists in sidebar.jsx -> Sidebar -> navigate(item)*/}
 			
 					{/* Content Wrapper */}
@@ -134,7 +132,7 @@ class App extends React.Component{
 						{/* Main Content */}
 						<div id="content">
 			
-							<Topbar title={this.state.title}></Topbar>
+							<Topbar title={this.state.title}/>
 			
 							{/* Begin Page Content */}
 							<div className="container-fluid">

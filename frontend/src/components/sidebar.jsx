@@ -17,7 +17,7 @@ class Sidebar extends React.Component{
 	render(){
 
 		// Nav items definitions, each defines how the nav buttons look and work
-		let homebtn, infobtn, fcbtn, nsbtn, diffbtn, cleanbtn, tsbtn, tmbtn, rmbtn, asbtn, rabtn, scbtn;
+		let homebtn, infobtn, fcbtn, nsbtn, diffbtn, cleanbtn, tsbtn, tmbtn, mergebtn, asbtn, rabtn, scbtn;
 
 		// these if statements change how the buttons look and behave based on this.state.nav
 		// highlight and disable them when active, dim and enable them when inactive
@@ -154,7 +154,7 @@ class Sidebar extends React.Component{
 				</li>
 			)
 		}
-
+/*
 		// Time Merge
 		if (this.state.nav === "tm"){
 			tmbtn = (
@@ -173,22 +173,22 @@ class Sidebar extends React.Component{
 				</li>
 			)
 		}
-
-		// Ridership Merge
-		if (this.state.nav === "rm"){
-			rmbtn = (
+*/
+		// Merge
+		if (this.state.nav === "merge"){
+			mergebtn = (
 				<li className="nav-item active">
 					<a className="nav-link">
 					<i className="fas fa-object-group"></i>
-						<span>Ridership Merge</span></a>
+						<span>Merge</span></a>
 				</li>
 			)
 		} else {
-			rmbtn = (
+			mergebtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.navigate("rm")}>
+					<a className="nav-link" href="" onClick = {() => this.navigate("merge")}>
 					<i className="fas fa-object-group"></i>
-						<span>Ridership Merge</span></a>
+						<span>Merge</span></a>
 				</li>
 			)
 		}
@@ -278,7 +278,7 @@ class Sidebar extends React.Component{
 					{cleanbtn}
 					{tsbtn}
 					{tmbtn}
-					{rmbtn}
+					{mergebtn}
 					{asbtn}
 					{rabtn}
 					{scbtn}
