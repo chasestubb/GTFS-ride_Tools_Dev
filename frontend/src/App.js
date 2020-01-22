@@ -71,7 +71,7 @@ class App extends React.Component{
 				this.setState({title: "GTFS-ride Feed Info"});
 				break;
 			case "fc":
-				this.setState({title: "GTFS-ride Feed Creation"});
+				this.setState({title: "GTFS-ride Test Feed Creation"});
 				break;
 			case "ns":
 				this.setState({title: "GTFS-ride Network State"});
@@ -150,7 +150,7 @@ class App extends React.Component{
 						<footer className="sticky-footer bg-white">
 							<div className="container my-auto">
 								<div className="copyright text-center my-auto">
-									<span>Copyright &copy; GTFS-ride 2020</span>
+									<span>Copyright &copy; 2020 GTFS-ride</span>
 								</div>
 							</div>
 						</footer>

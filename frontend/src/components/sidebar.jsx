@@ -66,7 +66,7 @@ class Sidebar extends React.Component{
 				<li className="nav-item active">
 					<a className="nav-link">
 					<i className="fas fa-file-archive"></i>
-						<span>Feed Creation</span></a>
+						<span>Test Feed Creation</span></a>
 				</li>
 			)
 		} else {
@@ -74,7 +74,7 @@ class Sidebar extends React.Component{
 				<li className="nav-item">
 					<a className="nav-link" href="" onClick = {() => this.navigate("fc")}>
 					<i className="fas fa-file-archive"></i>
-						<span>Feed Creation</span></a>
+						<span>Test Feed Creation</span></a>
 				</li>
 			)
 		}

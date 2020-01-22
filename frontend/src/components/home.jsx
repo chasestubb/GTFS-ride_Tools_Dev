@@ -44,7 +44,7 @@ class Home extends React.Component{
 								<h5 className="font-weight-bold">Feed Info</h5>
 								Receives a GTFS or GTFS-ride feed and displays feed information.
 								<br /><br />
-								<h5 className="font-weight-bold">Feed Creation</h5>
+								<h5 className="font-weight-bold">Test Feed Creation</h5>
 								Generates a test feed that is either user-provided, randomly generated, or a mix of both.
 								<br /><br />
 								<h5 className="font-weight-bold">Network State</h5>
@@ -59,10 +59,7 @@ class Home extends React.Component{
 								<h5 className="font-weight-bold">Time Split</h5>
 								Filters a GTFS or GTFS-ride feed based on start and end time.
 								<br /><br />
-								<h5 className="font-weight-bold">Time Merge</h5>
-								Merges two feeds from different time periods. Needs further definition. Similar open-source tools may already exist.
-								<br /><br />
-								<h5 className="font-weight-bold">Ridership Merge</h5>
+								<h5 className="font-weight-bold">Merge</h5>
 								Merges two feeds. Needs further definition. Uses a user-defined weight to each source.
 								<br /><br />
 								<h5 className="font-weight-bold">Agency Split</h5>
