@@ -1,0 +1,14 @@
+{
+  "name": "gtfs-ride-backend",
+  "version": "0.1.0",
+  "description": "Server-side code for GTFS-ride Tools",
+  "main": "filehandler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "formidable": "^1.2.1"
+  }
+}

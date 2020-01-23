@@ -1,8 +1,8 @@
 import React from 'react'
-//import Axios from 'axios'
+import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:3000/";
+const url = "http://localhost:8080/fileupload";
 
 class Home extends React.Component{
 	constructor(props){
@@ -26,11 +26,12 @@ class Home extends React.Component{
 		//const url = "localhost";
 		let fd = new FormData();
 		fd.append("file", this.state.file);
-		//const config = {headers: {"content-type": "multipart/form-data"}};
-		//return Axios.post(url, fd, config);
-		fetch(url, {
-			method: 'PUT',
-			body: fd
+		const config = {headers: {"content-type": "multipart/form-data"}, mode: "no-cors"};
+		return Axios.post(url, fd, config);
+		/*fetch(url, {
+			mode: "no-cors",
+			method: 'POST',
+			body: fd,
 		})
 		.then((response) => response.json())
 		.then((result) => {
@@ -38,8 +39,7 @@ class Home extends React.Component{
 		})
 		.catch((error) => {
 			console.error('Error:', error);
-		});
-		// modified from https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+		});*/
 	}
 
 	render () {
