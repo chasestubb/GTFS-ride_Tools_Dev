@@ -1,5 +1,8 @@
 import React from 'react'
-import Axios from 'axios'
+//import Axios from 'axios'
+
+// FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
+const url = "http://localhost:3000/";
 
 class Home extends React.Component{
 	constructor(props){
@@ -18,16 +21,30 @@ class Home extends React.Component{
 		// the file path will always be "C:\\fakepath\\<FILENAME>"
 	}
 
+	// uploads the file when user clicks "confirm upload"
 	upload(event){
-		const url = "localhost";
+		//const url = "localhost";
 		let fd = new FormData();
 		fd.append("file", this.state.file);
-		const config = {headers: {"content-type": "multipart/form-data"}};
-		return Axios.post(url, fd, config);
+		//const config = {headers: {"content-type": "multipart/form-data"}};
+		//return Axios.post(url, fd, config);
+		fetch(url, {
+			method: 'PUT',
+			body: fd
+		})
+		.then((response) => response.json())
+		.then((result) => {
+			console.log('Success:', result);
+		})
+		.catch((error) => {
+			console.error('Error:', error);
+		});
+		// modified from https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 	}
 
 	render () {
 
+		// disable the confirm upload button if the user has no file selected
 		let uploadConfirmBtn;
 		if (this.state.filepath){
 			uploadConfirmBtn = <button onClick={this.upload}>Confirm Upload</button>;
