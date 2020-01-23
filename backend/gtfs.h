@@ -8,11 +8,15 @@ using namespace std;
 
 //all structs contain the information from the file they are created for
 struct routes{
-    char route_id;
+    string route_id;
+    string agency_id;
     int route_short_name;
     string route_long_name;
     string route_desc;
     int route_type;
+    string route_url;
+    string route_color;
+    string route_text_color;
 };
 
 struct calendar_dates{
@@ -41,6 +45,8 @@ struct agency{
     string agency_timezone;
     string agency_phone;
     string agency_lang;
+    string agency_fare_url;
+    string agency_email;
 };
 
 struct trips{
@@ -53,10 +59,12 @@ struct trips{
 
 struct stops{
     string stop_id;
+    string stop_code;
     string stop_name;
     string stop_desc;
     float stop_lat;
     float stop_lon;
+    string zone_id;
     string stop_url;
     string location_type;
     string parent_station;
@@ -99,6 +107,21 @@ struct ridership{
     int total_alightings;
     int ridership_start_date;
     int ridership_end_date;
+    int ridership_start_time;
+    int ridership_end_time;
+    int service_id;
+    int monday;
+    int tuesday;
+    int wednesday;
+    int thursday;
+    int friday;
+    int saturday;
+    int sunday;
+    string agency_id;
+    string route_id;
+    int direction_id;
+    int trip_id;
+    int stop_id;
 };
 
 struct rider_trip{
@@ -144,7 +167,8 @@ class GTFS{
             void populateAgency(vector<struct agency>&);
             void populateStops(vector<struct stops>&);
             void populateStopTimes(vector<struct stop_times>&);
-         
+            void Info(GTFS);
+          //  int routesPerAgency(struct agency, int,vector<struct routes>);
 };
 
 class GTFS_ride:public GTFS{
@@ -159,7 +183,5 @@ class GTFS_ride:public GTFS{
             void populateTripCapacity(vector<struct trip_capacity>&);
             void populateRidership(vector<struct ridership>&);
             void populateRiderTrip(vector<struct rider_trip>&);
-            void populateRideFeedInfo(vector<struct ride_feed_info>&);
-        
-           
+            void populateRideFeedInfo(vector<struct ride_feed_info>&);           
 };
