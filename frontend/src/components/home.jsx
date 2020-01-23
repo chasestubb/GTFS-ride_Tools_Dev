@@ -23,23 +23,11 @@ class Home extends React.Component{
 
 	// uploads the file when user clicks "confirm upload"
 	upload(event){
-		//const url = "localhost";
 		let fd = new FormData();
 		fd.append("file", this.state.file);
 		const config = {headers: {"content-type": "multipart/form-data"}, mode: "no-cors"};
+		//                        required for the file upload to succeed
 		return Axios.post(url, fd, config);
-		/*fetch(url, {
-			mode: "no-cors",
-			method: 'POST',
-			body: fd,
-		})
-		.then((response) => response.json())
-		.then((result) => {
-			console.log('Success:', result);
-		})
-		.catch((error) => {
-			console.error('Error:', error);
-		});*/
 	}
 
 	render () {

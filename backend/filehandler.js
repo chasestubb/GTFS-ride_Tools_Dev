@@ -2,8 +2,11 @@ var http = require('http');
 var formidable = require('formidable');
 var fs = require('fs');
 
+var PORT = 8080;
+var URL = '/fileupload';
+
 http.createServer(function (req, res) {
-    if (req.url == '/fileupload') {
+    if (req.url == URL) {
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var oldpath = files.file.path;
@@ -23,4 +26,7 @@ http.createServer(function (req, res) {
         res.write('</form>');
         return res.end();
     }
-}).listen(8080);
+}).listen(PORT);
+
+// adapted from https://www.w3schools.com/nodejs/nodejs_uploadfiles.asp
+// TODO: extract zip files
