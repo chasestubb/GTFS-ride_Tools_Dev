@@ -1,24 +1,36 @@
 import React from 'react'
+import Axios from 'axios'
 
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: ""}; // filename = the name only, without path
+		this.state = {filepath: "", filename: "", file: null}; // filename = the name only, without path
 		this.fileSelected = this.fileSelected.bind(this);
+		this.upload = this.upload.bind(this);
 	}
 
 	// updates state when user selects a file
 	fileSelected(event){
-		let file = event.target.value
-		this.setState({filepath: file, filename: file.slice(12)})
+		console.log("File selected:");
+		console.log(event.target.files);
+		let fp = event.target.value;
+		this.setState({filepath: fp, filename: fp.slice(12), file: event.target.files[0]});
 		// the file path will always be "C:\\fakepath\\<FILENAME>"
+	}
+
+	upload(event){
+		const url = "localhost";
+		let fd = new FormData();
+		fd.append("file", this.state.file);
+		const config = {headers: {"content-type": "multipart/form-data"}};
+		return Axios.post(url, fd, config);
 	}
 
 	render () {
 
 		let uploadConfirmBtn;
 		if (this.state.filepath){
-			uploadConfirmBtn = <button name="upload-confirm">Confirm Upload</button>;
+			uploadConfirmBtn = <button onClick={this.upload}>Confirm Upload</button>;
 		} else {
 			uploadConfirmBtn = <button disabled>No file selected</button>;
 		}
