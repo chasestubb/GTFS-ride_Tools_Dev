@@ -9,6 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "formidable": "^1.2.1"
-  }
+    "extract-zip": "^1.6.7",
+    "formidable": "^1.2.1",
+    "nan": "^2.14.0"
+  },
+  "gypfile": true
 }
