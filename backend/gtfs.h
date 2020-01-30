@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <node.hpp>
+
 
 using namespace std;
 
@@ -168,7 +170,8 @@ class GTFS{
             void populateStops(vector<struct stops>&);
             void populateStopTimes(vector<struct stop_times>&);
             void Info(GTFS);
-          //  int routesPerAgency(struct agency, int,vector<struct routes>);
+
+          //  int routesPerAgency(struct agency, int, vector<struct routes>);
 };
 
 class GTFS_ride:public GTFS{
@@ -180,8 +183,14 @@ class GTFS_ride:public GTFS{
             vector<struct ride_feed_info> rfi;
             vector<struct board_alight> ba;
     public:
+            vector<struct trip_capacity> getCapacity(){return trip_cap;};
+            vector<struct ridership> getRidership(){return rs;};
+            vector<struct rider_trip> getRidertrip(){return rt;};
+            vector<struct ride_feed_info> getRideFeedInfo(){return rfi;};
+            vector<struct board_alight> getBoardALight(){return ba;};
             void populateTripCapacity(vector<struct trip_capacity>&);
             void populateRidership(vector<struct ridership>&);
             void populateRiderTrip(vector<struct rider_trip>&);
-            void populateRideFeedInfo(vector<struct ride_feed_info>&);           
+            void populateRideFeedInfo(vector<struct ride_feed_info>&);   
+            void populateBoardAlight(vector<struct board_alight>&;)        
 };
