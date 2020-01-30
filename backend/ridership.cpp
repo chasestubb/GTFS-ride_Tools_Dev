@@ -5,7 +5,7 @@ using namespace std;
 void GTFS_ride::populateTripCapacity(vector<struct trip_capacity> &t){
     string line;
     string temp; //for storing results from file and converting type
-    struct trip_capacitytempr;
+    struct trip_capacity tempr;
     int i = 0;
     int num_lines = 0;
     ifstream file("trip_capacity.txt");
@@ -48,7 +48,7 @@ void GTFS_ride::populateTripCapacity(vector<struct trip_capacity> &t){
             }        
         i++;
         }
-        t.push_back(tempt);
+        t.push_back(tempr);
     }
 }
 
@@ -82,6 +82,36 @@ void GTFS_ride::populateRidership(vector<ridership> &r){
         
             else if ( i == 3)
                tempr.ridership_end_date = stoi(temp);
+            else if ( i == 4)
+                tempr.ridership_start_time = stoi(temp);
+            else if ( i == 5)
+                tempr.ridership_end_time = stoi(temp);
+            else if ( i == 6)
+                tempr.service_id = stoi(temp);
+            else if ( i == 7)
+                tempr.monday = stoi(temp);
+            else if ( i == 8)
+                tempr.tuesday = stoi(temp);
+            else if ( i == 9)
+                tempr.wednesday = stoi(temp);
+            else if ( i == 10)
+                tempr.thursday = stoi(temp);
+            else if ( i == 11)
+                tempr.friday = stoi(temp);
+            else if ( i == 12)
+                tempr.saturday = stoi(temp);
+            else if (i == 13)
+                tempr.sunday = stoi(temp);
+            else if ( i == 14)
+                tempr.agency_id = (temp);
+            else if ( i == 15)
+                tempr.route_id = temp;
+            else if ( i == 16)
+                tempr.direction_id = stoi(temp);
+            else if ( i == 17)
+                tempr.trip_id = stoi(temp);
+            else if ( i == 18)
+                tempr.stop_id = stoi(temp);
             else
             {
                 break;
