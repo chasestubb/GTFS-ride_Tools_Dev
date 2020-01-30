@@ -1,15 +1,15 @@
 import React from 'react';
-//import {Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 const navoptions = [
 	{id: "info", name: "Feed Info", icon: "fas fa-info-circle"},
-	{id: "fc", name: "Feed Creation", icon: "fas fa-file-archive"},
+	{id: "fc", name: "Test Feed Creation", icon: "fas fa-file-archive"},
 	{id: "ns", name: "Network State", icon: "fas fa-project-diagram"},
-	{id: "diff", name: "Diff", icon: "fas fa-not-equal"},
+	{id: "diff", name: "Difference", icon: "fas fa-not-equal"},
 	{id: "clean", name: "Clean", icon: "fas fa-broom"},
 	{id: "ts", name: "Time Split", icon: "fas fa-calendar-day"},
-	{id: "tm", name: "Time Merge", icon: "fas fa-calendar-alt"},
-	{id: "rm", name: "Ridership Merge", icon: "fas fa-object-group"},
+	//{id: "tm", name: "Time Merge", icon: "fas fa-calendar-alt"},
+	{id: "rm", name: "Merge", icon: "fas fa-object-group"},
 	{id: "as", name: "Agency Split", icon: "fas fa-landmark"},
 	{id: "ra", name: "Ridership Anomaly", icon: "fas fa-search"},
 	{id: "sc", name: "Service Changes", icon: "fas fa-edit"}
@@ -37,17 +37,17 @@ class Sidebar extends React.Component{
 		if (this.state.nav === "home"){ // if user is currently at home
 			homebtn = (
 				<li className="nav-item active">
-					<a className="nav-link" href="" onClick = {() => this.navigate("home")}>
+					<Link className="nav-link" to="/" onClick = {() => this.navigate("home")}>
 					<i className="fas fa-home"></i>
-						<span>Home/About</span></a>
+						<span>Home/About</span></Link>
 				</li>
 			)
 		} else { // if user is currently NOT at home
 			homebtn = (
 				<li className="nav-item">
-					<a className="nav-link" href="" onClick = {() => this.navigate("home")}>
+					<Link className="nav-link" to="/" onClick = {() => this.navigate("home")}>
 					<i className="fas fa-home"></i>
-						<span>Home/About</span></a>
+						<span>Home/About</span></Link>
 				</li>
 			)
 		}
@@ -56,9 +56,9 @@ class Sidebar extends React.Component{
 		let options = navoptions.map(option =>
 			// key is required for each list item       the "active" class will only be used if the user navigates to that page
 			<li key={option.id} className={(this.state.nav === option.id) ? "nav-item active" : "nav-item"}>
-				<a className="nav-link" href="" onClick = {() => this.navigate(option.id)}>
+				<Link className="nav-link" to={"/" + option.id} onClick = {() => this.navigate(option.id)}>
 				<i className={option.icon}></i>
-				<span>{option.name}</span></a>
+				<span>{option.name}</span></Link>
 			</li>
 		);
 

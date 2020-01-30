@@ -1,8 +1,9 @@
 import React from 'react';
 import './App.css';
+import {Switch, Route, useParams} from 'react-router-dom'
 
 // the general elements
-import Sidebar from "./components/sidebar"
+import Sidebar from "./components/sidebar2"
 import Topbar from "./components/topbar"
 
 // the contents & the naming conventions
@@ -22,7 +23,8 @@ import SC from "./components/sc"       // service changes
 // other contents
 import Error404 from "./components/404"
 
-function content(nav){
+
+/*function content(nav){
 	if (nav === "home"){
 		return (<Home/>);
 	} else if (nav === "info") {
@@ -48,7 +50,7 @@ function content(nav){
 	} else {
 		return (<Error404/>);
 	}
-}
+}*/
 
 class App extends React.Component{
 	constructor(props){ 
@@ -67,6 +69,9 @@ class App extends React.Component{
 		// dynamically change the page title on the topbar
 		// selectedNav and this.state.nav use the same naming convention as the sidebar nav buttons
 		switch (selectedNav){
+			case "home":
+				this.setState({title: "GTFS-ride Tools"});
+				break;
 			case "info":
 				this.setState({title: "GTFS-ride Feed Info"});
 				break;
@@ -100,8 +105,8 @@ class App extends React.Component{
 			case "sc":
 				this.setState({title: "GTFS-ride Service Changes"});
 				break;
-			default: // home, 404, etc.
-				this.setState({title: "GTFS-ride Tools"});
+			default: // 404
+				this.setState({title: "Not Found"});
 				break;
 		}
 	}
@@ -114,7 +119,7 @@ class App extends React.Component{
 		} else if (this.state.nav === "info") {
 			content = <Info></Info>;
 		}*/
-		let contentPreview = content(this.state.nav);
+		//let contentPreview = content(this.state.nav);
 
 		return (
 			<div id="page-top">
@@ -137,7 +142,45 @@ class App extends React.Component{
 							{/* Begin Page Content */}
 							<div className="container-fluid">
 			
-								{contentPreview}
+								{/*contentPreview*/}
+								<Switch>
+									<Route exact path="/">
+										<Home/>
+									</Route>
+									<Route path="/info">
+										<Info/>
+									</Route>
+									<Route path="/fc">
+										<FC/>
+									</Route>
+									<Route path="/ns">
+										<NS/>
+									</Route>
+									<Route path="/diff">
+										<Diff/>
+									</Route>
+									<Route path="/clean">
+										<Clean/>
+									</Route>
+									<Route path="/ts">
+										<TS/>
+									</Route>
+									<Route path="/merge">
+										<Merge/>
+									</Route>
+									<Route path="/as">
+										<AS/>
+									</Route>
+									<Route path="/ra">
+										<RA/>
+									</Route>
+									<Route path="/sc">
+										<SC/>
+									</Route>
+									<Route path="/">
+										<Error404/>
+									</Route>
+								</Switch>
 								
 								
 							</div>

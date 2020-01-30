@@ -113,6 +113,7 @@ class Home extends React.Component{
 								Use the lefthand sidebar to choose tool.
 								<br /><br />
 								<h5 className="font-weight-bold">Uploads</h5>
+								Use the file upload button above. <br/>
 								GTFS and GTFS-ride feeds consist of .txt files in a zipped folder.
 								<br /><br />
 							</div>
@@ -128,19 +129,13 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">About GTFS-ride</h5>
 							</div>
 							<div className="card-body">
-								<h5 className="font-weight-bold">Feed Info</h5>
-								Receives a GTFS or GTFS-ride feed and displays feed information.
-								<br /><br />
-								<h5 className="font-weight-bold">Feed Creation</h5>
-								Generates a test feed that is either user-provided, randomly generated, or a mix of both.
-								<br /><br />
+								GTFS-ride is an extension to the <a href="https://www.gtfs.org/">GTFS</a> data standard. This addition allows any GTFS feed to track riderships.
 							</div>
 						</div>
 					</div>
 	
 				</div>
-		</div>
-	
+			</div>
 		)
 	}
 }
