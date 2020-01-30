@@ -1,6 +1,6 @@
 #include "gtfs.h"
 
-void populateAgency(vector<agency> &a){
+void GTFS::populateAgency(vector<agency> &a){
     string line;
     string temp; //for storing results from file and converting type
     struct agency tempa;
@@ -36,6 +36,10 @@ void populateAgency(vector<agency> &a){
                 tempa.agency_phone = temp;
             else if ( i == 5)
                 tempa.agency_lang = temp;
+            else if ( i == 6)
+                tempa.agency_fare_url = temp;
+            else if ( i == 7)
+                tempa.agency_email = temp;
             else
             {
                 break;
