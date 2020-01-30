@@ -2,11 +2,13 @@ var http = require('http');
 var formidable = require('formidable');
 var fs = require('fs');
 var extract = require('extract-zip')
+var csv = require('csv-parse/lib/sync')
 
 var PORT = 8080;
 var URL = '/fileupload';
 
-var somewhere
+var agency = null, routes = null
+var agency_done = false
 
 http.createServer(function (req, res) {
     if (req.url == URL) {
@@ -27,7 +29,13 @@ http.createServer(function (req, res) {
                         console.log("Error in extraction: " + err);
                     } else {
                         console.log("Files extracted to " + noext + "/");
+                        routes = csv(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true})
+                        agency = csv(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
+                        
                     }
+                    //console.log(agency.length)
+                    //console.log(agency[0].agency_name);
+                    //console.log("Agency: " + agency[0].agency_name)
                     
                 })
             });
