@@ -59,28 +59,25 @@ class Home extends React.Component{
 							</div>
 							<div className="card-body">
 								<h5 className="font-weight-bold">Feed Info</h5>
-								Receives a GTFS or GTFS-ride feed and displays feed information.
+								Receives a GTFS or GTFS-ride feed and displays helpful information.
 								<br /><br />
 								<h5 className="font-weight-bold">Test Feed Creation</h5>
-								Generates a test feed that is either user-provided, randomly generated, or a mix of both.
+								Randomly generates a GTFS-ride test feed, allowing user to specify feed characteristics.
 								<br /><br />
 								<h5 className="font-weight-bold">Network State</h5>
-								Needs further definition.
+								Reports irregular states of the network in a GTFS or GTFS-ride feed (for example different holiday service hours)
 								<br /><br />
 								<h5 className="font-weight-bold">Difference</h5>
-								Compares two feeds, often an old and new version of the same feed.
+								Compares two GTFS or GTFS-ride feeds, often two versions of the same feed.
 								<br /><br />
 								<h5 className="font-weight-bold">Clean</h5>
-								Removes unused data elements and notifies user on what was changed.
+								Removes unused data elements in a GTFS or GTFS-ride feed and notifies user on what was changed.
 								<br /><br />
-								<h5 className="font-weight-bold">Time Split</h5>
-								Filters a GTFS or GTFS-ride feed based on start and end time.
+								<h5 className="font-weight-bold">Split</h5>
+								Filters a GTFS or GTFS-ride feed based on agencies included or start/end time.
 								<br /><br />
 								<h5 className="font-weight-bold">Merge</h5>
-								Merges two feeds. Needs further definition. Uses a user-defined weight to each source.
-								<br /><br />
-								<h5 className="font-weight-bold">Agency Split</h5>
-								Filters a GTFS or GTFS-ride feed based on agencies included.
+								Merges two GTFS or GTFS-ride feeds by either ridership or time, implementing a user-defined weight for each source.
 								<br /><br />
 							</div>
 						</div>
