@@ -13,10 +13,10 @@ import FC from "./components/fc"       // feed creation
 import NS from "./components/ns"       // network state
 import Diff from "./components/diff"   // diff
 import Clean from "./components/clean" // clean
-import TS from "./components/ts"       // time split
+import Split from "./components/split"    //  split
 //import TM from "./components/tm"     // time merge -- combined with "ridership merge" to create "merge"
 import Merge from "./components/merge" // merge (formerly "ridership merge")
-import AS from "./components/as"       // agency split
+//import AS from "./components/as"       // agency split -- combined with "time split" to create "split"
 import RA from "./components/ra"       // ridership anomaly
 import SC from "./components/sc"       // service changes
 
@@ -88,7 +88,7 @@ class App extends React.Component{
 				this.setState({title: "GTFS-ride Clean"});
 				break;
 			case "ts":
-				this.setState({title: "GTFS-ride Time Split"});
+				this.setState({title: "GTFS-ride Split"});
 				break;
 			/*case "tm":
 				this.setState({title: "GTFS-ride Time Merge"});
@@ -96,9 +96,9 @@ class App extends React.Component{
 			case "merge":
 				this.setState({title: "GTFS-ride Merge"});
 				break;
-			case "as":
+			/*case "as":
 				this.setState({title: "GTFS-ride Agency Split"});
-				break;
+				break;*/
 			case "ra":
 				this.setState({title: "GTFS-ride Ridership Anomaly"});
 				break;
@@ -162,14 +162,11 @@ class App extends React.Component{
 									<Route path="/clean">
 										<Clean/>
 									</Route>
-									<Route path="/ts">
-										<TS/>
+									<Route path="/split">
+										<Split/>
 									</Route>
 									<Route path="/merge">
 										<Merge/>
-									</Route>
-									<Route path="/as">
-										<AS/>
 									</Route>
 									<Route path="/ra">
 										<RA/>

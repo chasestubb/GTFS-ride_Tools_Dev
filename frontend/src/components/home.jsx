@@ -91,16 +91,16 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">Upload a Feed</h5>
 							</div>
 							<div className="card-body">
-								1. Choose a feed file<br/>
+								<strong>1. Choose a feed file<br/></strong>
 								<input type="file" name="fileupload" accept=".zip" onChange={this.fileSelected}/><br/>
 								<br/>
-								2. Upload the selected file: <strong>{this.state.filename}</strong><br/>
+								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/><br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip).
 							</div>
 						</div>
 	
-						{/* NAVIGATION - Project Card */}
+						{/* HELP - Project Card */}
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
 								<h5 className="m-0 font-weight-bold text-primary">Help</h5>
@@ -109,8 +109,8 @@ class Home extends React.Component{
 								<h5 className="font-weight-bold">Navigation</h5>
 								Use the lefthand sidebar to choose tool.
 								<br /><br />
-								<h5 className="font-weight-bold">Uploads</h5>
-								Use the file upload button above. <br/>
+								<h5 className="font-weight-bold">Feed Upload</h5>
+								Use the "Upload a Feed" card above. <br/>
 								GTFS and GTFS-ride feeds consist of .txt files in a zipped folder.
 								<br /><br />
 							</div>
@@ -126,7 +126,7 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">About GTFS-ride</h5>
 							</div>
 							<div className="card-body">
-								GTFS-ride is an extension to the <a href="https://www.gtfs.org/">GTFS</a> data standard. This addition allows any GTFS feed to track riderships.
+								GTFS-ride is an extension to the <a href="https://www.gtfs.org/">GTFS</a> data standard that appends ridership data.
 							</div>
 						</div>
 					</div>
