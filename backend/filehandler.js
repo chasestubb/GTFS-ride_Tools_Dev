@@ -4,6 +4,8 @@ var fs = require('fs');
 var extract = require('extract-zip')
 var csv = require('csv-parse/lib/sync')
 
+var Info = require("./js/info")
+
 var PORT = 8080;
 var URL = '/fileupload';
 
@@ -30,11 +32,11 @@ http.createServer(function (req, res) {
                 extract(newpath, {dir: (process.cwd() + "/uploads/" + noext)}, function (err) {
                     if (err){
                         console.log("Error in extraction: " + err);
-                        res.writeHead(415)
-                        res.write("The specified file is not a valid GTFS feed.")
+                        res.writeHead(415, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+                        res.write("The server could not extract " + noext + ".zip. Check if the file is corrupted or in the wrong format.\n\nDetails:\n" + err);
                         res.end();
                     } else {
-                        console.log("Files extracted to " + noext + "/");
+                        console.log("\nFiles extracted to " + noext + "/");
 
                         // check for required files
                         if (fs.existsSync("uploads/" + noext + "/routes.txt") &&
@@ -46,7 +48,7 @@ http.createServer(function (req, res) {
                             
                             // send response to client
                             res.writeHead(200, {'Content-Type': 'text/html', "Access-Control-Allow-Origin": "http://localhost:3000"});
-                            res.write('File upload successful!');
+                            res.write(noext);
                             res.end();
 
                             // read files and parse them
@@ -60,27 +62,47 @@ http.createServer(function (req, res) {
                             // GTFS conditionally required files
                             if (fs.existsSync("uploads/" + noext + "/calendar.txt")){
                                 calendar = csv(fs.readFileSync("uploads/" + noext + "/calendar.txt"), {columns: true})
+                            } else {
+                                calendar = null
                             }
                             if (fs.existsSync("uploads/" + noext + "/calendar_dates.txt")){
                                 calendar_dates = csv(fs.readFileSync("uploads/" + noext + "/calendar_dates.txt"), {columns: true})
+                            } else {
+                                calendar_dates = null
                             }
 
                             // GTFS optional files
                             if (fs.existsSync("uploads/" + noext + "/frequencies.txt")){
                                 frequencies = csv(fs.readFileSync("uploads/" + noext + "/frequencies.txt"), {columns: true})
+                            } else {
+                                frequencies = null
                             }
 
                             // GTFS-ride files
                             if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
                                 gtfs_ride_feed = true;
-                                board_alight = csv(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
+                                // GTFS-ride optional files
+                                if (fs.existsSync("uploads/" + noext + "/board_alight.txt")){
+                                    board_alight = csv(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
+                                } else {
+                                    board_alight = null
+                                }
+                            } else {
+                                gtfs_ride_feed = false
                             }
 
+                            if (gtfs_ride_feed){
+                                console.log("GTFS-ride feed parsed: " + noext + ".zip")
+                            } else {
+                                console.log("GTFS feed parsed: " + noext + ".zip")
+                            }
+                            
+
                         } else { // if the required files do not exist
-                            res.writeHead(415)
-                            res.write("The specified file is not a valid GTFS feed.")
+                            res.writeHead(415, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+                            res.write(noext + ".zip is NOT a valid GTFS feed");
                             res.end();
-                            console.log(noext + ".zip is not a valid GTFS feed");
+                            console.log(noext + ".zip is NOT a valid GTFS feed");
                         }
                         
                     }

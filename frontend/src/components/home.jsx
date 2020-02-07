@@ -27,7 +27,12 @@ class Home extends React.Component{
 		fd.append("file", this.state.file);
 		const config = {headers: {"content-type": "multipart/form-data"}, mode: "no-cors"};
 		//                        required for the file upload to succeed
-		return Axios.post(url, fd, config);
+		return Axios.post(url, fd, config).then(function(res){
+			console.log(res);
+		}).catch(function(err){
+			console.log(err);
+			alert(err.response.data); // shows a browser alert containing error data
+		});
 	}
 
 	render () {
@@ -99,7 +104,7 @@ class Home extends React.Component{
 								<br/>
 								2. Upload the selected file: <strong>{this.state.filename}</strong><br/>
 								{uploadConfirmBtn}<br/><br/>
-								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip).
+								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
 						</div>
 	
