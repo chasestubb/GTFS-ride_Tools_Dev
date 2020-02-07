@@ -7,10 +7,10 @@ const navoptions = [
 	{id: "ns", name: "Network State", icon: "fas fa-project-diagram"},
 	{id: "diff", name: "Difference", icon: "fas fa-not-equal"},
 	{id: "clean", name: "Clean", icon: "fas fa-broom"},
-	{id: "ts", name: "Time Split", icon: "fas fa-calendar-day"},
+	{id: "split", name: "Split", icon: "fas fa-copy"},
 	//{id: "tm", name: "Time Merge", icon: "fas fa-calendar-alt"},
-	{id: "rm", name: "Merge", icon: "fas fa-object-group"},
-	{id: "as", name: "Agency Split", icon: "fas fa-landmark"},
+	{id: "merge", name: "Merge", icon: "fas fa-object-group"},
+	//{id: "as", name: "Agency Split", icon: "fas fa-landmark"},
 	{id: "ra", name: "Ridership Anomaly", icon: "fas fa-search"},
 	{id: "sc", name: "Service Changes", icon: "fas fa-edit"}
 ];
@@ -39,7 +39,7 @@ class Sidebar extends React.Component{
 				<li className="nav-item active">
 					<Link className="nav-link" to="/" onClick = {() => this.navigate("home")}>
 					<i className="fas fa-home"></i>
-						<span>Home/About</span></Link>
+						<span>Home</span></Link>
 				</li>
 			)
 		} else { // if user is currently NOT at home
@@ -47,7 +47,7 @@ class Sidebar extends React.Component{
 				<li className="nav-item">
 					<Link className="nav-link" to="/" onClick = {() => this.navigate("home")}>
 					<i className="fas fa-home"></i>
-						<span>Home/About</span></Link>
+						<span>Home</span></Link>
 				</li>
 			)
 		}
