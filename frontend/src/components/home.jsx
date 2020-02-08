@@ -101,7 +101,7 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/><br/>
-								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
+								Accepted file types: zipped GTFS or GTFS-ride feed folders (.zip). Password-protected zip files are not supported.
 							</div>
 						</div>
 	
@@ -113,10 +113,6 @@ class Home extends React.Component{
 							<div className="card-body">
 								<h5 className="font-weight-bold">Navigation</h5>
 								Use the lefthand sidebar to choose tool.
-								<br /><br />
-								<h5 className="font-weight-bold">Feed Upload</h5>
-								Use the "Upload a Feed" card above. <br/>
-								GTFS and GTFS-ride feeds consist of .txt files in a zipped folder.
 								<br /><br />
 							</div>
 						</div>
