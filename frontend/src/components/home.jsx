@@ -64,28 +64,25 @@ class Home extends React.Component{
 							</div>
 							<div className="card-body">
 								<h5 className="font-weight-bold">Feed Info</h5>
-								Receives a GTFS or GTFS-ride feed and displays feed information.
+								Receives a GTFS or GTFS-ride feed and displays helpful information.
 								<br /><br />
 								<h5 className="font-weight-bold">Test Feed Creation</h5>
-								Generates a test feed that is either user-provided, randomly generated, or a mix of both.
+								Randomly generates a GTFS-ride test feed, allowing user to specify feed characteristics.
 								<br /><br />
 								<h5 className="font-weight-bold">Network State</h5>
-								Needs further definition.
+								Reports irregular states of the network in a GTFS or GTFS-ride feed (for example different holiday service hours)
 								<br /><br />
 								<h5 className="font-weight-bold">Difference</h5>
-								Compares two feeds, often an old and new version of the same feed.
+								Compares two GTFS or GTFS-ride feeds, often two versions of the same feed.
 								<br /><br />
 								<h5 className="font-weight-bold">Clean</h5>
-								Removes unused data elements and notifies user on what was changed.
+								Removes unused data elements in a GTFS or GTFS-ride feed and notifies user on what was changed.
 								<br /><br />
-								<h5 className="font-weight-bold">Time Split</h5>
-								Filters a GTFS or GTFS-ride feed based on start and end time.
+								<h5 className="font-weight-bold">Split</h5>
+								Filters a GTFS or GTFS-ride feed based on agencies included or start/end time.
 								<br /><br />
 								<h5 className="font-weight-bold">Merge</h5>
-								Merges two feeds. Needs further definition. Uses a user-defined weight to each source.
-								<br /><br />
-								<h5 className="font-weight-bold">Agency Split</h5>
-								Filters a GTFS or GTFS-ride feed based on agencies included.
+								Merges two GTFS or GTFS-ride feeds by either ridership or time, implementing a user-defined weight for each source.
 								<br /><br />
 							</div>
 						</div>
@@ -99,16 +96,16 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">Upload a Feed</h5>
 							</div>
 							<div className="card-body">
-								1. Choose a feed file<br/>
+								<strong>1. Choose a feed file<br/></strong>
 								<input type="file" name="fileupload" accept=".zip" onChange={this.fileSelected}/><br/>
 								<br/>
-								2. Upload the selected file: <strong>{this.state.filename}</strong><br/>
+								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/><br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
 						</div>
 	
-						{/* NAVIGATION - Project Card */}
+						{/* HELP - Project Card */}
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
 								<h5 className="m-0 font-weight-bold text-primary">Help</h5>
@@ -117,8 +114,8 @@ class Home extends React.Component{
 								<h5 className="font-weight-bold">Navigation</h5>
 								Use the lefthand sidebar to choose tool.
 								<br /><br />
-								<h5 className="font-weight-bold">Uploads</h5>
-								Use the file upload button above. <br/>
+								<h5 className="font-weight-bold">Feed Upload</h5>
+								Use the "Upload a Feed" card above. <br/>
 								GTFS and GTFS-ride feeds consist of .txt files in a zipped folder.
 								<br /><br />
 							</div>
@@ -134,7 +131,7 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">About GTFS-ride</h5>
 							</div>
 							<div className="card-body">
-								GTFS-ride is an extension to the <a href="https://www.gtfs.org/">GTFS</a> data standard. This addition allows any GTFS feed to track riderships.
+								GTFS-ride is an extension to the <a href="https://www.gtfs.org/">GTFS</a> data standard that appends ridership data.
 							</div>
 						</div>
 					</div>
