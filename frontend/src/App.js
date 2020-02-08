@@ -138,7 +138,7 @@ class App extends React.Component{
 						{/* Main Content */}
 						<div id="content">
 			
-							<Topbar title={this.state.title}/>
+							<Topbar/>
 			
 							{/* Begin Page Content */}
 							<div className="container-fluid">
