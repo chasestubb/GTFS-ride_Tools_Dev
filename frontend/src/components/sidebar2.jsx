@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, NavLink, Switch, Route, useParams} from 'react-router-dom';
 
 const navoptions = [
 	{id: "info", name: "Feed Info", icon: "fas fa-info-circle"},
@@ -34,10 +34,11 @@ class Sidebar extends React.Component{
 		let homebtn;
 
 		// Home
-		if (this.state.nav === "home"){ // if user is currently at home
+		/*
+		if (current_nav === "home"){ // if user is currently at home
 			homebtn = (
 				<li className="nav-item active">
-					<Link className="nav-link" to="/" onClick = {() => this.navigate("home")}>
+					<Link className="nav-link" to="/">
 					<i className="fas fa-home"></i>
 						<span>Home/About</span></Link>
 				</li>
@@ -45,20 +46,28 @@ class Sidebar extends React.Component{
 		} else { // if user is currently NOT at home
 			homebtn = (
 				<li className="nav-item">
-					<Link className="nav-link" to="/" onClick = {() => this.navigate("home")}>
+					<Link className="nav-link" to="/">
 					<i className="fas fa-home"></i>
 						<span>Home/About</span></Link>
 				</li>
 			)
 		}
+		*/
+		homebtn = (
+			<li className="nav-item">
+				<NavLink className="nav-link" activeClassName="active" exact to="/">
+				<i className="fas fa-home"></i>
+					<span>Home/About</span></NavLink>
+			</li>
+		)
 
 		// the rest of the functionalities
 		let options = navoptions.map(option =>
 			// key is required for each list item       the "active" class will only be used if the user navigates to that page
-			<li key={option.id} className={(this.state.nav === option.id) ? "nav-item active" : "nav-item"}>
-				<Link className="nav-link" to={"/" + option.id} onClick = {() => this.navigate(option.id)}>
+			<li key={option.id} className="nav-item">
+				<NavLink className="nav-link" to={"/" + option.id} activeClassName="active">
 				<i className={option.icon}></i>
-				<span>{option.name}</span></Link>
+				<span>{option.name}</span></NavLink>
 			</li>
 		);
 
@@ -67,12 +76,12 @@ class Sidebar extends React.Component{
 				<ul className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 				
 					{/* the "GTFS-ride Tools" brand (with the logo) - should go to home on click */}
-					<a className="sidebar-brand d-flex align-items-center justify-content-center" onClick = {() => this.navigate("home")}>
+					<Link className="sidebar-brand d-flex align-items-center justify-content-center" to="/">
 						<div className="sidebar-brand-icon sidebar-logo">
 							<img src="img/isolated-monochrome-white.svg" alt="GTFS-ride logo" />
 						</div>
 						<div className="sidebar-brand-text mx-3">GTFS-ride Tools</div>
-					</a>
+					</Link>
 		
 					{/* Divider */}
 					<hr className="sidebar-divider my-0" />

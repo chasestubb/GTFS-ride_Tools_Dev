@@ -1,4 +1,5 @@
 import React from 'react'
+import {Switch, Route} from 'react-router-dom'
 
 class Topbar extends React.Component{
 	
@@ -11,7 +12,44 @@ class Topbar extends React.Component{
 				<i className="fa fa-bars"></i>
 			</button>
 
-			<h5 className="h5 mb-0 text-gray-800">{this.props.title}</h5>
+			<h5 className="h5 mb-0 text-gray-800">
+				{/* Dynamically change page title */}
+				<Switch>
+					<Route exact path="/">
+						GTFS-ride Tools
+					</Route>
+					<Route path="/info">
+						GTFS-ride Feed Info
+					</Route>
+					<Route path="/fc">
+						GTFS-ride Test Feed Creation
+					</Route>
+					<Route path="/ns">
+						GTFS-ride Network State
+					</Route>
+					<Route path="/diff">
+						GTFS-ride Diff (Compare)
+					</Route>
+					<Route path="/clean">
+						GTFS-ride Clean
+					</Route>
+					<Route path="/split">
+						GTFS-ride Split
+					</Route>
+					<Route path="/merge">
+						GTFS-ride Merge
+					</Route>
+					<Route path="/ra">
+						GTFS-ride Ridership Anomaly
+					</Route>
+					<Route path="/sc">
+						GTFS-ride Service Changes
+					</Route>
+					<Route path="*">
+						Not Found
+					</Route>
+				</Switch>
+			</h5>
 
 			{/* Topbar Navbar */}
 			<ul className="navbar-nav ml-auto">
