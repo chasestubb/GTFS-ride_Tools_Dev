@@ -7,7 +7,7 @@ const url = "http://localhost:8080/fileupload";
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: "", file: null}; // filename = the name only, without path
+		this.state = {filepath: "", filename: "", file: null, upload_status: false}; // filename = the name only, without path
 		this.fileSelected = this.fileSelected.bind(this);
 		this.upload = this.upload.bind(this);
 	}
@@ -19,6 +19,7 @@ class Home extends React.Component{
 		let fp = event.target.value;
 		this.setState({filepath: fp, filename: fp.slice(12), file: event.target.files[0]});
 		// the file path will always be "C:\\fakepath\\<FILENAME>"
+		// slice(n) removes the first n characters from a string (non-destructive)
 	}
 
 	// uploads the file when user clicks "confirm upload"
@@ -29,9 +30,12 @@ class Home extends React.Component{
 		//                        required for the file upload to succeed
 		return Axios.post(url, fd, config).then(function(res){
 			console.log(res);
+			this.setState({upload_status: true});
 		}).catch(function(err){
-			console.log(err);
-			alert(err.response.data); // shows a browser alert containing error data
+			if (err){
+				console.log(err);
+				alert(err.response.data); // shows a browser alert containing error data
+			}
 		});
 	}
 
@@ -100,7 +104,9 @@ class Home extends React.Component{
 								<input type="file" name="fileupload" accept=".zip" onChange={this.fileSelected}/><br/>
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
-								{uploadConfirmBtn}<br/><br/>
+								{uploadConfirmBtn}<br/>
+								{this.state.upload_status ? <span>Upload successful.</span> : null}
+								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
 						</div>

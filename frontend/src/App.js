@@ -13,10 +13,10 @@ import FC from "./components/fc"       // feed creation
 import NS from "./components/ns"       // network state
 import Diff from "./components/diff"   // diff
 import Clean from "./components/clean" // clean
-import Split from "./components/split"    //  split
+import Split from "./components/split" // split (formerly "time split")
 //import TM from "./components/tm"     // time merge -- combined with "ridership merge" to create "merge"
 import Merge from "./components/merge" // merge (formerly "ridership merge")
-//import AS from "./components/as"       // agency split -- combined with "time split" to create "split"
+//import AS from "./components/as"     // agency split -- combined with "time split" to create "split"
 import RA from "./components/ra"       // ridership anomaly
 import SC from "./components/sc"       // service changes
 
@@ -55,13 +55,14 @@ import Error404 from "./components/404"
 class App extends React.Component{
 	constructor(props){ 
 		super(props);
-		this.state = {nav: "home", title: "GTFS-ride Tools"};
-		this.navChange = this.navChange.bind(this); // required to make onNavChange={this.navChange} work
+		//this.state = {nav: "home", title: "GTFS-ride Tools"};
+		//this.navChange = this.navChange.bind(this); // required to make onNavChange={this.navChange} work
 	}
 
 	// handles receiving data from the sidebar
 	// selectedNav is where the item from sidebar.jsx -> Sidebar -> navigate(item) received
-	navChange(selectedNav) {
+	// no longer used in favor of using React Router
+	/*navChange(selectedNav) {
 
 		// set the navigation state of the page
 		this.setState({nav: selectedNav});
@@ -90,15 +91,15 @@ class App extends React.Component{
 			case "ts":
 				this.setState({title: "GTFS-ride Split"});
 				break;
-			/*case "tm":
-				this.setState({title: "GTFS-ride Time Merge"});
-				break;*/
+			//case "tm":
+			//	this.setState({title: "GTFS-ride Time Merge"});
+			//	break;
 			case "merge":
 				this.setState({title: "GTFS-ride Merge"});
 				break;
-			/*case "as":
-				this.setState({title: "GTFS-ride Agency Split"});
-				break;*/
+			//case "as":
+			//	this.setState({title: "GTFS-ride Agency Split"});
+			//	break;
 			case "ra":
 				this.setState({title: "GTFS-ride Ridership Anomaly"});
 				break;
@@ -109,7 +110,7 @@ class App extends React.Component{
 				this.setState({title: "Not Found"});
 				break;
 		}
-	}
+	}*/
 
 	render(){
 
@@ -128,8 +129,9 @@ class App extends React.Component{
 				<div id="wrapper">
 
 					{/* see explanation on sidebar.jsx */}
-					<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}/>
+					{/*<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}/>*/}
 					{/* onNavChange also exists in sidebar.jsx -> Sidebar -> navigate(item)*/}
+					<Sidebar/>
 			
 					{/* Content Wrapper */}
 					<div id="content-wrapper" className="d-flex flex-column">
