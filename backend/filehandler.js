@@ -6,25 +6,30 @@ var csv = require('csv-parse/lib/sync')
 
 var Info = require("./js/info")
 
-var PORT = 8080;
-var URL = '/fileupload';
+const PORT = 8080;
+
+const UPLOAD_URL = '/fileupload';
+const INFO_URL = '/info'
 
 // parsed files go here
 // GTFS required
-var agency = null, routes = null, trips = null, stops = null, stop_times = null, calendar = null, calendar_dates = null
+var agencies = null, routes = null, trips = null, stops = null, stop_times = null, calendar = null, calendar_dates = null
 // GTFS optional
 var frequencies = null
 // GTFS-ride
 var gtfs_ride_feed = false; // true = GTFS-ride, false = GTFS (condition for true: ride_feed_info.txt exists)
 var board_alight = null
 
+var filename = ""
+
 http.createServer(function (req, res) {
-    if (req.url == URL) {
+    if (req.url == UPLOAD_URL) {
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var oldpath = files.file.path;
             var newpath = './uploads/' + files.file.name;
             var noext = (files.file.name).slice(0, -4); // removes the last 4 chars (".zip")
+            filename = noext;
             fs.rename(oldpath, newpath, function (err) {
                 if (err) throw err;
 
@@ -54,7 +59,7 @@ http.createServer(function (req, res) {
                             // read files and parse them
                             // GTFS required files
                             routes = csv(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true})
-                            agency = csv(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
+                            agencies = csv(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
                             trips = csv(fs.readFileSync("uploads/" + noext + "/trips.txt"), {columns: true})
                             stops = csv(fs.readFileSync("uploads/" + noext + "/stops.txt"), {columns: true})
                             stop_times = csv(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
@@ -113,6 +118,26 @@ http.createServer(function (req, res) {
                 })
             });
         });
+    } else if (req.url == INFO_URL){
+        // initialize object
+        var feed_info = {
+            filename: filename,
+            is_gtfs_ride: gtfs_ride_feed,
+            agencies: []
+        }
+
+        for (x = 0; x < agencies.length; x++){
+            var agency = {
+                name: agencies[x].agency_name,
+                //routes: Info.routesPerAgency(agencies[x], routes) // needs import to work
+            }
+            feed_info.agencies.push(agency);
+        }
+
+        // send object to front-end
+        res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+        res.write(JSON.stringify(feed_info));
+        res.end();
     } else {
         res.writeHead(200, {'Content-Type': 'text/html'});
         /*res.write('<form action="fileupload" method="post" enctype="multipart/form-data">');
