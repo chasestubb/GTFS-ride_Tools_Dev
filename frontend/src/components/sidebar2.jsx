@@ -2,18 +2,19 @@ import React from 'react';
 import {Link, NavLink} from 'react-router-dom';
 
 // navigation options
+// the ID also defines the path (example: to go to Network State, the user can click on "Network State" or type "<HOSTNAME>/ns")
 const navoptions = [
-	{id: "info", name: "Feed Info", icon: "fas fa-info-circle"},
-	{id: "fc", name: "Test Feed Creation", icon: "fas fa-file-archive"},
-	{id: "ns", name: "Network State", icon: "fas fa-project-diagram"},
-	{id: "diff", name: "Difference", icon: "fas fa-not-equal"},
-	{id: "clean", name: "Clean", icon: "fas fa-broom"},
-	{id: "split", name: "Split", icon: "fas fa-copy"},
-	//{id: "tm", name: "Time Merge", icon: "fas fa-calendar-alt"},
-	{id: "merge", name: "Merge", icon: "fas fa-object-group"},
-	//{id: "as", name: "Agency Split", icon: "fas fa-landmark"},
-	{id: "ra", name: "Ridership Anomaly", icon: "fas fa-search"},
-	{id: "sc", name: "Service Changes", icon: "fas fa-edit"}
+	{id: "info",  name: "Feed Info",          icon: "fas fa-info-circle"},
+	{id: "fc",    name: "Test Feed Creation", icon: "fas fa-file-archive"},
+	{id: "ns",    name: "Network State",      icon: "fas fa-project-diagram"},
+	{id: "diff",  name: "Difference",         icon: "fas fa-not-equal"},
+	{id: "clean", name: "Clean",              icon: "fas fa-broom"},
+	{id: "split", name: "Split",              icon: "fas fa-copy"},
+	//{id: "tm",  name: "Time Merge",         icon: "fas fa-calendar-alt"}, // now in merge
+	{id: "merge", name: "Merge",              icon: "fas fa-object-group"},
+	//{id: "as",  name: "Agency Split",       icon: "fas fa-landmark"}, // now in split
+	{id: "ra",    name: "Ridership Anomaly",  icon: "fas fa-search"},
+	{id: "sc",    name: "Service Changes",    icon: "fas fa-edit"}
 ];
 
 class Sidebar extends React.Component{

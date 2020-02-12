@@ -7,7 +7,7 @@ const url = "http://localhost:8080/fileupload";
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: "", file: null, upload_status: false}; // filename = the name only, without path
+		this.state = {filepath: "", filename: "", file: null, parsed_feed = null}; // filename = the name only, without path
 		this.fileSelected = this.fileSelected.bind(this);
 		this.upload = this.upload.bind(this);
 	}
@@ -30,13 +30,24 @@ class Home extends React.Component{
 		//                        required for the file upload to succeed
 		return Axios.post(url, fd, config).then(function(res){
 			console.log(res);
-			this.setState({upload_status: true});
+			this.setState({parsed_feed = res.data});
 		}).catch(function(err){
 			if (err){
 				console.log(err);
 				alert(err.response.data); // shows a browser alert containing error data
 			}
 		});
+		/* how it should work:
+		   1. client uploads feed to server from home.jsx
+		   2. home.jsx sends the feed as HTTP POST request
+		   3. server receives the feed
+		   4. server extracts the feed
+		   5. server parses the feed
+		   6. server "manipulates" data (parsed feed) without writing to any files
+		   7. server sends "manipulated" data back to client as a response
+		   8. home.jsx receives the "manipulated" data as HTTP response to point #2
+		   9. home.jsx sends the data to App.js
+		*/
 	}
 
 	render () {
@@ -105,7 +116,7 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
-								{this.state.upload_status ? <span>Upload successful.</span> : null}
+								{this.state.parsed_feed ? <span><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
@@ -118,7 +129,7 @@ class Home extends React.Component{
 							</div>
 							<div className="card-body">
 								<h5 className="font-weight-bold">Navigation</h5>
-								Use the lefthand sidebar to choose tool.
+								Use the lefthand sidebar to choose a tool.
 								<br /><br />
 								<h5 className="font-weight-bold">Feed Upload</h5>
 								Use the "Upload a Feed" card above. <br/>
