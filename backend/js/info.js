@@ -9,22 +9,22 @@ module.exports = {
         return peragency;
     },
 
-    stopsPerAgency: function(agency, routes, trips, stops){
+    stopsPerAgency: function(agency, routes, trips, stop_times){
         var num = 0;
-        for (var i = 0; i < stops.length; i++){
-            var match = stops[i].trip_id; // stops.txt does not contain trip_id
+        for (var i = 0; i < stop_times.length; i++){
+            var match = stops_times[i].trip_id; // stops.txt does not contain trip_id
             for ( var j = 0; j < trips.length; j++){
                 var match2 = trips[j].trip_id;
-                //var compare = match.localeCompare(match2);
-                //if(compare == 0){
-                //console.log("match = " + match + ", match2 = " + match2)
+                var compare = match.localeCompare(match2);
+                if(compare == 0){
+                console.log("match = " + match + ", match2 = " + match2)
                 if (match == match2){
                         var trip_route = trips[j].route_id;
                         for ( var k = 0; k < routes.length; k++){
                             var match3 = routes[k].route_id;
-                            //var compare2 = match3.localeCompare(trip_route);
-                            //if(compare2 == 0)
-                            //console.log("match3 = " + match3 + ", trip_route = " + trip_route)
+                            var compare2 = match3.localeCompare(trip_route);
+                            if(compare2 == 0)
+                            console.log("match3 = " + match3 + ", trip_route = " + trip_route)
                             if (match3 == trip_route)
                                 num++;
                         }
@@ -75,16 +75,32 @@ module.exports = {
 
 
     serviceDays: function(route, trips, calendar){
-        var days;
+        var days = [];
         for (var i = 0; i < trips.length; i++){
             var match = trips[i].route_id;
             var compare = match.localeCompare(route.route_id);
             if (compare == 0){
-                if (trips[i].service_id == "WE"){
-                        days = "weekends";
+                for ( j = 0; j < calendar.length; j++){
+                    var match2 = calendar[j].service_id;
+                    var match3 = trips[i].service_id;
+                    var compare2 = match3.localeCompare(match2);
+                    if (compare2 == 0){
+                        if (calendar[j].monday == 1)
+                            days.push("M");
+                        if (calendar[j].tuesday == 1)
+                            days.push("T");
+                        if (calendar[j].wednesday == 1)
+                            days.push("W");
+                        if (calendar[j].thursday == 1)
+                            days.push("R");
+                        if (calendar[j].friday == 1)
+                            days.push("F");
+                        if (calendar[j].saturday == 1)
+                            days.push("S");
+                        if (calendar[j].sunday == 1)
+                            days.push("U");
+                    }
                 }
-                else
-                    days = "weekdays";
             }
         }
         return days;
@@ -100,7 +116,7 @@ module.exports = {
         }
         return count;
     },
-    fcountStopRiders: function(board_alights, stop){
+    countStopRiders: function(board_alights, stop){
         var count = 0;
         for ( var i = 0; i < board_alights.length; i++){
         var match = board_alights[i].stop_id;
@@ -110,6 +126,47 @@ module.exports = {
         }
         return count;
     },
+    countAgencyRiders: function(agency, board_alights, trips, routes){
+        var count = 0;
+        for ( var i = 0; i < routes.length; i++){
+            var match = routes[i].agency_id;
+            var compare = match.localeCompare(agency.agency_id);
+            if (compare == 0){
+                for ( var j = 0; j < trips.length; j++){
+                    var match2 = trips[j].route_id;
+                    var compare2 = match2.localeCompare(routes[i].route_id);
+                    if (compare2 == 0){
+                        for ( var k = 0; k < board_alights.length; k++){
+                            var match3 = board_alight[k].trip_id
+                            var compare3 = match3.localeCompare(trips[j].trip_id)
+                            if (compare3 == 0){
+                                count = count + (board_alights[k].boardings);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    countRouteRiders: function(route, board_alights, trips){
+        var count = 0;
+        for ( var j = 0; j < trips.length; j++){
+            var match = trips[j].route_id;
+            var compare2 = match2.localeCompare(route.route_id);
+            if (compare2 == 0){
+                for ( var k = 0; k < board_alights.length; k++){
+                    var match3 = board_alight[k].trip_id
+                    var compare3 = match3.localeCompare(trips[j].trip_id)
+                    if (compare3 == 0){
+                        count = count + (board_alights[k].boardings);
+                    }
+                }
+            }
+        }
+    },
+
+    
 
     findTripRecordUse: function(board_alights, trips){
         var found;
@@ -153,15 +210,19 @@ function Info(){
     }
     for (var j = 0; j < num_agency; j++){
         num_routes = routesPerAgency(agency[i], routes);
-        num_stops = stopsPerAgency(agency[i], routes, trips, stops)
-        console.log("Agency " + agency[j].agency_name + " has "+ num_routes + "routes" + " and " + num_stops + " stops\n")
+        num_stops = stopsPerAgency(agency[i], routes, trips, stops_times)
+        var num_ag_riders = countAgencyRiders(agency[i], board_alights, trips, routes);
+        console.log("Agency " + agency[j].agency_name + " has "+ num_routes + "routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + "boardings\n")
+        
     }
     for (var k = 0; k < num_routes; k++){
         var days = serviceDays(routes[k], trips, calendar);
+        var route_riders = countRouteRiders(routes[k], board_alights, trips);
         console.log("Route " + routes[k].route_long_name + "has active trip service on " + days);
         var starts = serviceStart(routes[k], trips, frequencies);
         var end = serviceEnd(routes[k], trips, frequencies);
         console.log("Route " + routes[k].route_long_name + "has service hours starting at" + starts + "and ending at " + end);
+        console.log("Route" + route[k].route_long_name + "has " + route_riders + "riders");
 
     }
     for (var x = 0; x < trips.length(); x++){
@@ -193,5 +254,3 @@ function Info(){
     }
 
 }
-
-
