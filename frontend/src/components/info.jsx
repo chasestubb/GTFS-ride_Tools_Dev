@@ -78,6 +78,66 @@ class Info extends React.Component{
 		if (this.state.filename){
 			return (
 				<div>
+
+					{/* Content Row */}
+					<div className="row">
+						<h4>Click on an agency's card for more info.</h4><br/><br/>
+					</div>
+			
+					<div className="row">
+
+						{/* FILENAME */}
+						<div className="col-xl-3 col-md-6 mb-4">
+							<div className="card border-left-info shadow h-100 py-2">
+								<div className="card-body">
+									<div className="row no-gutters align-items-center">
+										<div className="col mr-2">
+											<div className="text-xs font-weight-bold text-info text-uppercase mb-1">File Uploaded</div>
+											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.filename}</div>
+										</div>
+										<div className="col-auto">
+											<i className="fas fa-file-archive fa-2x text-gray-300"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{/* FEED FORMAT */}
+						<div className="col-xl-3 col-md-6 mb-4">
+							<div className="card border-left-danger shadow h-100 py-2">
+								<div className="card-body">
+									<div className="row no-gutters align-items-center">
+										<div className="col mr-2">
+											<div className="text-xs font-weight-bold text-danger text-uppercase mb-1">Feed Format</div>
+											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.is_gtfs_ride ? "GTFS-ride" : "GTFS"}</div>
+										</div>
+										<div className="col-auto">
+											<i className="fas fa-bus fa-2x text-gray-300"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{/* Agency 2 mockup */}
+						<div className="col-xl-3 col-md-6 mb-4">
+							<div className="card border-left-success shadow h-100 py-2">
+								<div className="card-body">
+									<div className="row no-gutters align-items-center">
+										<div className="col mr-2">
+											<div className="text-xs font-weight-bold text-success text-uppercase mb-1">Number of Agencies</div>
+											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.agency_list.length}</div>
+										</div>
+										<div className="col-auto">
+											<i className="fas fa-landmark fa-2x text-gray-300"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
 					
 					{/* Content Row */}
 					<div className="row">

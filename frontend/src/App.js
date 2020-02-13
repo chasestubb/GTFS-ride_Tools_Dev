@@ -19,6 +19,7 @@ import Merge from "./components/merge" // merge (formerly "ridership merge")
 //import AS from "./components/as"     // agency split -- combined with "time split" to create "split"
 import RA from "./components/ra"       // ridership anomaly
 import SC from "./components/sc"       // service changes
+import InfoAgency from './components/info-agency' // agency view of info
 
 // other contents
 import Error404 from "./components/404"
@@ -154,6 +155,9 @@ class App extends React.Component{
 								<Switch>
 									<Route exact path="/">
 										<Home onUpload={this.setFilename}/>
+									</Route>
+									<Route path="/info-agency">
+										<InfoAgency/>
 									</Route>
 									<Route path="/info">
 										<Info/>
