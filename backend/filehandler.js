@@ -194,7 +194,8 @@ http.createServer(function (req, res) {
         console.log("Index: " + index);
         console.log(agency_info);
 
-        res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+        //res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+        res.writeHead(200, {"mode": "no-cors"});
         res.write(JSON.stringify(agency_info));
         res.end();
     
