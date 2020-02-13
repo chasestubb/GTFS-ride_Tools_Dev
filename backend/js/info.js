@@ -197,6 +197,23 @@ module.exports = {
         }
         return found;
     },
+    serviceException: function(trip, dates){
+        exceptions = [];
+        for ( var i = 0; i < dates.length, i++){
+            match = dates[i].trip_id;
+            compare = match.localeCompare(trip.trip_id);
+            if ( compare == 0){
+                exception.push(dates[i].date, ": ", dates[i].exception_type);
+            }
+        }
+        for ( var j = 0; j < exceptions.length; j++){
+            if (exception[j] == 1)
+                exceptions[j] = "Added\n";
+            if (exceptions[j] == 0)
+                exceptions[j] = "Removed\n";
+        }
+
+    },
 }
 
 function Info(){
@@ -209,9 +226,9 @@ function Info(){
         console.log(agency[i].agency_name + "\n");
     }
     for (var j = 0; j < num_agency; j++){
-        num_routes = routesPerAgency(agency[i], routes);
-        num_stops = stopsPerAgency(agency[i], routes, trips, stops_times)
-        var num_ag_riders = countAgencyRiders(agency[i], board_alights, trips, routes);
+        num_routes = routesPerAgency(agency[j], routes);
+        num_stops = stopsPerAgency(agency[j], routes, trips, stops_times)
+        var num_ag_riders = countAgencyRiders(agency[j], board_alights, trips, routes);
         console.log("Agency " + agency[j].agency_name + " has "+ num_routes + "routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + "boardings\n")
         
     }
@@ -228,12 +245,14 @@ function Info(){
     for (var x = 0; x < trips.length(); x++){
         var num_boardings = countTripRiders(board_alights, trips[x]);
         var has_ridership = findTripRecordUse(board_alights, trips[x]);
+        var exceptions = serviceException(trips[x], calendar_dates);
         if (has_ridership == 0)
-            console.log("Trip " + trip[i].trip_id + " has ridership data\n");
+            console.log("Trip " + trip[x].trip_id + " has ridership data\n");
         else if (has_ridership == 1)
-            console.log("Trip " + trip[i].trip_id + " does not have ridership data\n");
+            console.log("Trip " + trip[x].trip_id + " does not have ridership data\n");
 
-        console.log("Trip " + trip[i].trip_id + "has " + num_boardings + "boardings");
+        console.log("Trip " + trip[x].trip_id + "has " + num_boardings + "boardings");
+        console.log("Trip " + trip[x] + "has execeptions: " + exceptions);
         avg_rider = num_boardings / 7;
         console.log("The average number of riders per day is " + avg_rider);
     }
@@ -243,14 +262,14 @@ function Info(){
     console.log("The average amount of trips per day is " + avg_trip);
 
     for (var y = 0; y < stops.length; y++){
-        var has_ridership = findStopRecordUse(board_alights, trips[x]);
+        var has_ridership = findStopRecordUse(board_alights, stops[y]);
         if (has_ridership == 0)
-            console.log("Stop " + stop[i].stop_id + " has ridership data\n");
+            console.log("Stop " + stop[y].stop_id + " has ridership data\n");
         else if (has_ridership == 1)
-            console.log("Trip " + stop[i].stop_id + " does not have ridership data\n");
+            console.log("Trip " + stop[y].stop_id + " does not have ridership data\n");
 
         num_boardings = countStopRiders(board_alights, stops[y]);
-        console.log("Stop " + stops[i].stop_id + "has " + num_boardings + "boardings");
+        console.log("Stop " + stops[y].stop_id + "has " + num_boardings + "boardings");
     }
 
 }
