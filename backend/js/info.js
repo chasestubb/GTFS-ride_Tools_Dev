@@ -248,7 +248,8 @@ module.exports = {
             }
         }
         return capacity_numbers;
-    }
+    },
+
 }
 
 
@@ -266,7 +267,30 @@ function Info(){
         num_routes = routesPerAgency(agency[j], routes);
         num_stops = stopsPerAgency(agency[j], routes, trips, stops_times)
         var num_ag_riders = countAgencyRiders(agency[j], board_alights, trips, routes);
-        console.log("Agency " + agency[j].agency_name + " has "+ num_routes + "routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + "boardings\n")
+        var avg_ag_riders = num_ag_riders / 7;
+        console.log("Agency " + agency[j].agency_name + " has "+ num_routes + "routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + "boardings and" + avg_ag_rider + "daily riders");
+        for ( var i = 0; i < num_routes; i++){
+            if (((agency[j].agency_id).localeCompare(routes[i].agency_id)) == 0){
+                console.log("Route " + routes[i].route_long_name + "within agency");
+                var routeRiders = countRouteRider(routes[j], trips, board_alight);
+                console.log("Rider count for this route is " + routeRiders);
+                for ( var k = 0; k < trips.length; k++){
+                    if (((trips[k].route_id).localeCompare(routes[i]).route_id) == 0){
+                        console.log("Trip within agency" + trips[i].trip_id);
+                        var tripRiders = countTripRiders(board_alights, trips[k]);
+                        console.log("Rider count for this trip is" + tripRiders);
+                        for (var j = 0; j < stop_times.length; j++){
+                            if (((stop_times[j].trip_id).localeCompare(trips[k].trip_id)) == 0){
+                                console.log("Stop within agency" + stop_times[j].stop_id);
+                                var stopRiders = countStopRiders(board_alights, stop[j]);
+                                console.log("Rider count for this stop:" + stopRiders);
+                            }
+                        }
+                }
+
+            }
+
+        }
         
     }
     for (var k = 0; k < num_routes; k++){
@@ -317,8 +341,10 @@ function Info(){
         else if (has_ridership == 1)
             console.log("Trip " + stop[y].stop_id + " does not have ridership data\n");
 
-        num_boardings = countStopRiders(board_alights, stops[y]);
+        var num_boardings = countStopRiders(board_alights, stops[y]);
         console.log("Stop " + stops[y].stop_id + "has " + num_boardings + "boardings");
+        var avg_stop_rider = num_boardings / 7;
+        console.log("Average number of riders on this stop per day" + avg_stop_riders);
     }
 
 }
