@@ -219,7 +219,8 @@ module.exports = {
 
     },
     
-    orphanTrip:function(trip, routes){
+
+    orphanTrip: function(trip, routes){
         var orphan = 0;
         for (var i = 0; i < routes.length; i++){
             var match = routes[i].route_id;
@@ -230,7 +231,8 @@ module.exports = {
         }
         return orphan;
     },
-    orphanStop:function(stop_time, trips){
+  
+    orphanStop: function(stop_time, trips){
         var orphan = 0;
         for ( var i = 0; i < trips.length; i++) {
             var match = trips[i].trip_id;
@@ -240,7 +242,8 @@ module.exports = {
             }
         }
     },
-    vehicleCapacity:function(trip, trip_capacity){
+
+    vehicleCapacity: function(trip, trip_capacity){
         capacity_numbers = [];
         for ( var i = 0; i < trip_capacity.length; i++){
             match = trip_capacity[i].trip_id;
