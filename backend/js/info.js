@@ -12,22 +12,24 @@ module.exports = {
     stopsPerAgency: function(agency, routes, trips, stop_times){
         var num = 0;
         for (var i = 0; i < stop_times.length; i++){
-            var match = stops_times[i].trip_id; // stops.txt does not contain trip_id
+            var match = stop_times[i].trip_id;
             for ( var j = 0; j < trips.length; j++){
                 var match2 = trips[j].trip_id;
-                var compare = match.localeCompare(match2);
-                if(compare == 0){
-                console.log("match = " + match + ", match2 = " + match2)
+                //var compare = match.localeCompare(match2);
+                //if(compare == 0){
                 if (match == match2){
-                        var trip_route = trips[j].route_id;
-                        for ( var k = 0; k < routes.length; k++){
-                            var match3 = routes[k].route_id;
-                            var compare2 = match3.localeCompare(trip_route);
-                            if(compare2 == 0)
-                            console.log("match3 = " + match3 + ", trip_route = " + trip_route)
-                            if (match3 == trip_route)
-                                num++;
+                    console.log("match = " + match + ", match2 = " + match2)
+                    if (match == match2){
+                            var trip_route = trips[j].route_id;
+                            for ( var k = 0; k < routes.length; k++){
+                                var match3 = routes[k].route_id;
+                                var compare2 = match3.localeCompare(trip_route);
+                                if(compare2 == 0)
+                                console.log("match3 = " + match3 + ", trip_route = " + trip_route)
+                                if (match3 == trip_route)
+                                    num++;
                         }
+                    }
                 }
             }
         }
@@ -66,10 +68,10 @@ module.exports = {
                     var compare2 = trip.localeCompare(match3);
                     if (compare2 == 0){
                         end.push(frequencies[i].end_time);     
-                        }
                     }
                 }
             }
+        }
         return end;
     },
 

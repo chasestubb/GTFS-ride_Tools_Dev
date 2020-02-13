@@ -1,4 +1,5 @@
 var http = require('http');
+var Url = require('url')
 var formidable = require('formidable');
 var fs = require('fs');
 var extract = require('extract-zip')
@@ -14,6 +15,7 @@ const PORT = 8080;
 // the URL paths, make them consistent with the front-end
 const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
+const INFO_AGENCY_URL = '/info/agency/*'
 
 
 
@@ -139,6 +141,8 @@ http.createServer(function (req, res) {
         // parse agencies' info
         for (x = 0; x < agencies.length; x++){
             var agency = {
+                index: x,
+                id: agencies[x].agency_id,
                 name: agencies[x].agency_name,
                 routes: Info.routesPerAgency(agencies[x], routes),
                 stops: Info.stopsPerAgency(agencies[x], routes, trips, stops)
@@ -150,6 +154,50 @@ http.createServer(function (req, res) {
         res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
         res.write(JSON.stringify(feed_info));
         res.end();
+    // FEED INFO -> AGENCY INFO
+    } else if (req.url == INFO_AGENCY_URL){
+        var q = req.url.split("/");
+        var index = q[q.length - 1]
+        var agency = agencies[index]
+        var agency_info = {
+            name: agency.agency_name,
+            url: agency.agency_url,
+            fare_url: agency.agency_fare_url,
+            phone: agency.agency_phone,
+            email: agency.agency_email,
+            hours: {
+				m: "",
+				t: "",
+				w: "",
+				r: "",
+				f: "",
+				s: "",
+				u: ""
+			},
+            routes: []
+        }
+
+        // get the agency's routes
+        //var agency_routes = []
+        routes.foreach(route => { // JS equivalent of Python's "for route in routes"
+            if (route.agency_id === agency.agency_id){
+                route_info = {
+                    short_name: route.route_short_name,
+                    long_name: route.route_long_name,
+                    desc: route.route_desc,
+                    type: route.route_type
+                }
+                agency_info.routes.push(route_info);
+            }
+        })
+
+        console.log("Index: " + index);
+        console.log(agency_info);
+
+        res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+        res.write(JSON.stringify(agency_info));
+        res.end();
+    
     } else {
         res.writeHead(200, {'Content-Type': 'text/html'});
         /*res.write('<form action="fileupload" method="post" enctype="multipart/form-data">');
