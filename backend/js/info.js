@@ -238,6 +238,17 @@ module.exports = {
             }
         }
     },
+    vehicleCapacity(trip, trip_capacity){
+        capacity_numbers = [];
+        for ( var i = 0; i < trip_capacity.length, i++){
+            match = trip_capacity[i].trip_id;
+            compare = match.localeCompare(trip.trip_id);
+            if (compare == 1){
+                capacity_numbers.push(trip_capacity[i].vehicle_description, trip_capacity[i].seated_capacity, trip_capacity[i].standing_capacity);
+            }
+        }
+        return capacity_numbers;
+    }
 }
 
 
@@ -245,6 +256,7 @@ function Info(){
     var num_agency = agency.length;
     var num_routes = routes.length;
     console.log("This feed started on "+ feed_info.feed_start_date + "and ended on " + feed_info.feed_end_date);
+    console.log("Ridership feed began on " + ride_feed_info.start_date + "and ended on " + ride_feed_info.end_date);
     console.log("This feed has" + num_agency + "agencies");
     console.log("Included agencies are:");
     for (var i = 0; i < num_agency; i++){
@@ -272,6 +284,7 @@ function Info(){
         var has_ridership = findTripRecordUse(board_alights, trips[x]);
         var exceptions = serviceException(trips[x], calendar_dates);
         var orphan = orphanTrip(trips[x], routes);
+        var capacities = vehicleCapacity(trips[x], trip_capacity);
         if ( orphan == -1){
             console.log("Trip " + trip[x].trip_id + "has no routes!");
         }
@@ -282,8 +295,11 @@ function Info(){
 
         console.log("Trip " + trip[x].trip_id + "has " + num_boardings + "boardings");
         console.log("Trip " + trip[x] + "has execeptions: " + exceptions);
+        console.log("The vehicles on this trip have the following capacities: " + capacities);
         avg_rider = num_boardings / 7;
         console.log("The average number of riders per day is " + avg_rider);
+
+        
     }
 
     var avg_trip = trips.length / 7;
