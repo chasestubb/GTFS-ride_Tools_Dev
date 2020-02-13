@@ -216,7 +216,30 @@ module.exports = {
         }
 
     },
+    
+    orphanTrip(trip, routes){
+        var orphan = 0;
+        for (var i = 0; i < routes.length, i++){
+            var match = routes[i].route_id;
+            var compare = match.localeCompare(trip.route_id);
+            if (compare == -1){
+                orphan = 1;
+            }
+        }
+        return orphan;
+    },
+    orphanStop(stop_time, trips){
+        var orphan = 0;
+        for ( var i = 0; i < trips.length; i++) {
+            var match = trips[i].trip_id;
+            var compare = match.localeCompare(stop_time.trip_id);
+            if (compare == -1){
+                orphan = 1;
+            }
+        }
+    },
 }
+
 
 function Info(){
     var num_agency = agency.length;
@@ -248,6 +271,10 @@ function Info(){
         var num_boardings = countTripRiders(board_alights, trips[x]);
         var has_ridership = findTripRecordUse(board_alights, trips[x]);
         var exceptions = serviceException(trips[x], calendar_dates);
+        var orphan = orphanTrip(trips[x], routes);
+        if ( orphan == -1){
+            console.log("Trip " + trip[x].trip_id + "has no routes!");
+        }
         if (has_ridership == 0)
             console.log("Trip " + trip[x].trip_id + " has ridership data\n");
         else if (has_ridership == 1)
@@ -265,6 +292,10 @@ function Info(){
 
     for (var y = 0; y < stops.length; y++){
         var has_ridership = findStopRecordUse(board_alights, stops[y]);
+        var orphan = orphanStop(stops[y], trips);
+        if (orphan == 1){
+            console.log("Stop " + stop[y].stop_id + "is not within a trip!");
+        }
         if (has_ridership == 0)
             console.log("Stop " + stop[y].stop_id + " has ridership data\n");
         else if (has_ridership == 1)
