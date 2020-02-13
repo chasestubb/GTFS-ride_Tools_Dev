@@ -93,7 +93,7 @@ class Info extends React.Component{
 									<div className="row no-gutters align-items-center">
 										<div className="col mr-2">
 											<div className="text-xs font-weight-bold text-info text-uppercase mb-1">File Uploaded</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.filename}</div>
+											<div className="h6 mb-0 font-weight-bold text-gray-800">{this.state.filename}</div>
 										</div>
 										<div className="col-auto">
 											<i className="fas fa-file-archive fa-2x text-gray-300"></i>
@@ -143,10 +143,10 @@ class Info extends React.Component{
 					<div className="row">
 		
 						{/* Content Column */}
-						<div className="col-lg-6 mb-4">
+						{/*<div className="col-lg-6 mb-4">*/}
 		
 							{/* Project Card Example */}
-							<div className="card shadow mb-4">
+							{/*<div className="card shadow mb-4">
 								<div className="card-header py-3">
 									<h6 className="m-0 font-weight-bold text-primary">General Feed Information</h6>
 								</div>
@@ -157,20 +157,20 @@ class Info extends React.Component{
 									Click on an agency's name to view detailed info.
 								</div>
 							</div>
-						</div>
+						</div>*/}
 		
 					{this.state.agency_list.map(agency => 
 						<div className="col-lg-6 mb-4">
 		
 							<div className="card shadow mb-4">
 								<div className="card-header py-3">
-									<h6 className="m-0 font-weight-bold text-primary"><Link to="/info/detail">{agency.name}</Link></h6>
+									<h6 className="m-0 font-weight-bold text-primary"><Link to={"/info/agency/" + agency.index}>{agency.name}</Link></h6>
 								</div>
 								<div className="card-body">
 									Routes: <strong>{agency.routes}</strong><br/>
 									Stops: <strong>{agency.stops}</strong><br/>
 									Service span: <strong>{agency.span}</strong><br/>
-									Weekly ridership: {this.state.is_gtfs_ride ? <strong>agency.ridership</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
+									Weekly ridership: {this.state.is_gtfs_ride ? <strong>{agency.ridership}</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
 								</div>
 							</div>
 						</div>

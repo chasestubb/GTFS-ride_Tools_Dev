@@ -1,6 +1,48 @@
 import React from 'react'
+import {Route, useParams} from 'react-router-dom'
+import Axios from 'axios'
+
+// FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
+const url = "http://localhost:8080/info/agency/";
 
 class Info_Detail extends React.Component{
+	constructor(props){
+		super(props);
+		this.state = {
+			name: "",
+			url: "",
+			fare_url: "",
+			phone: "",
+			email: "",
+			hours: {
+				m: "",
+				t: "",
+				w: "",
+				r: "",
+				f: "",
+				s: "",
+				u: ""
+			},
+			routes: []
+		}
+	}
+
+	getInfo(){
+		Axios.get(url + this.props.index, {mode: "no-cors"}).then((res) => {
+			console.log(res)
+			/*this.setState({
+				filename: res.data.filename,
+				is_gtfs_ride: res.data.is_gtfs_ride,
+				agency_list: res.data.agencies
+			})*/
+			this.setState(res.data)
+		})
+	}
+
+	componentDidMount(){
+		this.getInfo();
+	}
+
 	render(){
 		return (
 			<div>
@@ -8,7 +50,7 @@ class Info_Detail extends React.Component{
 	
 					{/* Page Heading */}
 					<div className="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 className="h3 mb-0 text-gray-800">{this.props.name}</h1>
+						<h1 className="h3 mb-0 text-gray-800">{this.state.name}</h1>
 					</div>
 				</div>
 	
@@ -21,7 +63,7 @@ class Info_Detail extends React.Component{
 								<div className="row no-gutters align-items-center">
 									<div className="col mr-2">
 										<div className="text-xs font-weight-bold text-info text-uppercase mb-1">Routes</div>
-										<div className="h5 mb-0 font-weight-bold text-gray-800">{(this.props.routes).length}</div>
+										<div className="h5 mb-0 font-weight-bold text-gray-800">{(this.state.routes).length}</div>
 									</div>
 									<div className="col-auto">
 										<i className="fas fa-route fa-2x text-gray-300"></i>
@@ -38,7 +80,7 @@ class Info_Detail extends React.Component{
 								<div className="row no-gutters align-items-center">
 									<div className="col mr-2">
 										<div className="text-xs font-weight-bold text-danger text-uppercase mb-1">Stops</div>
-										<div className="h5 mb-0 font-weight-bold text-gray-800">{this.props.stops}</div>
+										<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.stops}</div>
 									</div>
 									<div className="col-auto">
 										<i className="fas fa-sign fa-2x text-gray-300"></i>
@@ -57,7 +99,7 @@ class Info_Detail extends React.Component{
 										<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. Daily Riderships</div>
 										<div className="row no-gutters align-items-center">
 											<div className="col-auto">
-											<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.props.ridership_day}</div>
+											<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership_day}</div>
 											</div>
 										</div>
 									</div>
@@ -129,7 +171,7 @@ class Info_Detail extends React.Component{
 										<div className="text-xs font-weight-bold text-info text-uppercase mb-1">Service Span</div>
 										<div className="row no-gutters align-items-center">
 											<div className="col-auto">
-												<div className="h3 mb-0 mr-3 font-weight-bold text-gray-800">{this.props.days}<br/>{this.props.span}</div>
+												<div className="h3 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.days}<br/>{this.state.span}</div>
 											</div>
 										</div>
 									</div>
@@ -171,13 +213,13 @@ class Info_Detail extends React.Component{
 								<h6 className="m-0 font-weight-bold text-primary">Agency Info</h6>
 							</div>
 							<div className="card-body">
-								Name: {this.props.name}
+								Name: {this.state.name}
 							</div>
 						</div>
 					</div>
 	
 					{/* Content Column */}
-					{this.props.routes.map(route => 
+					{this.state.routes.map(route => 
 						<div className="col-lg-6 mb-4">
 	
 							<div className="card shadow mb-4">

@@ -1,5 +1,5 @@
 import React from 'react'
-import {Switch, Route} from 'react-router-dom'
+import {Switch, Route, Link} from 'react-router-dom'
 
 class Topbar extends React.Component{
 	
@@ -56,9 +56,9 @@ class Topbar extends React.Component{
 
 				{/* Nav Item - User Information */}
 				<li className="nav-item">
-					<a className="nav-link" href="#">
+					<Link className="nav-link" to="/">
 						<span className="mr-2 d-none d-lg-inline text-black-50 small">{this.props.filename ? this.props.filename : <em>No feed uploaded</em>}</span>
-					</a>
+					</Link>
 				</li>
 
 			</ul>
