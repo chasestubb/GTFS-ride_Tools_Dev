@@ -19,6 +19,11 @@ class Info extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
+			filename : "",
+			is_gtfs_ride : true,
+			agency_list : []
+		}
+		/*this.state = { // mock data
 			filename : "mockdata.zip",
 			is_gtfs_ride : true,
 			agency_list : [
@@ -41,23 +46,36 @@ class Info extends React.Component{
 					span: "Every day 24 hours",
 					ridership: "10000"
 				}
-			]// mock data
-		}
+			]
+		}*/
 		
 		
-		//this.componentDidMount = this.componentDidMount.bind(this)
+		this.getInfo = this.getInfo.bind(this)
 	}
 
-	/*componentDidMount(){
-		Axios.get(url).then(function(res){
-			this.filename = res.filename;
-			this.is_gtfs_ride = res.is_gtfs_ride;
-			this.agency_list = res.agencies;
+	getInfo(){
+		Axios.get(url).then((res) => {
+			console.log(res)
+			this.setState({
+				filename: res.data.filename,
+				is_gtfs_ride: res.data.is_gtfs_ride,
+				agency_list: res.data.agencies
+			})
+			//this.setState(res.data)
 		})
+	}
+
+	componentDidMount(){
+		this.getInfo();
+	}
+
+	/*componentDidUpdate(){
+		console.log(this.state)
 	}*/
 
 	render(){
-		if (this.state.agency_list){
+		console.log(this.state)
+		if (this.state.filename){
 			return (
 				<div>
 					
@@ -92,7 +110,7 @@ class Info extends React.Component{
 									Routes: <strong>{agency.routes}</strong><br/>
 									Stops: <strong>{agency.stops}</strong><br/>
 									Service span: <strong>{agency.span}</strong><br/>
-									Weekly ridership: <strong>{agency.ridership}</strong>
+									Weekly ridership: {this.state.is_gtfs_ride ? <strong>agency.ridership</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
 								</div>
 							</div>
 						</div>

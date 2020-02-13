@@ -6,10 +6,16 @@ var csv = require('csv-parse/lib/sync')
 
 var Info = require("./js/info")
 
+// feel free to change the things below, but the values must be consistent with the front-end
+
+// the port for the server to listen to
 const PORT = 8080;
 
+// the URL paths, make them consistent with the front-end
 const UPLOAD_URL = '/fileupload';
-const INFO_URL = '/info'
+const INFO_URL = '/info';
+
+
 
 // parsed files go here
 // GTFS required
@@ -23,6 +29,8 @@ var board_alight = null
 var filename = ""
 
 http.createServer(function (req, res) {
+    
+    // FILE UPLOAD
     if (req.url == UPLOAD_URL) {
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
@@ -118,6 +126,8 @@ http.createServer(function (req, res) {
                 })
             });
         });
+
+    // FEED INFO
     } else if (req.url == INFO_URL){
         // initialize object
         var feed_info = {
@@ -126,10 +136,12 @@ http.createServer(function (req, res) {
             agencies: []
         }
 
+        // parse agencies' info
         for (x = 0; x < agencies.length; x++){
             var agency = {
                 name: agencies[x].agency_name,
-                //routes: Info.routesPerAgency(agencies[x], routes) // needs import to work
+                routes: Info.routesPerAgency(agencies[x], routes),
+                stops: Info.stopsPerAgency(agencies[x], routes, trips, stops)
             }
             feed_info.agencies.push(agency);
         }

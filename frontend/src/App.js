@@ -57,6 +57,8 @@ class App extends React.Component{
 		super(props);
 		//this.state = {nav: "home", title: "GTFS-ride Tools"};
 		//this.navChange = this.navChange.bind(this); // required to make onNavChange={this.navChange} work
+		this.state = {filename: ""};
+		this.setFilename = this.setFilename.bind(this);
 	}
 
 	// handles receiving data from the sidebar
@@ -112,6 +114,10 @@ class App extends React.Component{
 		}
 	}*/
 
+	setFilename(name){
+		this.setState({filename: name});
+	}
+
 	render(){
 
 		/*let content;
@@ -139,7 +145,7 @@ class App extends React.Component{
 						{/* Main Content */}
 						<div id="content">
 			
-							<Topbar/>
+							<Topbar filename={this.state.filename}/>
 			
 							{/* Begin Page Content */}
 							<div className="container-fluid">
@@ -147,7 +153,7 @@ class App extends React.Component{
 								{/*contentPreview*/}
 								<Switch>
 									<Route exact path="/">
-										<Home/>
+										<Home onUpload={this.setFilename}/>
 									</Route>
 									<Route path="/info">
 										<Info/>

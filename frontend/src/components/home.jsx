@@ -7,7 +7,7 @@ const url = "http://localhost:8080/fileupload";
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: "", file: null, parsed_feed = null}; // filename = the name only, without path
+		this.state = {filepath: "", filename: "", file: null, parsed_feed: null}; // filename = the name only, without path
 		this.fileSelected = this.fileSelected.bind(this);
 		this.upload = this.upload.bind(this);
 	}
@@ -30,11 +30,15 @@ class Home extends React.Component{
 		//                        required for the file upload to succeed
 		return Axios.post(url, fd, config).then(function(res){
 			console.log(res);
-			this.setState({parsed_feed = res.data});
+			//this.setState({parsed_feed: res.data});
+			this.props.onUpload(res.data);
 		}).catch(function(err){
 			if (err){
 				console.log(err);
-				alert(err.response.data); // shows a browser alert containing error data
+				if (err.response){
+					alert(err.response.data); // shows a browser alert containing error data
+				}
+				
 			}
 		});
 		/* how it should work:
