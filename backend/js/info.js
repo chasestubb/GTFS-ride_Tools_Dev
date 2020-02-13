@@ -201,7 +201,7 @@ module.exports = {
     },
     serviceException: function(trip, dates){
         exceptions = [];
-        for ( var i = 0; i < dates.length, i++){
+        for ( var i = 0; i < dates.length; i++){
             match = dates[i].trip_id;
             compare = match.localeCompare(trip.trip_id);
             if ( compare == 0){
