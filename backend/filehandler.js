@@ -11,11 +11,12 @@ var Info = require("./js/info");
 
 // the port for the server to listen to
 const PORT = 8080;
+const CORS = "http://localhost:3000"
 
 // the URL paths, make them consistent with the front-end
 const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
-const INFO_AGENCY_URL = '/info/agency/*'
+const INFO_AGENCY_URL = '/info/agency/';
 
 
 
@@ -31,6 +32,7 @@ var board_alight = null
 var filename = ""
 
 http.createServer(function (req, res) {
+    console.log(req.url)
     
     // FILE UPLOAD
     if (req.url == UPLOAD_URL) {
@@ -47,7 +49,7 @@ http.createServer(function (req, res) {
                 extract(newpath, {dir: (process.cwd() + "/uploads/" + noext)}, function (err) {
                     if (err){
                         console.log("Error in extraction: " + err);
-                        res.writeHead(415, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+                        res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
                         res.write("The server could not extract " + noext + ".zip. Check if the file is corrupted or in the wrong format.\n\nDetails:\n" + err);
                         res.end();
                     } else {
@@ -62,7 +64,7 @@ http.createServer(function (req, res) {
                         (fs.existsSync("uploads/" + noext + "/calendar.txt") || fs.existsSync("uploads/" + noext + "/calendar_dates.txt"))){
                             
                             // send response to client
-                            res.writeHead(200, {'Content-Type': 'text/html', "Access-Control-Allow-Origin": "http://localhost:3000"});
+                            res.writeHead(200, {'Content-Type': 'text/html', "Access-Control-Allow-Origin": CORS});
                             res.write(noext);
                             res.end();
 
@@ -114,7 +116,7 @@ http.createServer(function (req, res) {
                             
 
                         } else { // if the required files do not exist
-                            res.writeHead(415, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+                            res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
                             res.write(noext + ".zip is NOT a valid GTFS feed");
                             res.end();
                             console.log(noext + ".zip is NOT a valid GTFS feed");
@@ -130,34 +132,101 @@ http.createServer(function (req, res) {
         });
 
     // FEED INFO
-    } else if (req.url == INFO_URL){
-        // initialize object
-        var feed_info = {
-            filename: filename,
-            is_gtfs_ride: gtfs_ride_feed,
-            agencies: []
-        }
-
-        // parse agencies' info
-        for (x = 0; x < agencies.length; x++){
-            var agency = {
-                index: x,
-                id: agencies[x].agency_id,
-                name: agencies[x].agency_name,
-                routes: Info.routesPerAgency(agencies[x], routes),
-                stops: Info.stopsPerAgency(agencies[x], routes, trips, stops)
+    } else if (req.url.startsWith(INFO_URL)){
+        // PER AGENCY
+        if (req.url.includes("agency")){
+            console.log("FEED INFO -> AGENCY INFO")
+            var q = req.url.split("=");
+            var index = q[1]
+            console.log(index)
+            //var index = req.headers.index;
+            //console.log(req);
+            var agency = agencies[index]
+            var agency_info = {
+                name: agency.agency_name,
+                url: agency.agency_url,
+                fare_url: agency.agency_fare_url,
+                phone: agency.agency_phone,
+                email: agency.agency_email,
+                hours: {
+                    m: "",
+                    t: "",
+                    w: "",
+                    r: "",
+                    f: "",
+                    s: "",
+                    u: ""
+                },
+                routes: []
             }
-            feed_info.agencies.push(agency);
-        }
 
-        // send object to front-end
-        res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
-        res.write(JSON.stringify(feed_info));
-        res.end();
+            // get the agency's routes
+            //var agency_routes = []
+            /*routes.foreach(route => { // JS equivalent of Python's "for route in routes"
+                if (route.agency_id === agency.agency_id){
+                    route_info = {
+                        short_name: route.route_short_name,
+                        long_name: route.route_long_name,
+                        desc: route.route_desc,
+                        type: route.route_type
+                    }
+                    agency_info.routes.push(route_info);
+                }
+            })*/
+
+            for (var x = 0; x < routes.length; x++){
+                var route = routes[x];
+                if (route.agency_id === agency.agency_id){
+                    route_info = {
+                        short_name: route.route_short_name,
+                        long_name: route.route_long_name,
+                        desc: route.route_desc,
+                        type: route.route_type
+                    }
+                    agency_info.routes.push(route_info);
+                }
+            }
+
+            //console.log("Index: " + index);
+            //console.log(agency_info);
+
+            res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
+            res.write(JSON.stringify(agency_info));
+            res.end();
+        } else {
+            console.log("FEED INFO")
+            // initialize object
+            var feed_info = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: []
+            }
+
+            // parse agencies' info
+            for (x = 0; x < agencies.length; x++){
+                var agency = {
+                    index: x,
+                    id: agencies[x].agency_id,
+                    name: agencies[x].agency_name,
+                    routes: Info.routesPerAgency(agencies[x], routes),
+                    stops: Info.stopsPerAgency(agencies[x], routes, trips, stops)
+                }
+                feed_info.agencies.push(agency);
+            }
+
+            // send object to front-end
+            res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
+            res.write(JSON.stringify(feed_info));
+            res.end();
+        }
+        
     // FEED INFO -> AGENCY INFO
-    } else if (req.url == INFO_AGENCY_URL){
-        var q = req.url.split("/");
-        var index = q[q.length - 1]
+    /*} else if (req.url == INFO_AGENCY_URL){
+        console.log("FEED INFO -> AGENCY INFO")
+        //var q = req.url.split("/");
+        //var index = q[q.length - 1]
+        var index = req.headers.index;
+        console.log(req);
         var agency = agencies[index]
         var agency_info = {
             name: agency.agency_name,
@@ -191,16 +260,29 @@ http.createServer(function (req, res) {
             }
         })
 
-        console.log("Index: " + index);
-        console.log(agency_info);
+        for (var x = 0; x < routes.length; x++){
+            var route = routes[x];
+            if (route.agency_id === agency.agency_id){
+                route_info = {
+                    short_name: route.route_short_name,
+                    long_name: route.route_long_name,
+                    desc: route.route_desc,
+                    type: route.route_type
+                }
+                agency_info.routes.push(route_info);
+            }
+        }
 
-        //res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
-        res.writeHead(200, {"mode": "no-cors"});
+        //console.log("Index: " + index);
+        //console.log(agency_info);
+
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
         res.write(JSON.stringify(agency_info));
-        res.end();
+        res.end();*/
     
     } else {
-        res.writeHead(200, {'Content-Type': 'text/html'});
+        console.log("ELSE")
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/html'});
         /*res.write('<form action="fileupload" method="post" enctype="multipart/form-data">');
         res.write('<input type="file" name="filetoupload"><br>');
         res.write('<input type="submit">');

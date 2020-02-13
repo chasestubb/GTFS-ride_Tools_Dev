@@ -3,7 +3,7 @@ import {Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/info/agency/";
+const url = "http://localhost:8080/info/";
 
 class Info_Detail extends React.Component{
 	constructor(props){
@@ -28,7 +28,8 @@ class Info_Detail extends React.Component{
 	}
 
 	getInfo(){
-		Axios.get(url + this.props.index, {mode: "no-cors"}).then((res) => {
+		console.log("getInfo()")
+		Axios.get(url, {params: {agency: this.props.index}}).then((res) => {
 			console.log(res)
 			/*this.setState({
 				filename: res.data.filename,
@@ -36,6 +37,8 @@ class Info_Detail extends React.Component{
 				agency_list: res.data.agencies
 			})*/
 			this.setState(res.data)
+		}).catch(function(err){
+			console.log("Error: " + err)
 		})
 	}
 
