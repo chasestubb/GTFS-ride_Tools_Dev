@@ -1,11 +1,11 @@
 var http = require('http');
-var Url = require('url')
+var Url = require('url');
 var formidable = require('formidable');
 var fs = require('fs');
-var extract = require('extract-zip')
-var csv = require('csv-parse/lib/sync')
+var extract = require('extract-zip');
+var csv = require('csv-parse/lib/sync');
 
-var Info = require("./js/info")
+var Info = require("./js/info");
 
 // feel free to change the things below, but the values must be consistent with the front-end
 
