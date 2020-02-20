@@ -20,19 +20,20 @@ module.exports = {
          return diff;
     },
 
-    checkFeedType: function(ride_feed_info1, ride_feed_info2){
+    checkFeedType: function(feed1_ride_feed_info, feed2_ride_feed_info){
         //returns true if the feed types are the same
-        if (!ride_feed_info1 == null){ //both ride feeds
-            if (!ride_feed_info2 == null)
+        if (!(feed1_ride_feed_info == null)){ //both ride feeds
+            if (!(feed2_ride_feed_info == null))
                 return true;
         }
-        else if (ride_feed_info1 == null){ //both standard gtfs feeds
-            if (ride_feed_info2 == null)
+        else if (feed1_ride_feed_info == null){ //both standard gtfs feeds
+            if (feed2_ride_feed_info == null)
                 return true;
         }
         else
             return false;  
     },
+
     checkRoutes: function(feed1_routes, feed2_routes){
         var diff = [];
         for (var i = 0; i < feed1_routes.length; i++){
@@ -73,6 +74,21 @@ module.exports = {
          return diff;
     },
 
+    checkStopTimes: function(feed1_stop_times, feed2_stop_times){
+        var diff = [];
+        for (var i = 0; i < feed1_stop_times.length; i++){
+            if(feed2_stop_times.indexOf(feed1_stop_times[i]) === -1){
+                diff.push(feed1_stop_times[i]);
+            }
+        }
+         for ( i = 0; i < feed2_stop_times.length; i++){
+             if(feed1_stop_times.indexOf(feed2_stop_times[i]) === -1)
+                diff.push(feed2_stop_times[i]);
+         }
+         return diff;
+    },
+    
+
     checkDates: function(feed1_dates, feed2_dates){
         var diff = [];
         for (var i = 0; i < feed1_dates.length; i++){
@@ -86,6 +102,21 @@ module.exports = {
          }
          return diff;
     },
+
+    checkCalendar: function(feed1_calendar, feed2_calendar){
+        var diff = [];
+        for (var i = 0; i < feed1_calendar.length; i++){
+            if(feed2_calendar.indexOf(feed1_calendar[i]) === -1){
+                diff.push(feed1_calendar[i]);
+            }
+        }
+         for ( i = 0; i < feed2_calendar.length; i++){
+             if(feed1_calendar.indexOf(feed2_calendar[i]) === -1)
+                diff.push(feed2_calendar[i]);
+         }
+         return diff;
+    },
+    
 
     checkAlight: function(feed1_board_alight, feed2_board_alight){
         var diff = [];
@@ -143,6 +174,32 @@ module.exports = {
          return diff;
     },
     
-
+    checkFeedInfo: function(feed1_info, feed2_info){
+        var diff = [];
+        for (var i = 0; i < feed1_info.length; i++){
+            if(feed2_info.indexOf(feed1_info[i]) === -1){
+                diff.push(feed1_info[i]);
+            }
+        }
+         for ( i = 0; i < feed2_info.length; i++){
+             if(feed1_info.indexOf(feed2_info[i]) === -1)
+                diff.push(feed2_info[i]);
+         }
+         return diff;
+    },
+    
+    checkFrequencies: function(feed1_freqencies, feed2_frequencies){
+        var diff = [];
+        for (var i = 0; i < feed1_frequencies.length; i++){
+            if(feed2_frequencies.indexOf(feed1_frequencies[i]) === -1){
+                diff.push(feed1_frequencies[i]);
+            }
+        }
+         for ( i = 0; i < feed2_frequencies.length; i++){
+             if(feed1_frequencies.indexOf(feed2_frequencies[i]) === -1)
+                diff.push(feed2_frequencies[i]);
+         }
+         return diff;
+    },
     
 }
