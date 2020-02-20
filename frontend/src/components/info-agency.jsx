@@ -7,7 +7,7 @@ const url = "http://localhost:8080/info/";
 const RIDERSHIP_TIME = "Weekly"
 
 function get_route_type(type){
-	switch(type){ // no break because of the return statements
+	switch(Number(type)){ // no break because of the return statements
 		case 0:
 			return("light rail")
 		case 1:
@@ -264,9 +264,9 @@ class Info_Agency extends React.Component{
 									<h6 className="m-0 font-weight-bold text-primary"><strong>{route.short_name}</strong>{(route.short_name && route.long_name) ? " - " : null}{route.long_name}</h6>
 								</div>
 								<div className="card-body">
-									Description: {route.desc} <br/>
-									Type: {get_route_type(route.type)} <br/>
-									{RIDERSHIP_TIME} ridership: {route.ridership} <br/>
+									Description: <strong>{route.desc}</strong> <br/>
+									Type: <strong>{get_route_type(route.type)}</strong> <br/>
+									{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + route.ridership : null} <br/>
 								</div>
 							</div>
 						</div>
@@ -289,7 +289,7 @@ class Info_Agency extends React.Component{
 								<div className="card-body">
 									Code: {stop.code} <br/>
 									Location: {stop.pos[0] + ", " + stop.pos[1]} <br/>
-									{RIDERSHIP_TIME} ridership: {stop.ridership} <br/>
+									{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + stop.ridership : null} <br/>
 								</div>
 							</div>
 						</div>
