@@ -36,6 +36,48 @@ module.exports = {
         return num;
     },
 
+    // returns a list of stops for a single agency
+    findStopByAgency: function(agencyID, routes, trips, stop_times, stops){
+        
+        var agency_routes = []
+        var agency_trips = []
+        var agency_times = []
+        var agency_stops = []
+        
+        for (var r = 0; r < routes.length; r++){
+            var route = routes[r]
+            // get routes per agency
+            if (route.agency_id == agencyID){
+                agency_routes.push(route)
+                for (var t = 0; t < trips.length; t++){
+                    var trip = trips[t]
+                    // get trips per route, no duplicates
+                    if (trip.route_id == route.route_id && !agency_trips.includes(trip)){
+                        agency_trips.push(trip)
+                        for (var st = 0; st < stop_times.length; st++){
+                            var time = stop_times[st];
+                            //console.log("A " + time)
+                            // get times per trip, no duplicates
+                            if (time.trip_id == trip.trip_id && !agency_times.includes(time)){
+                                //console.log("B " + time)
+                                agency_times.push(time)
+                                for (var s = 0; s < stops.length; s++){
+                                    var stop = stops[s]
+                                    //console.log(stop)
+                                    // get stops per time, no duplicates
+                                    if (stop.stop_id == time.stop_id && !agency_stops.includes(stop)){
+                                        agency_stops.push(stop)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return agency_stops;
+    },
+
     serviceStart: function(route, trips, frequencies){
         var arrival = [];
         for (var j = 0; j < trips.length; j++){

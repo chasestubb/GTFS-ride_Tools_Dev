@@ -23,7 +23,7 @@ import InfoAgency from './components/info-agency' // agency view of info
 
 // other contents
 import Error404 from "./components/404"
-import InfoDetail from './components/info-detail';
+//import InfoDetail from './components/info-detail';
 
 
 /*function content(nav){
@@ -56,7 +56,7 @@ import InfoDetail from './components/info-detail';
 
 function AgencyInfo(){
 	const {index} = useParams();
-	return <InfoDetail index={index}/>
+	return <InfoAgency index={index}/>
 }
 
 class App extends React.Component{
@@ -162,9 +162,9 @@ class App extends React.Component{
 									<Route exact path="/">
 										<Home onUpload={this.setFilename}/>
 									</Route>
-									<Route path="/info-agency">
+									{/*<Route path="/info-agency">
 										<InfoAgency/>
-									</Route>
+									</Route>*/}
 									<Route path="/info/agency/:index">
 										<AgencyInfo/>
 									</Route>

@@ -5,7 +5,7 @@ import Axios from 'axios'
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const url = "http://localhost:8080/info/";
 
-class Info_Detail extends React.Component{
+class Info_Agency extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
@@ -23,7 +23,10 @@ class Info_Detail extends React.Component{
 				s: "",
 				u: ""
 			},
-			routes: []
+			routes: [],
+			stops: [],
+			is_gtfs_ride: false,
+			ridership: 0,
 		}
 	}
 
@@ -83,7 +86,7 @@ class Info_Detail extends React.Component{
 								<div className="row no-gutters align-items-center">
 									<div className="col mr-2">
 										<div className="text-xs font-weight-bold text-dark text-uppercase mb-1">Stops</div>
-										<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.stops}</div>
+										<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.stops.length}</div>
 									</div>
 									<div className="col-auto">
 										<i className="fas fa-sign fa-2x text-gray-300"></i>
@@ -99,10 +102,10 @@ class Info_Detail extends React.Component{
 							<div className="card-body">
 								<div className="row no-gutters align-items-center">
 									<div className="col mr-2">
-										<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. Daily Riderships</div>
+										<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. Weekly Riderships</div>
 										<div className="row no-gutters align-items-center">
 											<div className="col-auto">
-											<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership_day}</div>
+											<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership}</div>
 											</div>
 										</div>
 									</div>
@@ -216,12 +219,19 @@ class Info_Detail extends React.Component{
 								<h6 className="m-0 font-weight-bold text-primary">Agency Info</h6>
 							</div>
 							<div className="card-body">
-								Name: {this.state.name}
+								Name: <strong>{this.state.name}</strong> <br/>
+								Website: {this.state.url ? <a href={this.state.url}><strong>{this.state.url}</strong></a> : "no website provided"} <br/>
+								Contact: {this.state.phone ? <strong>{this.state.phone}</strong> : "no phone number provided"} / {this.state.email ? <strong>{this.state.email}</strong> : "no email address provided"}
 							</div>
 						</div>
 					</div>
+				</div>
+				<div className="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 className="h3 mb-0 text-gray-800">Routes</h1>
+				</div>
+				<div className="row">
 	
-					{/* Content Column */}
+					{/* Content Column - ROUTES */}
 					{this.state.routes.map(route => 
 						<div className="col-lg-6 mb-4">
 	
@@ -237,9 +247,31 @@ class Info_Detail extends React.Component{
 					)}
 					
 				</div>
+				<div className="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 className="h3 mb-0 text-gray-800">Stops</h1>
+				</div>
+				<div className="row">
+	
+					{/* Content Column - STOPS */}
+					{this.state.stops.map(stop => 
+						<div className="col-lg-6 mb-4">
+	
+							<div className="card shadow mb-4">
+								<div className="card-header py-3">
+									<h6 className="m-0 font-weight-bold text-primary">{stop.stop_name}</h6>
+								</div>
+								<div className="card-body">
+									Code: {stop.stop_code} <br/>
+									{/*Location: <a href={"geo:" + stop.stop_lat + "," + stop.stop_lon}>show on map</a><br/>*/}
+								</div>
+							</div>
+						</div>
+					)}
+					
+				</div>
 		</div>
 	
 		)
 	}
 }
-export default Info_Detail
+export default Info_Agency

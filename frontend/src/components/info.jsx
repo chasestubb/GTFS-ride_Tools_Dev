@@ -1,7 +1,7 @@
 import React from 'react'
 import {Link, Switch, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
-import Info_Detail from "./info-detail"
+//import InfoAgency from "./info-agency"
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const url = "http://localhost:8080/info";

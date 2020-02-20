@@ -170,7 +170,7 @@ http.createServer(function (req, res) {
                             }
                           
                         // TEST JS OBJECT CREATION ***************** //////////////////////////////////////
-                    
+                        /*
                         var num_agency = agencies.length;
                         var num_routes = routes.length;
                         console.log("This feed started on " + feed_info[0].feed_start_date + " and ended on " + feed_info[0].feed_end_date);
@@ -264,7 +264,7 @@ http.createServer(function (req, res) {
                             var avg_stop_rider = num_boardings / 7;
                             console.log("Average number of riders on this stop per day" + avg_stop_rider);
                         }
-                    
+                        */
                         // END TEST //////////////////////////////////////////////
 
                         } else { // if the required files do not exist
@@ -297,6 +297,7 @@ http.createServer(function (req, res) {
             //console.log(req);
             var agency = agencies[index]
             var agency_info = {
+                id: agency.agency_id,
                 name: agency.agency_name,
                 url: agency.agency_url,
                 fare_url: agency.agency_fare_url,
@@ -311,23 +312,13 @@ http.createServer(function (req, res) {
                     s: "",
                     u: ""
                 },
-                routes: []
+                routes: [],
+                stops: [],
+                is_gtfs_ride: false,
+                ridership: 0,
             }
 
             // get the agency's routes
-            //var agency_routes = []
-            /*routes.foreach(route => { // JS equivalent of Python's "for route in routes"
-                if (route.agency_id === agency.agency_id){
-                    route_info = {
-                        short_name: route.route_short_name,
-                        long_name: route.route_long_name,
-                        desc: route.route_desc,
-                        type: route.route_type
-                    }
-                    agency_info.routes.push(route_info);
-                }
-            })*/
-
             for (var x = 0; x < routes.length; x++){
                 var route = routes[x];
                 if (route.agency_id === agency.agency_id){
@@ -341,6 +332,18 @@ http.createServer(function (req, res) {
                 }
             }
 
+            // get the agency's stops
+            agency_info.stops = Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops);
+            //console.log(agency_info.stops)
+
+            // send feed type
+            agency_info.is_gtfs_ride = gtfs_ride_feed
+
+            // GTFS-ride specific fields
+            if (gtfs_ride_feed){
+                agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
+            }
+
             //console.log("Index: " + index);
             //console.log(agency_info);
 
@@ -348,9 +351,10 @@ http.createServer(function (req, res) {
             res.write(JSON.stringify(agency_info));
             res.end();
         } else {
+            // general feed info
             console.log("FEED INFO")
             // initialize object
-            var feed_info = {
+            var feed_info_ = {
                 filename: filename,
                 is_gtfs_ride: gtfs_ride_feed,
                 agencies: []
@@ -363,8 +367,12 @@ http.createServer(function (req, res) {
                     id: agencies[x].agency_id,
                     name: agencies[x].agency_name,
                     routes: Info.routesPerAgency(agencies[x], routes),
-                    stops: Info.stopsPerAgency(agencies[x], routes, trips, stops)
+                    stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
+                    ridership: 0,
                 };
+                if (gtfs_ride_feed){
+                    agency.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes)
+                }
                 feed_info_.agencies.push(agency);
             }
 
