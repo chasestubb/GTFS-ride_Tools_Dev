@@ -82,7 +82,7 @@ class Info_Detail extends React.Component{
 							<div className="card-body">
 								<div className="row no-gutters align-items-center">
 									<div className="col mr-2">
-										<div className="text-xs font-weight-bold text-danger text-uppercase mb-1">Stops</div>
+										<div className="text-xs font-weight-bold text-dark text-uppercase mb-1">Stops</div>
 										<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.stops}</div>
 									</div>
 									<div className="col-auto">
@@ -227,7 +227,7 @@ class Info_Detail extends React.Component{
 	
 							<div className="card shadow mb-4">
 								<div className="card-header py-3">
-									<h6 className="m-0 font-weight-bold text-primary"><strong>{route.short_name}</strong> - {route.long_name}</h6>
+									<h6 className="m-0 font-weight-bold text-primary"><strong>{route.short_name}</strong>{(route.short_name && route.long_name) ? " - " : null}{route.long_name}</h6>
 								</div>
 								<div className="card-body">
 									Description: {route.desc}
