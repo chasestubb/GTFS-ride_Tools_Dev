@@ -156,7 +156,7 @@ module.exports = {
         var match = board_alight[i].trip_id;
         var compare = match.localeCompare(trip.trip_id);
         if (compare == 0)
-            count = count + (board_alight[i].boardings);
+            count = count + Number(board_alight[i].boardings);
         }
         return count;
     },
@@ -166,7 +166,7 @@ module.exports = {
         var match = board_alight[i].stop_id;
         var compare = match.localeCompare(stop.stop_id);
         if (compare == 0)
-            count = count + (board_alight[i].boardings);
+            count = count + Number(board_alight[i].boardings);
         }
         return count;
     },
@@ -184,7 +184,7 @@ module.exports = {
                             var match3 = board_alight[k].trip_id;
                             var compare3 = match3.localeCompare(trips[j].trip_id);
                             if (compare3 == 0){
-                                count = count + (board_alight[k].boardings);
+                                count = count + Number(board_alight[k].boardings);
                             }
                         }
                     }
@@ -204,7 +204,7 @@ module.exports = {
                     var match3 = board_alight[k].trip_id;
                     var compare3 = match3.localeCompare(trips[j].trip_id);
                     if (compare3 == 0){
-                        count = count + (board_alight[k].boardings);
+                        count = count + Number(board_alight[k].boardings);
                     }
                 }
             }
