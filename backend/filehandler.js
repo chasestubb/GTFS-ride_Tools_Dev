@@ -1,11 +1,14 @@
 var http = require('http');
 var Url = require('url');
-var formidable = require('formidable');
+var formidable = require('formidable'); // A Node.js module for parsing form data, especially file uploads.
+
 var fs = require('fs');
 var extract = require('extract-zip');
-var csv = require('csv-parse/lib/sync');
+//var csv = require('csv-parse/lib/sync'); // converting CSV text input into arrays or objects
+var csv = require('csv') // generalized now that we are both using csv-parse + csv-generate
 
 var Info = require("./js/info");
+var Feed_Creation = require("./js/feed_creation");
 
 // feel free to change the things below, but the values must be consistent with the front-end
 
@@ -41,7 +44,8 @@ var filename = ""
 
 http.createServer(function (req, res) {
     
-    // FILE UPLOAD
+    // FILE UPLOAD (Receive all files from the frontend) ====================
+    //
     if (req.url == UPLOAD_URL) {
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
@@ -76,19 +80,26 @@ http.createServer(function (req, res) {
                             res.end();
 
                             // read files and parse them
-                            // GTFS required files
-                            routes = csv(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true})
+
+                            // GTFS required files ====================
+
+                            // ROUTES // AGENCY // TRIPS // STOPS // STOP TIMES // 
+                            routes = csv(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true}) 
                             agencies = csv(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
                             trips = csv(fs.readFileSync("uploads/" + noext + "/trips.txt"), {columns: true})
                             stops = csv(fs.readFileSync("uploads/" + noext + "/stops.txt"), {columns: true})
                             stop_times = csv(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
 
-                            // GTFS conditionally required files
+                            // GTFS conditionally required files ====================
+
+                            // CALENDAR //
                             if (fs.existsSync("uploads/" + noext + "/calendar.txt")){
                                 calendar = csv(fs.readFileSync("uploads/" + noext + "/calendar.txt"), {columns: true})
                             } else {
                                 calendar = null
                             }
+
+                            // CALENDAR DATES //
                             if (fs.existsSync("uploads/" + noext + "/calendar_dates.txt")){
                                 calendar_dates = csv(fs.readFileSync("uploads/" + noext + "/calendar_dates.txt"), {columns: true})
                             } else {
@@ -119,39 +130,42 @@ http.createServer(function (req, res) {
                             }
 
                             // GTFS-ride files =================
+
+                            // RIDE FEED INFO //
                             if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
                                 gtfs_ride_feed = true;
 
                                 // GTFS-ride optional files ==============
-                                // BOARD ALIGHT
+
+                                // BOARD ALIGHT //
                                 if (fs.existsSync("uploads/" + noext + "/board_alight.txt")){
                                     board_alight = csv(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
                                 } else {
                                     board_alight = null
                                 }
 
-                                // TRIP CAPACITY
+                                // TRIP CAPACITY //
                                 if (fs.existsSync("uploads/" + noext + "/trip_capacity.txt")){
                                     trip_capacity = csv(fs.readFileSync("uploads/" + noext + "/trip_capacity.txt"), {columns: true})
                                 } else {
                                     trip_capacity = null
                                 }
 
-                                // RIDER TRIP
+                                // RIDER TRIP //
                                 if (fs.existsSync("uploads/" + noext + "/rider_trip.txt")){
                                     rider_trip = csv(fs.readFileSync("uploads/" + noext + "/rider_trip.txt"), {columns: true})
                                 } else {
                                     rider_trip = null
                                 }
 
-                                // RIDERSHIP
+                                // RIDERSHIP //
                                 if (fs.existsSync("uploads/" + noext + "/ridership.txt")){
                                     ridership = csv(fs.readFileSync("uploads/" + noext + "/ridership.txt"), {columns: true})
                                 } else {
                                     ridership = null
                                 }
 
-                                // RIDE FEED INFO
+                                // RIDE FEED INFO //
                                 if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
                                     ride_feed_info = csv(fs.readFileSync("uploads/" + noext + "/ride_feed_info.txt"), {columns: true})
                                 } else {
@@ -161,13 +175,15 @@ http.createServer(function (req, res) {
                                 gtfs_ride_feed = false
                             }
 
+                            // console log feed type
                             if (gtfs_ride_feed){
                                 console.log("GTFS-ride feed parsed: " + noext + ".zip")
                             } else {
                                 console.log("GTFS feed parsed: " + noext + ".zip")
                             }
                           
-                        // TEST JS OBJECT CREATION ***************** //////////////////////////////////////
+
+                        // TEST JS OBJECT CREATION //////////////////////////////////////////////
                     
                         var num_agency = agencies.length;
                         var num_routes = routes.length;
@@ -222,7 +238,7 @@ http.createServer(function (req, res) {
                         for (var x = 0; x < trips.length; x++){
                             var num_boardings = Info.countTripRiders(board_alight, trips[x]);
                             var has_ridership = Info.findTripRecordUse(board_alight, trips[x]);
-                            //DEBUG var exceptions = Info.serviceException(trips[x], calendar_dates);
+                            //var exceptions = Info.serviceException(trips[x], calendar_dates);
                             var orphan = Info.orphanTrip(trips[x], routes);
                             var capacities = Info.vehicleCapacity(trips[x], trip_capacity);
                             if ( orphan == -1){
@@ -308,6 +324,7 @@ http.createServer(function (req, res) {
         res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
         res.write(JSON.stringify(feed_info_));
         res.end();
+
     // FEED INFO -> AGENCY INFO
     } else if (req.url == INFO_AGENCY_URL){
         var q = req.url.split("/");
