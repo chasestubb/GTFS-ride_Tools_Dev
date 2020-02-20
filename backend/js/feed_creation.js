@@ -69,6 +69,27 @@ module.exports = {
        
     },
 
+    // CREATE FEED_INFO.TXT (GTFS) ================
+    // Description: 
+    //   Simple function. This exists to provide "feed_version" for 
+    //   ride_feed_info.txt
+    //          
+    // User Input: 
+    //   feed_start_date
+    //   feed_end_date
+    //
+    // Attributes: 
+    //   feed_publisher_name  | static - always "Test Transit"
+    //   feed_publisher_url   | static - always "https://github.com/ODOT-PTS/GTFS-ride/"         
+    //   feed_lang            | static - always "en"
+    //   feed_start_date      | user-defined
+    //   feed_end_date        | user-defined
+    //   feed_version         | static - always "1.0.0"    
+
+    feedInfoCreate: function(feed_start_date, feed_end_date){
+       
+    },
+
 
     // CREATE ROUTES.TXT (GTFS) ================
     // Description: 
@@ -114,6 +135,30 @@ module.exports = {
     //   stop_lon   | random - see description above
 
     stopsCreate: function(num_stops){
+       
+    },
+    
+    // <<<< TODO >>>>
+    // CREATE STOP_TIMES.TXT (GTFS) ================
+    // Description: 
+    //   generates one line per stop desired by the user
+    //   '#' in the examples below will be '1', '2' ... 'n'
+    //   location_type is undefined, meaning all stops are merely stops
+    //     without any nested hierarchy/variation in types of stop.
+    //   starts a trip at 6:00:00 then, increments it upward by 5 minutes
+    //     between stops with a 2 minute difference between the arrival_time
+    //     and departure time
+    //          
+    // User Input: 
+    //   number of stops
+    //   number of 
+    //
+    // Attributes: 
+    //   trip_id         | static - always "STOP#"          
+    //   arrival_time    | static - incremented in a pattern. see desc above
+    //   departure_time  | static - incremented in a pattern. see desc above
+
+    stopTimesCreate: function(num_stops){
        
     },
 
