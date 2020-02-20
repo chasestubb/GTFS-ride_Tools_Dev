@@ -4,6 +4,30 @@ import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const url = "http://localhost:8080/info/";
+const RIDERSHIP_TIME = "Weekly"
+
+function get_route_type(type){
+	switch(type){ // no break because of the return statements
+		case 0:
+			return("light rail")
+		case 1:
+			return("rail rapid transit")
+		case 2:
+			return("rail")
+		case 3:
+			return("bus")
+		case 4:
+			return("ferry")
+		case 5:
+			return("cable car")
+		case 6:
+			return("cable-suspended")
+		case 7:
+			return("furnicular")
+		default:
+			return("unknown")
+	}
+}
 
 class Info_Agency extends React.Component{
 	constructor(props){
@@ -102,10 +126,10 @@ class Info_Agency extends React.Component{
 							<div className="card-body">
 								<div className="row no-gutters align-items-center">
 									<div className="col mr-2">
-										<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. Weekly Riderships</div>
+										<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. {RIDERSHIP_TIME} Riderships</div>
 										<div className="row no-gutters align-items-center">
 											<div className="col-auto">
-											<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership}</div>
+											<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership ? this.state.ridership : "no data"}</div>
 											</div>
 										</div>
 									</div>
@@ -240,7 +264,9 @@ class Info_Agency extends React.Component{
 									<h6 className="m-0 font-weight-bold text-primary"><strong>{route.short_name}</strong>{(route.short_name && route.long_name) ? " - " : null}{route.long_name}</h6>
 								</div>
 								<div className="card-body">
-									Description: {route.desc}
+									Description: {route.desc} <br/>
+									Type: {get_route_type(route.type)} <br/>
+									{RIDERSHIP_TIME} ridership: {route.ridership} <br/>
 								</div>
 							</div>
 						</div>
@@ -258,11 +284,12 @@ class Info_Agency extends React.Component{
 	
 							<div className="card shadow mb-4">
 								<div className="card-header py-3">
-									<h6 className="m-0 font-weight-bold text-primary">{stop.stop_name}</h6>
+									<h6 className="m-0 font-weight-bold text-primary">{stop.name}</h6>
 								</div>
 								<div className="card-body">
-									Code: {stop.stop_code} <br/>
-									{/*Location: <a href={"geo:" + stop.stop_lat + "," + stop.stop_lon}>show on map</a><br/>*/}
+									Code: {stop.code} <br/>
+									Location: {stop.pos[0] + ", " + stop.pos[1]} <br/>
+									{RIDERSHIP_TIME} ridership: {stop.ridership} <br/>
 								</div>
 							</div>
 						</div>

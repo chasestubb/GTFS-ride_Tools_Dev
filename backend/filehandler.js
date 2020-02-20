@@ -338,18 +338,36 @@ http.createServer(function (req, res) {
             for (var x = 0; x < routes.length; x++){
                 var route = routes[x];
                 if (route.agency_id === agency.agency_id){
-                    route_info = {
+                    var route_info = {
                         short_name: route.route_short_name,
                         long_name: route.route_long_name,
                         desc: route.route_desc,
-                        type: route.route_type
+                        type: route.route_type,
+                        ridership: 0,
+                    }
+                    if (gtfs_ride_feed){
+                        route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
                     }
                     agency_info.routes.push(route_info);
                 }
             }
 
             // get the agency's stops
-            agency_info.stops = Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops);
+            Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
+                var stop_info = {
+                    id: stop.stop_id,
+                    name: stop.stop_name,
+                    code: stop.stop_code,
+                    pos: [stop.stop_lat, stop.stop_lon],
+                    zone: stop.zone_id,
+                    ridership: 0,
+                }
+                if (gtfs_ride_feed){
+                    stop_info.ridership = Info.countStopRiders(board_alight, stop)
+                }
+                agency_info.stops.push(stop_info)
+            })
+
             //console.log(agency_info.stops)
 
             // send feed type
@@ -387,7 +405,7 @@ http.createServer(function (req, res) {
                     ridership: 0,
                 };
                 if (gtfs_ride_feed){
-                    agency.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes)
+                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
                 }
                 feed_info_.agencies.push(agency);
             }
