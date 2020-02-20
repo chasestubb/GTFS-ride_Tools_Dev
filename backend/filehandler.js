@@ -186,6 +186,7 @@ http.createServer(function (req, res) {
                          
 
                         // TEST JS OBJECT CREATION //////////////////////////////////////////////
+                        /*
                     
                         var num_agency = agencies.length;
                         var num_routes = routes.length;
