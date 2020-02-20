@@ -1,4 +1,10 @@
 module.exports = {
+//These functions will report anything that is not in BOTH feeds (symmetric difference)
+//example
+//ar1 = [a,b];
+//ar2 = [b, d];
+//all functions will return [a,d]
+
     checkAgencies:function (feed1_agencies, feed2_agencies){
         //returns agencies that are not in both feeds
         var diff = [];
@@ -123,5 +129,20 @@ module.exports = {
          return diff;
     },
     
+    checkTripCapacity: function(feed1_trip_capacity, feed2_trip_capacity){
+        var diff = [];
+        for (var i = 0; i < feed1_trip_capacity.length; i++){
+            if(feed2_trip_capacity.indexOf(feed1_trip_capacity[i]) === -1){
+                diff.push(feed1_trip_capacity[i]);
+            }
+        }
+         for ( i = 0; i < feed2_trip_capacity.length; i++){
+             if(feed1_trip_capacity.indexOf(feed2_trip_capacity[i]) === -1)
+                diff.push(feed2_trip_capacity[i]);
+         }
+         return diff;
+    },
+    
+
     
 }
