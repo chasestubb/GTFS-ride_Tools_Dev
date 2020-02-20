@@ -5,7 +5,8 @@ var formidable = require('formidable'); // A Node.js module for parsing form dat
 var fs = require('fs');
 var extract = require('extract-zip');
 //var csv = require('csv-parse/lib/sync'); // converting CSV text input into arrays or objects
-var csv = require('csv') // generalized now that we are both using csv-parse + csv-generate
+var csv_parse = require('csv-parse/lib/sync') // generalized now that we are both using csv-parse + csv-generate
+var csv_generate = require('csv-generate')
 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
@@ -86,24 +87,24 @@ http.createServer(function (req, res) {
                             // GTFS required files ====================
 
                             // ROUTES // AGENCY // TRIPS // STOPS // STOP TIMES // 
-                            routes = csv(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true}) 
-                            agencies = csv(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
-                            trips = csv(fs.readFileSync("uploads/" + noext + "/trips.txt"), {columns: true})
-                            stops = csv(fs.readFileSync("uploads/" + noext + "/stops.txt"), {columns: true})
-                            stop_times = csv(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
+                            routes = csv_parse(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true}) 
+                            agencies = csv_parse(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
+                            trips = csv_parse(fs.readFileSync("uploads/" + noext + "/trips.txt"), {columns: true})
+                            stops = csv_parse(fs.readFileSync("uploads/" + noext + "/stops.txt"), {columns: true})
+                            stop_times = csv_parse(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
 
                             // GTFS conditionally required files ====================
 
                             // CALENDAR //
                             if (fs.existsSync("uploads/" + noext + "/calendar.txt")){
-                                calendar = csv(fs.readFileSync("uploads/" + noext + "/calendar.txt"), {columns: true})
+                                calendar = csv_parse(fs.readFileSync("uploads/" + noext + "/calendar.txt"), {columns: true})
                             } else {
                                 calendar = null
                             }
 
                             // CALENDAR DATES //
                             if (fs.existsSync("uploads/" + noext + "/calendar_dates.txt")){
-                                calendar_dates = csv(fs.readFileSync("uploads/" + noext + "/calendar_dates.txt"), {columns: true})
+                                calendar_dates = csv_parse(fs.readFileSync("uploads/" + noext + "/calendar_dates.txt"), {columns: true})
                             } else {
                                 calendar_dates = null
                             }
@@ -112,21 +113,21 @@ http.createServer(function (req, res) {
 
                             // FREQUENCIES //
                             if (fs.existsSync("uploads/" + noext + "/frequencies.txt")){
-                                frequencies = csv(fs.readFileSync("uploads/" + noext + "/frequencies.txt"), {columns: true})
+                                frequencies = csv_parse(fs.readFileSync("uploads/" + noext + "/frequencies.txt"), {columns: true})
                             } else {
                                 frequencies = null
                             }
 
                             // FEED INFO //
                             if (fs.existsSync("uploads/" + noext + "/feed_info.txt")){
-                                feed_info = csv(fs.readFileSync("uploads/" + noext + "/feed_info.txt"), {columns: true})
+                                feed_info = csv_parse(fs.readFileSync("uploads/" + noext + "/feed_info.txt"), {columns: true})
                             } else {
                                 feed_info = null
                             }
 
                             // STOP TIMES //
                             if (fs.existsSync("uploads/" + noext + "/stop_times.txt")){
-                                stop_times = csv(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
+                                stop_times = csv_parse(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
                             } else {
                                 stop_times = null
                             }
@@ -141,35 +142,35 @@ http.createServer(function (req, res) {
 
                                 // BOARD ALIGHT //
                                 if (fs.existsSync("uploads/" + noext + "/board_alight.txt")){
-                                    board_alight = csv(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
+                                    board_alight = csv_parse(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
                                 } else {
                                     board_alight = null
                                 }
 
                                 // TRIP CAPACITY //
                                 if (fs.existsSync("uploads/" + noext + "/trip_capacity.txt")){
-                                    trip_capacity = csv(fs.readFileSync("uploads/" + noext + "/trip_capacity.txt"), {columns: true})
+                                    trip_capacity = csv_parse(fs.readFileSync("uploads/" + noext + "/trip_capacity.txt"), {columns: true})
                                 } else {
                                     trip_capacity = null
                                 }
 
                                 // RIDER TRIP //
                                 if (fs.existsSync("uploads/" + noext + "/rider_trip.txt")){
-                                    rider_trip = csv(fs.readFileSync("uploads/" + noext + "/rider_trip.txt"), {columns: true})
+                                    rider_trip = csv_parse(fs.readFileSync("uploads/" + noext + "/rider_trip.txt"), {columns: true})
                                 } else {
                                     rider_trip = null
                                 }
 
                                 // RIDERSHIP //
                                 if (fs.existsSync("uploads/" + noext + "/ridership.txt")){
-                                    ridership = csv(fs.readFileSync("uploads/" + noext + "/ridership.txt"), {columns: true})
+                                    ridership = csv_parse(fs.readFileSync("uploads/" + noext + "/ridership.txt"), {columns: true})
                                 } else {
                                     ridership = null
                                 }
 
                                 // RIDE FEED INFO //
                                 if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
-                                    ride_feed_info = csv(fs.readFileSync("uploads/" + noext + "/ride_feed_info.txt"), {columns: true})
+                                    ride_feed_info = csv_parse(fs.readFileSync("uploads/" + noext + "/ride_feed_info.txt"), {columns: true})
                                 } else {
                                     ride_feed_info = null
                                 }
@@ -187,7 +188,6 @@ http.createServer(function (req, res) {
 
                         // TEST JS OBJECT CREATION //////////////////////////////////////////////
                         /*
-                    
                         var num_agency = agencies.length;
                         var num_routes = routes.length;
                         console.log("This feed started on " + feed_info[0].feed_start_date + " and ended on " + feed_info[0].feed_end_date);
@@ -331,7 +331,7 @@ http.createServer(function (req, res) {
                 },
                 routes: [],
                 stops: [],
-                is_gtfs_ride: false,
+                is_gtfs_ride: gtfs_ride_feed,
                 ridership: 0,
             }
 
