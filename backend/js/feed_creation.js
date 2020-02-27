@@ -28,6 +28,9 @@
 //   ride_feed_info.txt (required)
 
 var randomLastName = require('random-lastname');
+var csvStringify = require('csv-stringify');
+var csv_stringify = csvStringify({delimiter: ','})
+var fs = require('fs')
 // ex. call => randomLastName();
 
 module.exports = {
@@ -47,16 +50,22 @@ module.exports = {
     //   agency_timezone | static - always "America/Los_Angeles"
 
     agencyCreate: function(num_agencies){
-        var agencies = [num_agencies];
+        var agencies = [];
         var temp_agency = {
-            agency_id,
-            agency_name,
-            agency_url,
-            agency_timezone,
+            agency_id: "",
+            agency_name: "",
+            agency_url: "",
+            agency_timezone: "",
         }
         for (var i = 0; i < num_agencies; i++){
-            temp_agency.agency_id = "AGENCY" + i;
-            temp_agency.agency_name = "Test Transit" + i;
+            temp_agency = {
+                agency_id: "",
+                agency_name: "",
+                agency_url: "",
+                agency_timezone: "",
+            }
+            temp_agency.agency_id = "AGENCY" + String(i);
+            temp_agency.agency_name = "Test Transit" + String(i);
             temp_agency.agency_url = "https://www.gtfs-ride.org";
             temp_agency.agency_timezone = "America/Los_Angeles";
             agencies.push(temp_agency);
@@ -81,16 +90,16 @@ module.exports = {
 
     calendarCreate: function(){
         var calendar = {
-            service_id = "CALENDAR_ALL",
-            monday = 1,
-            tuesday = 1,
-            wednesday = 1,
-            thursday = 1,
-            friday = 1,
-            saturday = 1,
-            sunday = 1,
-            start_date = 2000101,
-            end_date = 20500101,
+            service_id: "CALENDAR_ALL",
+            monday: 1,
+            tuesday: 1,
+            wednesday: 1,
+            thursday: 1,
+            friday: 1,
+            saturday: 1,
+            sunday: 1,
+            start_date: 2000101,
+            end_date: 20500101,
         }
         return calendar;              
     },
@@ -114,11 +123,11 @@ module.exports = {
 
     feedInfoCreate: function(feed_start_date1, feed_end_date1){
         var feed_info = {
-            feed_publisher_name = "Test Transit",
-            feed_publisher_url = "https://github.com/ODOT-PTS/GTFS-ride/",
-            feed_lang = "en",
-            feed_start_date = feed_start_date1,
-            feed_end_date = feed_end_date1,
+            feed_publisher_name: "Test Transit",
+            feed_publisher_url: "https://github.com/ODOT-PTS/GTFS-ride/",
+            feed_lang: "en",
+            feed_start_date: feed_start_date1,
+            feed_end_date: feed_end_date1,
         }
        return feed_info;
     },
@@ -144,16 +153,22 @@ module.exports = {
     routesCreate: function(num_routes, num_agencies){
         routes = [];
         var temp_route = {
-            route_id,
-            agency_id,
-            route_short_name,
-            route_type,
-        }; 
-        agencies = agencyCreate(num_agencies);
+            route_id: "",
+            agency_id: "",
+            route_short_name: "",
+            route_type: -1,
+        };
+        //agencies = module.exports.agencyCreate(num_agencies);
         for (var i = 0; i < num_routes; i++){
+            temp_route = {
+                route_id: "",
+                agency_id: "",
+                route_short_name: "",
+                route_type: -1,
+            };
             temp_route.route_id = "ROUTE" + i;
-            var rand_agency = Math.floor(Math.random() * num_agencies);
-            temp_route.agency_id = agencies[rand_agency].agency_id;
+            var rand_agency = Math.floor(Math.random() * Number(num_agencies));
+            temp_route.agency_id = "AGENCY#" + rand_agency;
             temp_route.route_short_name = randomLastName();
             temp_route.route_type = 3;
             routes.push(temp_route);
@@ -185,14 +200,20 @@ module.exports = {
     //   stop_lon   | random - see description above
 
     stopsCreate: function(num_stops){
-        stops = [num_stops];
-        temp_stop = {
-            stop_id,
-            stop_name,
-            stop_lat,
-            stop_lon
+        var stops = [];
+        var temp_stop = {
+            stop_id: "",
+            stop_name: "",
+            stop_lat: 0,
+            stop_lon: 0,
         }
         for (var i = 0; i < num_stops; i++){
+            temp_stop = {
+                stop_id: "",
+                stop_name: "",
+                stop_lat: 0,
+                stop_lon: 0,
+            }
             temp_stop.stop_id = "STOP" + i;
             temp_stop.stop_name = randomLastName();
             stops.push(temp_stop);
@@ -260,13 +281,19 @@ module.exports = {
     tripsCreate: function(num_routes, num_trips_per_route){
         var trips = [];
         var temp_trip = {
-            route_id,
-            service_id,
-            trip_id,
-            direction_id,
+            route_id: "",
+            service_id: "",
+            trip_id: "",
+            direction_id: 0,
         }
         for (var i = 0; i < num_routes; i++){
             for (var j = 0; j < num_trips_per_route; j++){
+                temp_trip = {
+                    route_id: "",
+                    service_id: "",
+                    trip_id: "",
+                    direction_id: 0,
+                }
                 temp_trip.route_id = "ROUTE" + i;
                 temp_trip.service_id = "CALENDAR_ALL";
                 temp_trip.trip_id = "TRIP" + j;
@@ -277,10 +304,47 @@ module.exports = {
         return trips;
    },
 
+    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date){
+        agencies = this.agencyCreate(num_agencies)
+        stops = this.stopsCreate(num_stops)
+        routes = this.routesCreate(num_routes, num_agencies)
+        trips = this.tripsCreate(num_routes, num_trips_per_route)
+        stopTimes = this.stopTimesCreate(num_stops, num_trips)
+        feedInfo = this.feedInfoCreate(start_date, end_date)
 
+        csvStringify(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]},
+        function(err, out){
+            fs.writeFileSync("../feed_creation/agencies.txt", out)
+        })
+        csvStringify(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]},
+        function(err, out){
+            fs.writeFileSync("../feed_creation/stops.txt", out)
+        })
+        csvStringify(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]},
+        function(err, out){
+            fs.writeFileSync("../feed_creation/routes.txt", out)
+        })
+        csvStringify(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]},
+        function(err, out){
+            fs.writeFileSync("../feed_creation/trips.txt", out)
+        })
+        csvStringify(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]},
+        function(err, out){
+            fs.writeFileSync("../feed_creation/stop_times.txt", out)
+        })
+        csvStringify(feedInfo, {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]},
+        function(err, out){
+            fs.writeFileSync("../feed_creation/feed_info.txt", out)
+        })
+
+        //fs.writeFileSync("../feed_creation/agencies.txt", str_agency)
+        //fs.writeFileSync("../feed_creation/stops.txt", str_stops)
+        //fs.writeFileSync("../feed_creation/routes.txt", str_routes)
+    }
 
 };
 
 
-//function Feed_Creation(){
-//}
+ 
+
+module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231)
