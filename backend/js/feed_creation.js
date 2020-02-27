@@ -47,7 +47,21 @@ module.exports = {
     //   agency_timezone | static - always "America/Los_Angeles"
 
     agencyCreate: function(num_agencies){
-       
+        var agencies = [num_agencies];
+        var temp_agency = {
+            agency_id,
+            agency_name,
+            agency_url,
+            agency_timezone,
+        }
+        for (var i = 0; i < num_agencies; i++){
+            temp_agency.agency_id = "AGENCY" + i;
+            temp_agency.agency_name = "Test Transit" + i;
+            temp_agency.agency_url = "https://www.gtfs-ride.org";
+            temp_agency.agency_timezone = "America/Los_Angeles";
+            agencies.push(temp_agency);
+        }
+        return agencies;  
     },
 
 
@@ -66,7 +80,19 @@ module.exports = {
     //   end_date         | static - always "20500101" = Jan 1, 2050
 
     calendarCreate: function(){
-       
+        var calendar = {
+            service_id = "CALENDAR_ALL",
+            monday = 1,
+            tuesday = 1,
+            wednesday = 1,
+            thursday = 1,
+            friday = 1,
+            saturday = 1,
+            sunday = 1,
+            start_date = 2000101,
+            end_date = 20500101,
+        }
+        return calendar;              
     },
 
     // CREATE FEED_INFO.TXT (GTFS) ================
@@ -86,8 +112,15 @@ module.exports = {
     //   feed_end_date        | user-defined
     //   feed_version         | static - always "1.0.0"    
 
-    feedInfoCreate: function(feed_start_date, feed_end_date){
-       
+    feedInfoCreate: function(feed_start_date1, feed_end_date1){
+        var feed_info = {
+            feed_publisher_name = "Test Transit",
+            feed_publisher_url = "https://github.com/ODOT-PTS/GTFS-ride/",
+            feed_lang = "en",
+            feed_start_date = feed_start_date1,
+            feed_end_date = feed_end_date1,
+        }
+       return feed_info;
     },
 
 
@@ -109,7 +142,23 @@ module.exports = {
     //   route_type       | static - always "3" (= Bus)
 
     routesCreate: function(num_routes, num_agencies){
-       
+        routes = [];
+        var temp_route = {
+            route_id,
+            agency_id,
+            route_short_name,
+            route_type,
+        }; 
+        agencies = agencyCreate(num_agencies);
+        for (var i = 0; i < num_routes; i++){
+            temp_route.route_id = "ROUTE" + i;
+            var rand_agency = Math.floor(Math.random() * num_agencies);
+            temp_route.agency_id = agencies[rand_agency].agency_id;
+            temp_route.route_short_name = randomLastName();
+            temp_route.route_type = 3;
+            routes.push(temp_route);
+        }
+        return routes;
     },
 
 
@@ -135,7 +184,19 @@ module.exports = {
     //   stop_lon   | random - see description above
 
     stopsCreate: function(num_stops){
-       
+        stops = [num_stops];
+        temp_stop = {
+            stop_id,
+            stop_name,
+            stop_lat,
+            stop_lon
+        }
+        for (var i = 0; i < num_stops; i++){
+            temp_stop.stop_id = "STOP" + i;
+            temp_stop.stop_name = randomLastName();
+            stops.push(temp_stop);
+        }
+        return stops;
     },
     
     // <<<< TODO >>>>
@@ -181,7 +242,7 @@ module.exports = {
     //                           included because it is referenced in GTFS-ride
 
     tripsCreate: function(num_routes, num_trips_per_route){
-       
+      
     },
 
 
