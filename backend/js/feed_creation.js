@@ -28,9 +28,13 @@
 //   ride_feed_info.txt (required)
 
 var randomLastName = require('random-lastname');
+<<<<<<< HEAD
 var csvStringify = require('csv-stringify');
 var csv_stringify = csvStringify({delimiter: ','})
 var fs = require('fs')
+=======
+const isSea = require('is-sea');
+>>>>>>> 73fdab887ddac570bde257b35b8110657e145788
 // ex. call => randomLastName();
 
 module.exports = {
@@ -150,7 +154,7 @@ module.exports = {
     //                               potentially not unique, but this is fine.
     //   route_type       | static - always "3" (= Bus)
 
-    routesCreate: function(num_routes, num_agencies){
+    routesCreate: function(num_routes, num_agencies,agencies){
         routes = [];
         var temp_route = {
             route_id: "",
@@ -207,6 +211,8 @@ module.exports = {
             stop_lat: 0,
             stop_lon: 0,
         }
+        var randLat;
+        var randLon;
         for (var i = 0; i < num_stops; i++){
             temp_stop = {
                 stop_id: "",
@@ -216,6 +222,16 @@ module.exports = {
             }
             temp_stop.stop_id = "STOP" + i;
             temp_stop.stop_name = randomLastName();
+            randLat = Math.floor(Math.random() * 90) - 90;
+            randLon = Math.floor(Math.random() * 180) - 180;
+            var check = isSea.get(randLat, randLon);
+            while(check){
+                randLat = Math.floor(Math.random() * 90) - 90;
+                randLon = Math.floor(Math.random() * 180) - 180;
+                check =isSea.get(randLat, randLon);
+            }
+            temp_stop.stop_lat = randLat;
+            temp_stop.stop_lon = randLon;
             stops.push(temp_stop);
         }
         return stops;
@@ -255,7 +271,28 @@ module.exports = {
     //   stop_id         | 
     //   stop_sequence   | algorithm - see desc above
 
-    stopTimesCreate: function(num_stops, num_trips){
+    stopTimesCreate: function(num_stops, num_trips, trips){
+        stop_times = {
+            trip_id,
+            arrival_time,
+            departure_time,
+            stop_id,
+            stop_sequence,
+        }
+        var min = 0;
+        for (var i = 0; i < num_trips; i++){
+            var rand_trip = Math.floor(Math.random() * num_trips);
+            var a = new Date();
+            a.setHours(6);
+            a.setMinutes(min);
+            stop_times.trip_id = trips[rand_trip].trip_id;
+            stop_times.arrival_time = a;
+            a.setMinutes(min + 2);
+            stop_times.departure_time = a;
+            min = min + 5;
+            //TODO stop_sequence
+       }
+
        
     },
 
