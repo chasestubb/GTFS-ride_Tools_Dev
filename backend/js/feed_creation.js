@@ -242,8 +242,24 @@ module.exports = {
     //                           included because it is referenced in GTFS-ride
 
     tripsCreate: function(num_routes, num_trips_per_route){
-      
-    },
+        var trips = [];
+        var temp_trip = {
+            route_id,
+            service_id,
+            trip_id,
+            direction_id,
+        }
+        for (var i = 0; i < num_routes; i++){
+            for (var j = 0; j < num_trips_per_route; j++){
+                temp_trip.route_id = "ROUTE" + i;
+                temp_trip.service_id = "CALENDAR_ALL";
+                temp_trip.trip_id = "TRIP" + j;
+                temp_trip.direction_id = Math.floor(Math.random() * 1);
+            }
+            trips.push(temp_trip);
+        }
+        return trips;
+   },
 
 
 
