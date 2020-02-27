@@ -169,7 +169,7 @@ class App extends React.Component{
 										<AgencyInfo/>
 									</Route>
 									<Route path="/info">
-										<Info/>
+										<Info filename={this.state.filename}/>
 									</Route>
 									<Route path="/fc">
 										<FC/>
