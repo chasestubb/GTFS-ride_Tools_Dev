@@ -11,7 +11,7 @@
 //     them will be included.
 
 // GTFS INCLUDED FILES  ============
-//   agency.txt
+//   agency.txt 
 //   stops.txt
 //   routes.txt
 //   trips.txt
@@ -123,6 +123,8 @@ module.exports = {
     //     and then uses these two numbers to randomly generate all stop 
     //     lat's and lon's (so stops occur roughly in the same geographical area)
     //     though sequences of stops will not occur in nice paths/make sense
+    //   NOTE :: we will need to be able to handle water vs land and we can use
+    //     this API -- https://github.com/simonepri/is-sea  
     //          
     // User Input: 
     //   number of stops 
@@ -138,29 +140,44 @@ module.exports = {
        
     },
     
-    // <<<< TODO >>>>
+
     // CREATE STOP_TIMES.TXT (GTFS) ================
     // Description: 
-    //   generates one line per stop desired by the user
-    //   '#' in the examples below will be '1', '2' ... 'n'
-    //   location_type is undefined, meaning all stops are merely stops
-    //     without any nested hierarchy/variation in types of stop.
-    //   starts a trip at 6:00:00 then, increments it upward by 5 minutes
-    //     between stops with a 2 minute difference between the arrival_time
-    //     and departure time
+    //     stop_times is essentially helper entries for each trip, specifying
+    //          the arrival and departure times for a given trip.
+    //     NOTE :: arrival_time / stop_time
+    //          starts a trip at 6:00:00 then, increments it upward by 5 minutes
+    //          between stops with a 2 minute difference between the arrival_time
+    //          and departure time.
+    //          ie (6:00 arrive, 6:02 depart), (6:07 arrive, 6:09 depart)...
+    //     NOTE :: user is specifying avg trips per route. This will yield a 
+    //          num_trips that will then have to be supplied to this function.
+    //     algorithm :: loops through all trips (see note), and for each one,
+    //          generates a journey essentially, with its stops (and order of stops),
+    //          and times. The sequence will be chosen by randomly selecting two
+    //          stops and then seeking to randomly choose stops that occur between
+    //          the two. To handle the case of stops being directly next to each
+    //          other/near one another, the amount of stops on the trip will be
+    //          determined by how quickly these stops can be found (ie do x random
+    //          attempts, then stop, so as to continue program execution.)
     //          
     // User Input: 
     //   number of stops
-    //   number of 
+    //
+    // Needs to be calculated elsewhere and supplied:
+    //   number of trips
     //
     // Attributes: 
-    //   trip_id         | static - always "STOP#"          
+    //   trip_id         | static - always "TRIP#"          
     //   arrival_time    | static - incremented in a pattern. see desc above
     //   departure_time  | static - incremented in a pattern. see desc above
+    //   stop_id         | 
+    //   stop_sequence   | algorithm - see desc above
 
-    stopTimesCreate: function(num_stops){
+    stopTimesCreate: function(num_stops, num_trips){
        
     },
+
 
     // CREATE TRIPS.TXT (GTFS) ================
     // Description: 
