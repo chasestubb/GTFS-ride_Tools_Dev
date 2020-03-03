@@ -1,8 +1,13 @@
 import React from 'react'
 import Axios from 'axios'
 
-// FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/fileupload";
+// FOR PRODUCTION, CHANGE THIS URL TO THE SERVER HOST URL
+const HOST = "http://localhost:8080";
+
+// ONLY CHANGE THESE IF YOU ARE CHANGING THEM ON THE SERVER AS WELL
+const path = "/fileupload"
+const url = HOST + path
+
 
 class Home extends React.Component{
 	constructor(props){
