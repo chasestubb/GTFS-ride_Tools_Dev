@@ -28,13 +28,10 @@
 //   ride_feed_info.txt (required)
 
 var randomLastName = require('random-lastname');
-<<<<<<< HEAD
 var csvStringify = require('csv-stringify');
 var csv_stringify = csvStringify({delimiter: ','})
 var fs = require('fs')
-=======
 const isSea = require('is-sea');
->>>>>>> 73fdab887ddac570bde257b35b8110657e145788
 // ex. call => randomLastName();
 
 module.exports = {
