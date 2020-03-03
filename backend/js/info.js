@@ -296,6 +296,82 @@ module.exports = {
         }
         return capacity_numbers;
     },
+
+
+    // returns seconds(time1 - time2)
+    // supports time greater than 24:00:00
+    compareTime: function(time1, time2){
+        _time1 = time1.split(":")
+        _time2 = time2.split(":")
+        if (_time1[0] != _time2[0]){
+            return (_time1[0] - _time2[0]) * 3600
+        } else if (_time1[1] != _time2[1]) {
+            return (_time1[1] - _time2[1]) * 60
+        } else if (_time1[2] != _time2[2]){
+            return _time1[2] - _time2[2]
+        } else {
+            return 0;
+        }
+    },
+
+    getRouteSpan: function(route, trips, stop_times){
+        var span = {
+            start: "",
+            stop: ""
+        }
+        const route_id = route.route_id
+        var trip_id = []
+        var times = []
+
+        // get a list of trip_id
+        for (var t = 0; t < trips.length; t++){
+            if (trip[t].route_id == route_id){
+                trip_id.push(trip[t].trip_id)
+            }
+        }
+
+        // get all stop_times for each trip
+        for (var s = 0; s < stop_times.length; s++){
+            if (trip_id.includes(stop_times[s].trip_id)){
+                times.push(stop_times[s])
+            }
+        }
+
+        // find the smallest and largest
+        
+
+        return span
+    },
+
+    tripsPerRoute: function(route, trips){
+        const route_id = route.route_id
+        var trips_per_route = []
+        // get a list of trips per route
+        for (var t = 0; t < trips.length; t++){
+            if (trips[t].route_id == route_id){
+                trips_per_route.push(trips[t])
+            }
+        }
+        return trips_per_route
+    },
+
+    countTripsPerAgency: function(agency, routes, trips){
+        var routes_per_agency = [];
+        var trips_per_agency = 0;
+        // get routes for this agency
+        for (var r = 0; r < routes.length; r++){
+            if (routes[r].agency_id == agency.agency_id){
+                routes_per_agency.push(routes[r])
+            }
+        }
+        // for each route in this agency
+        for (var r = 0; r < routes_per_agency.length; r++){
+            trips_per_agency += (this.tripsPerRoute(routes_per_agency[r], trips)).length
+        }
+        return trips_per_agency;
+    }
+
+
 };
 
 
