@@ -49,7 +49,7 @@ class FC extends React.Component{
 
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
-		const config = {headers: {"content-type": "application/json"}};
+		const config = {headers: {"content-type": "application/json"}, mode: "no-cors"};
 		try {
 			const res = await Axios.post(postURL, json, config);
 			console.log(res.data);

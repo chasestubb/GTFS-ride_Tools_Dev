@@ -21,6 +21,8 @@ const CORS = "http://localhost:3000"
 const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
 const INFO_AGENCY_URL = '/info/agency/';
+const FC_POST_URL = '/fc/params'
+const FC_GET_URL = 'fc/getfile'
 
 
 
@@ -302,6 +304,7 @@ http.createServer(function (req, res) {
             });
         });
 
+    // --------------------------------------------------------------------------------
     // FEED INFO
     } else if (req.url.startsWith(INFO_URL)){
         // PER AGENCY
@@ -503,6 +506,14 @@ http.createServer(function (req, res) {
         res.write(JSON.stringify(agency_info));
         res.end();*/
     
+    // --------------------------------------------------------------------------------
+    // FEED CREATION - PARAMETERS
+    } else if (req.url.startsWith(FC_POST_URL)){
+        console.log("FC PARAMS")
+        console.log(req.url)
+        //console.log(req)
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+        res.end()
     } else {
         console.log("ELSE")
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/html'});

@@ -9,21 +9,21 @@ const RIDERSHIP_TIME = "Weekly"
 function get_route_type(type){
 	switch(Number(type)){ // no break because of the return statements
 		case 0:
-			return(<span>light rail</span>)
+			return(<span><strong>light rail</strong></span>)
 		case 1:
-			return(<span>rail rapid transit</span>)
+			return(<span><strong>rail rapid transit</strong></span>)
 		case 2:
-			return(<span>rail</span>)
+			return(<span><strong>rail</strong></span>)
 		case 3:
-			return(<span>bus</span>)
+			return(<span><strong>bus</strong></span>)
 		case 4:
-			return(<span>ferry</span>)
+			return(<span><strong>ferry</strong></span>)
 		case 5:
-			return(<span>cable tram</span>)
+			return(<span><strong>cable tram</strong></span>)
 		case 6:
-			return(<span>cable-suspended lift</span>)
+			return(<span><strong>cable-suspended lift</strong></span>)
 		case 7:
-			return(<span>furnicular</span>)
+			return(<span><strong>furnicular</strong></span>)
 		default:
 			return(<span><em>unknown</em></span>)
 	}
@@ -271,7 +271,7 @@ class Info_Agency extends React.Component{
 									</div>
 									<div className="card-body">
 										Description: <strong>{route.desc}</strong> <br/>
-										Type: <strong>{get_route_type(route.type)}</strong> <br/>
+										Type: {get_route_type(route.type)} <br/>
 										Trips: <strong>{route.trips}</strong> <br/>
 										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + route.ridership : null} <br/>
 									</div>

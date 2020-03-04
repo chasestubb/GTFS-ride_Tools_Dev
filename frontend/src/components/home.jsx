@@ -122,7 +122,7 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
-								{this.state.err ? <span className="text-danger"><strong>{this.state.err.toString()}</strong></span> : null }
+								{this.state.err ? <span className="text-danger"><strong>{this.state.err.response ? this.state.err.response.data : this.state.err.toString()}</strong></span> : null }
 								{this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.

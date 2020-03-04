@@ -31,7 +31,7 @@ var randomLastName = require('random-lastname');
 var csvStringify = require('csv-stringify');
 var csv_stringify = csvStringify({delimiter: ','})
 var fs = require('fs')
-const isSea = require('is-sea');
+//const isSea = require('is-sea');
 // ex. call => randomLastName();
 
 module.exports = {
@@ -221,11 +221,12 @@ module.exports = {
             temp_stop.stop_name = randomLastName();
             randLat = Math.floor(Math.random() * 90) - 90;
             randLon = Math.floor(Math.random() * 180) - 180;
-            var check = isSea.get(randLat, randLon);
+            //var check = isSea.get(randLat, randLon);
+            var check = 0
             while(check){
                 randLat = Math.floor(Math.random() * 90) - 90;
                 randLon = Math.floor(Math.random() * 180) - 180;
-                check =isSea.get(randLat, randLon);
+                //check =isSea.get(randLat, randLon);
             }
             temp_stop.stop_lat = randLat;
             temp_stop.stop_lon = randLon;
@@ -270,11 +271,11 @@ module.exports = {
 
     stopTimesCreate: function(num_stops, num_trips, trips){
         stop_times = {
-            trip_id,
-            arrival_time,
-            departure_time,
-            stop_id,
-            stop_sequence,
+            trip_id: "",
+            arrival_time: "",
+            departure_time: "",
+            stop_id: "",
+            stop_sequence: 0,
         }
         var min = 0;
         for (var i = 0; i < num_trips; i++){
@@ -339,36 +340,36 @@ module.exports = {
    },
 
     Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date){
-        agencies = this.agencyCreate(num_agencies)
-        stops = this.stopsCreate(num_stops)
-        routes = this.routesCreate(num_routes, num_agencies)
-        trips = this.tripsCreate(num_routes, num_trips_per_route)
-        stopTimes = this.stopTimesCreate(num_stops, num_trips)
-        feedInfo = this.feedInfoCreate(start_date, end_date)
+        var agencies = this.agencyCreate(num_agencies)
+        var stops = this.stopsCreate(num_stops)
+        var routes = this.routesCreate(num_routes, num_agencies)
+        var trips = this.tripsCreate(num_routes, num_trips_per_route)
+        //var stopTimes = this.stopTimesCreate(num_stops, num_trips, trips)
+        var feedInfo = this.feedInfoCreate(start_date, end_date)
 
         csvStringify(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]},
         function(err, out){
-            fs.writeFileSync("../feed_creation/agencies.txt", out)
+            fs.writeFileSync("./feed_creation/agencies.txt", out)
         })
         csvStringify(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]},
         function(err, out){
-            fs.writeFileSync("../feed_creation/stops.txt", out)
+            fs.writeFileSync("./feed_creation/stops.txt", out)
         })
         csvStringify(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]},
         function(err, out){
-            fs.writeFileSync("../feed_creation/routes.txt", out)
+            fs.writeFileSync("./feed_creation/routes.txt", out)
         })
         csvStringify(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]},
         function(err, out){
-            fs.writeFileSync("../feed_creation/trips.txt", out)
+            fs.writeFileSync("./feed_creation/trips.txt", out)
         })
-        csvStringify(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]},
+        /*csvStringify(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]},
         function(err, out){
-            fs.writeFileSync("../feed_creation/stop_times.txt", out)
-        })
+            fs.writeFileSync("./feed_creation/stop_times.txt", out)
+        })*/
         csvStringify(feedInfo, {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]},
         function(err, out){
-            fs.writeFileSync("../feed_creation/feed_info.txt", out)
+            fs.writeFileSync("./feed_creation/feed_info.txt", out)
         })
 
         //fs.writeFileSync("../feed_creation/agencies.txt", str_agency)
@@ -380,5 +381,6 @@ module.exports = {
 
 
  
-
+// function for testing
+console.log(process.cwd())
 module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231)
