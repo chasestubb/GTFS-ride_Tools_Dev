@@ -28,13 +28,10 @@
 //   ride_feed_info.txt (required)
 
 var randomLastName = require('random-lastname');
-<<<<<<< HEAD
 var csvStringify = require('csv-stringify');
 var csv_stringify = csvStringify({delimiter: ','})
 var fs = require('fs')
-=======
 const isSea = require('is-sea');
->>>>>>> 73fdab887ddac570bde257b35b8110657e145788
 // ex. call => randomLastName();
 
 module.exports = {
@@ -273,11 +270,11 @@ module.exports = {
 
     stopTimesCreate: function(num_stops, num_trips, trips){
         stop_times = {
-            trip_id,
-            arrival_time,
-            departure_time,
-            stop_id,
-            stop_sequence,
+            trip_id = "",
+            arrival_time = 0,
+            departure_time = 0,
+            stop_id = "",
+            stop_sequence ="",
         }
         var min = 0;
         for (var i = 0; i < num_trips; i++){
@@ -340,6 +337,173 @@ module.exports = {
         }
         return trips;
    },
+
+      // CREATE RIDE_FEED_INFO.TXT
+   // ride_files | TBD user input or require all
+   // ride_start_date | user-defined
+   // ride_end_date | user-defined
+   // gtfs_feed_date | user-defined -- links to feed_info?
+   // default_currency_type | static -- USD
+   // ride_feed_version | static -- v1
+
+   rideFeedInfoCreate: function(files, start_date, end_date, feed_date){
+       var ride_feed_info = {
+           ride_files = files,
+           ride_start_date = start_date,
+           ride_end_date = end_date,
+           gtfs_feed_date = feed_date,
+           default_currency_type = "USD",
+           ride_feed_version = 1,
+       } 
+      if ( files == null ){
+           //defaults to all files if not speciified
+            ride_feed_info.ride_files = 6;
+       }
+       return ride_feed_info;
+   },
+   
+
+   // CREATE BOARD_ALIGHT.TXT
+   // trip_id | static - always "TRIP#"
+   // stop_id | static - always "STOP#"
+   // stop_sequence | algorithm from stop_times
+   // record_use | static - 0  Entry contains complete ridership counts
+   // schedule_relationship | user-defined
+   // boardings |automated based on stop
+   // alightings | automated based on stop
+   // currrent_load | load_count / load_type
+   // load_count | user-defined
+   // load_type | user-defined
+   // rack_down | user-defined
+   // associated vars are all user defined
+   
+  // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
+    boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times, user_source){
+        var board_alight = [];
+        var temp_alight = {
+            trip_id = "",
+            stop_id = "",
+            stop_sequence = 0,
+            record_use = 0,
+            schedule_relationship = 0,
+            boardings = 0,
+            alightings = 0,
+            current_load = 0,
+            load_type = 0,
+            rack_down = 0,
+            bike_boardings = 0,
+            bike_alightings = 0,
+            ramp_used = 0,
+            ramp_boardings = 0,
+            ramp_alightings = 0,
+            service_date = 20000101,
+            service_arrival_time = 0,
+            service_departure_time = 0,
+            source = user_source,  
+        }
+
+        var min = 0;
+        for (var i = 0; i < num_trips; i++){
+            var rand_trip = Math.floor(Math.random() * num_trips);
+            var a = new Date();
+            a.setHours(6);
+            a.setMinutes(min);
+            temp_alight.trip_id = trips[rand_trip].trip_id;
+            temp_alight.arrival_time = a;
+            a.setMinutes(min + 2);
+            temp_alight.departure_time = a;
+            min = min + 5;
+            for ( var j = 0; j < stop_times.length; j++){
+                if (stop_times[j].trip_id === trips[i].trip_id)
+                    temp_alight.stop_sequence = stop_times[j].stop_sequence;
+            }
+            for (var k = 0; k < num_stops; k++){
+                if (stops[k].trip_id == trips[i].trip_id){
+                    temp_alight.stop_id = stop[k].stop_id;
+                }
+            }
+            
+            //TODO add functionality for optional fields
+            board_alight.push(temp_alight);
+        }
+        return board_alight;
+   },
+
+   riderTripCreate: function(num_riders, trips, num_trips, num_stops){
+    var rider_trips = [];
+    var temp_rider = {
+        rider_id = "",
+        agency_id = "RIDE",
+        trip_id = "",
+        boarding_stop_id = "",
+        boarding_stop_sequence = 0,
+        alighting_stop_id = "",
+        alighting_stop_sequence = 0,
+        service_date = 20000101,
+        boarding_time = 0,
+        alighting_time = 0,
+        rider_type = 0,
+        rider_type_description = "No special type",
+        fare_paid = 10,
+        transaction_type = 0,
+        fare_media = 0,
+        accompanying_device = 0,
+        transfer_status = 0,
+    }
+    for (var i = 0; i < num_riders; i++){
+        temp_rider.rider_id = "RIDER" + i;
+        var rand_stop = Math.floor(Math.random() * num_stops);
+        var rand_stop2 = Math.floor(Math.random() * num_stops);
+        temp_rider.boarding_stop_id = rand_stop;
+        temp_rider.alighting_stop_id = rand_stop2;
+        var rand_trip = Math.floor(Math.random() * num_trips);
+        var a = new Date();
+        a.setHours(6);
+        a.setMinutes(min);
+        temp_rider.trip_id = trips[rand_trip].trip_id;
+        temp_rider.boarding_time = a;
+        a.setMinutes(min + 2);
+        temp_rider.alighting_time = a;
+        min = min + 5;
+        rider_trips.push(temp_rider);
+    }
+    return rider_trips;
+  },
+
+  ridershipCreate: function(stops, num_stops, num_routes, routes, board_alight){
+      var ridership = [];
+      var temp_ridership = {
+        total_boardings = 0,
+        total_alightings = 0,
+        ridership_start_date = 20000101,
+        ridership_end_date = 20000101,
+        ridership_start_time = 0,
+        ridership_end_time = 0,
+        service_id: "CALENDAR_ALL",
+        monday: 1,
+        tuesday: 1,
+        wednesday: 1,
+        thursday: 1,
+        friday: 1,
+        saturday: 1,
+        sunday: 1,
+        agency_id = "RIDE",
+        route_id = "",
+        direction_id = "" ,
+        trip_id = "",
+        stop_id = "",
+        }
+      for ( var i = 0; i< num_stops; i++ ){
+        if (board_alight.stop_id == stops[i].stop_id){
+            temp_ridership.stop_id = stops[i].stop_id;
+            temp_ridership.total_boardings == temp_ridership.total_boardings + board_alight.boardings;
+            temp_ridership.total_alightings == temp_ridership.total_alightings + board_alight.alightings;
+        }
+        ridership.push(temp_ridership);
+      }
+      return ridership;
+  },
+
 
     Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date){
         agencies = this.agencyCreate(num_agencies)
