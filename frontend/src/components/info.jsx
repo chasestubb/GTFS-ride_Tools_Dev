@@ -15,6 +15,14 @@ function agency_plural(count){
 	}
 }
 
+function date_formatter(date_int){
+	var date = String(date_int)
+	var year = date.substr(0, 4)
+	var month = date.substr(4, 2)
+	var day = date.substr(6, 2)
+	return (year + "-" + month + "-" + day)
+}
+
 class Info extends React.Component{
 	
 	constructor(props){
@@ -68,7 +76,7 @@ class Info extends React.Component{
 				agency_list: res.data.agencies,
 				stop_list: res.data.stops,
 				num_trips: res.data.num_trips,
-				date: [String(res.data.date[0]), String(res.data.date[1])],
+				date: [date_formatter(res.data.date[0]), date_formatter(res.data.date[1])],
 			})
 			//this.setState(res.data)
 		})
@@ -182,7 +190,7 @@ class Info extends React.Component{
 
 						{/* END DATE */}
 						<div className="col-xl-3 col-md-6 mb-4">
-							<div className="card border-left-secondart shadow h-100 py-2">
+							<div className="card border-left-secondary shadow h-100 py-2">
 								<div className="card-body">
 									<div className="row no-gutters align-items-center">
 										<div className="col mr-2">

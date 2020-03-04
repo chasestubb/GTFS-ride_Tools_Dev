@@ -9,21 +9,21 @@ const RIDERSHIP_TIME = "Weekly"
 function get_route_type(type){
 	switch(Number(type)){ // no break because of the return statements
 		case 0:
-			return(<span><strong>light rail</strong></span>)
+			return(<span>light rail</span>)
 		case 1:
-			return(<span><strong>rail rapid transit</strong></span>)
+			return(<span>rail rapid transit</span>)
 		case 2:
-			return(<span><strong>rail</strong></span>)
+			return(<span>rail</span>)
 		case 3:
-			return(<span><strong>bus</strong></span>)
+			return(<span>bus</span>)
 		case 4:
-			return(<span><strong>ferry</strong></span>)
+			return(<span>ferry</span>)
 		case 5:
-			return(<span><strong>cable tram</strong></span>)
+			return(<span>cable tram</span>)
 		case 6:
-			return(<span><strong>cable-suspended lift</strong></span>)
+			return(<span>cable-suspended lift</span>)
 		case 7:
-			return(<span><strong>furnicular</strong></span>)
+			return(<span>furnicular</span>)
 		default:
 			return(<span><em>unknown</em></span>)
 	}
@@ -53,6 +53,7 @@ class Info_Agency extends React.Component{
 			is_gtfs_ride: false,
 			ridership: 0,
 			trips: 0,
+			err: null,
 		}
 	}
 
@@ -66,9 +67,10 @@ class Info_Agency extends React.Component{
 				agency_list: res.data.agencies
 			})*/
 			this.setState(res.data)
-			this.setState({status: res.status})
+			this.setState({status: res.status, err: null})
 		}).catch(function(err){
 			console.log("Error: " + err)
+			this.setState({err: err})
 		})
 	}
 
@@ -281,6 +283,12 @@ class Info_Agency extends React.Component{
 					
 				</div>
 		
+			)
+		} else if (this.state.err) {
+			return(
+				<div className="row">
+					<h4>{this.state.err}</h4><br/><br/>
+				</div>
 			)
 		} else {
 			return(

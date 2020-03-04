@@ -57,7 +57,7 @@ class Topbar extends React.Component{
 				{/* Nav Item - User Information */}
 				<li className="nav-item">
 					<Link className="nav-link" to="/">
-						<span className="mr-2 d-none d-lg-inline text-black-50 small">{this.props.filename ? this.props.filename : <em>No feed uploaded</em>}</span>
+						<span className="mr-2 text-black-50">{this.props.filename ? <span>Feed: <strong className="text-dark">{this.props.filename}</strong></span> : <em>No feed uploaded</em>}</span>
 					</Link>
 				</li>
 

@@ -2,17 +2,12 @@ import React from 'react'
 import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER HOST URL
-const HOST = "http://localhost:8080";
-
-// ONLY CHANGE THESE IF YOU ARE CHANGING THEM ON THE SERVER AS WELL
-const path = "/fileupload"
-const url = HOST + path
-
+const url = "http://localhost:8080/fileupload";
 
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: "", file: null, parsed_feed: null}; // filename = the name only, without path
+		this.state = {filepath: "", filename: "", file: null, parsed_feed: null, err: null}; // filename = the name only, without path
 		this.fileSelected = this.fileSelected.bind(this);
 		this.upload = this.upload.bind(this);
 	}
@@ -36,11 +31,12 @@ class Home extends React.Component{
 		try {
 			const res = await Axios.post(url, fd, config);
 			console.log(res.data);
-			this.setState({ parsed_feed: res.data });
+			this.setState({ parsed_feed: res.data, err: null });
 			this.props.onUpload(res.data);
 		}
 		catch (err) {
 			if (err) {
+				this.setState({err: err})
 				console.log(err);
 				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
@@ -126,7 +122,8 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
-								{this.state.parsed_feed ? <span><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
+								{this.state.err ? <span className="text-danger"><strong>{this.state.err.toString()}</strong></span> : null }
+								{this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
