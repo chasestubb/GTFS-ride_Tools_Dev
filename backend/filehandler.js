@@ -1,7 +1,7 @@
 // built-in modules
 var http = require('http');
 var Url = require('url');
-var bodyParser = require('body-parser')
+//var bodyParser = require('body-parser')
 var fs = require('fs');
 
 // third-party modules
@@ -63,6 +63,7 @@ var filename = ""
     //
     //if (req.url == UPLOAD_URL) {
     app.post(UPLOAD_URL, (req, res) => {
+        console.log(req.method + " to " + req.url)
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var oldpath = files.file.path;
@@ -537,16 +538,21 @@ var filename = ""
     // --------------------------------------------------------------------------------
     // FEED CREATION - PARAMETERS
     //} else if (req.url.startsWith(FC_POST_URL)){
-    app.post(FC_POST_URL + "*", (req, res) => {
+    app.post(FC_POST_URL, (req, res) => {
         console.log("FC PARAMS")
         console.log(req.url)
         //console.log(req)
-        var parsedURL = Url.parse(req.url)
-        console.log(parsedURL)
+        //var parsedURL = Url.parse(req.url)
+        //console.log(parsedURL)
+        console.log(req.body)
+        //var {params} = JSON.parse(req.body)
+        //console.log(params)
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
         res.end()
     })
 
+    // --------------------------------------------------------------------------------
+    // CLIENT CHECKS IF SERVER IS ALIVE
     //} else if (req.url == SERVER_CHECK_URL){
     app.get(SERVER_CHECK_URL, (req, res) => {
         console.log("Server is alive.")
@@ -554,10 +560,22 @@ var filename = ""
         res.write("TRUE")
         res.end()
     })
-        
+    
+    app.options("*", (req, res) => {
+        console.log("OPTIONS")
+        res.writeHead(200, {
+            "Access-Control-Allow-Origin": CORS,
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        });
+        //res.write("TRUE")
+        res.end()
+    })
+
     //} else {
     app.all("*", (req, res) => {
-        console.log("ELSE")
+        console.log("Client requested something else")
+        console.log(req.method + " to " + req.url)
         res.writeHead(404, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
         return res.end();
     })

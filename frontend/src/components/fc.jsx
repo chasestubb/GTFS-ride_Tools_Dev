@@ -8,6 +8,7 @@ const HOST = "http://localhost:8080"
 // DO NOT CHANGE THESE UNLESS YOU CHANGE THEM ON THE SERVER AS WELL
 const postURL = HOST + "/fc/params"
 const getURL = HOST + "/fc/getfile"
+const SERVER_CHECK_URL = "/server_check"
 
 class FC extends React.Component{
 	constructor(props){
@@ -28,6 +29,17 @@ class FC extends React.Component{
 		this.setDate = this.setDate.bind(this)
 		this.set = this.set.bind(this)
 		this.submit = this.submit.bind(this)
+		this.isServerAlive = this.isServerAlive.bind(this)
+	}
+
+	async isServerAlive(){
+		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
+			console.log(res)
+			this.setState({status: res.status})
+		}).catch((err) => {
+			console.log("Error: " + err)
+			this.setState({status: -99})
+		})
 	}
 
 	setNumber(event){
@@ -80,7 +92,7 @@ class FC extends React.Component{
 
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
-		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors", params: this.state.params};
+		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors"/*, params: this.state.params*/};
 		try {
 			const res = await Axios.post(postURL, json, config);
 			console.log(res.data);
@@ -107,11 +119,15 @@ class FC extends React.Component{
 			end_date: this.strDateToIntDate(this.state.params.end_date),
 		}
 		console.log(params)
-		var postBody = JSON.stringify(params)
-		this.sendPost(postBody)
+		//var postBody = JSON.stringify(params)
+		//this.sendPost(postBody)
+		this.sendPost(params)
 		this.sendGet()
 	}
 	
+	componentDidMount(){
+		this.isServerAlive()
+	}
 
 	render(){
 		return (
