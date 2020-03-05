@@ -268,13 +268,14 @@ module.exports = {
     //   stop_id         | 
     //   stop_sequence   | algorithm - see desc above
 
-    stopTimesCreate: function(num_stops, num_trips, trips){
-        stop_times = {
+    stopTimesCreate: function(num_trips, trips){
+        var stop_times = [];
+        var temp_times = {
             trip_id = "",
             arrival_time = 0,
             departure_time = 0,
             stop_id = "",
-            stop_sequence ="",
+            stop_sequence =0,
         }
         var min = 0;
         for (var i = 0; i < num_trips; i++){
@@ -282,15 +283,16 @@ module.exports = {
             var a = new Date();
             a.setHours(6);
             a.setMinutes(min);
-            stop_times.trip_id = trips[rand_trip].trip_id;
-            stop_times.arrival_time = a;
+            temp_times.trip_id = trips[rand_trip].trip_id;
+            temp_times.arrival_time = a;
             a.setMinutes(min + 2);
-            stop_times.departure_time = a;
+            temp_times.departure_time = a;
             min = min + 5;
-            //TODO stop_sequence
+           //Currently stop_sequence is simply incremented up
+            temp_times.stop_sequence = temp_times.stop_sequence + 1;
+            stop_times.push(temp_times);
        }
-
-       
+       return stop_times;
     },
 
 
@@ -465,43 +467,73 @@ module.exports = {
         a.setMinutes(min + 2);
         temp_rider.alighting_time = a;
         min = min + 5;
+        temp_rider.boarding_stop_sequence = temp_rider.boarding_stop_sequence + 1;
+        temp_rider.alighting_stop_sequence = temp_rider.alighting_stop_sequence + 1;
         rider_trips.push(temp_rider);
     }
     return rider_trips;
   },
 
-  ridershipCreate: function(stops, num_stops, num_routes, routes, board_alight){
-      var ridership = [];
-      var temp_ridership = {
-        total_boardings = 0,
-        total_alightings = 0,
-        ridership_start_date = 20000101,
-        ridership_end_date = 20000101,
-        ridership_start_time = 0,
-        ridership_end_time = 0,
-        service_id: "CALENDAR_ALL",
-        monday: 1,
-        tuesday: 1,
-        wednesday: 1,
-        thursday: 1,
-        friday: 1,
-        saturday: 1,
-        sunday: 1,
-        agency_id = "RIDE",
-        route_id = "",
-        direction_id = "" ,
-        trip_id = "",
-        stop_id = "",
+    ridershipCreate: function(stops, num_stops, num_routes, routes, board_alight, num_riders){
+        var ridership = [];
+        var temp_ridership = {
+            total_boardings = 0,
+            total_alightings = 0,
+            ridership_start_date = 20000101,
+            ridership_end_date = 20000101,
+            ridership_start_time = 0,
+            ridership_end_time = 0,
+            service_id: "CALENDAR_ALL",
+            monday: 1,
+            tuesday: 1,
+            wednesday: 1,
+            thursday: 1,
+            friday: 1,
+            saturday: 1,
+            sunday: 1,
+            agency_id = "RIDE",
+            route_id = "",
+            direction_id = "" ,
+            trip_id = "",
+            stop_id = "",
+            }
+        for (var j = 0; j < num_riders; j++){    
+            for ( var i = 0; i< num_stops; i++ ){
+                if (board_alight.stop_id == stops[i].stop_id){
+                    temp_ridership.stop_id = stops[i].stop_id;
+                    temp_ridership.trip_id = stops[i].trip_id;
+                    temp_ridership.total_boardings == temp_ridership.total_boardings + board_alight.boardings;
+                    temp_ridership.total_alightings == temp_ridership.total_alightings + board_alight.alightings;
+                }
+            }
+            var rand_route = Math.floor(Math.random() * num_routes);
+            var rand_id = routes[rand_route].route_id;
+            temp_ridership.route_id = rand_id;
+            ridership.push(temp_ridership);
+       }
+    return ridership;
+    },
+
+    tripCapacityCreate: function(trips, num_trips, agencies, num_agencies, ){
+        var trip_capacities = {};
+        var temp_trip = {
+            agency_id = "",
+            trip_id = "",
+            service_date = 20000101,
+            vehicle_description = "Bus",
+            seated_capacity = 75,
+            standing_capacity = 30,
+            wheelchair_capacity = 5,
+            bike_capacity = 15
         }
-      for ( var i = 0; i< num_stops; i++ ){
-        if (board_alight.stop_id == stops[i].stop_id){
-            temp_ridership.stop_id = stops[i].stop_id;
-            temp_ridership.total_boardings == temp_ridership.total_boardings + board_alight.boardings;
-            temp_ridership.total_alightings == temp_ridership.total_alightings + board_alight.alightings;
-        }
-        ridership.push(temp_ridership);
-      }
-      return ridership;
+        for (var i = 0; i < num_trips; i++){
+            temp_trip.trip_id = trips[i];
+            var rand_agency_index = Math.floor(Math.random() * num_agencies);
+            var rand_agency = agencies[rand_agency_index].agency_id;
+            temp_trip.agency_id = rand_agency;
+            trip_capacities.push(temp_trip);
+       }
+       return trip_capacities;
   },
 
 
