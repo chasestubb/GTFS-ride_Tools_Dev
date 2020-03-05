@@ -519,7 +519,7 @@ module.exports = {
     return ridership;
     },
 
-    tripCapacityCreate: function(trips, num_trips, agencies, num_agencies, ){
+    tripCapacityCreate: function(trips, num_trips, agencies, num_agencies){
         var trip_capacities = {};
         var temp_trip = {
             agency_id = "",
@@ -542,13 +542,20 @@ module.exports = {
   },
 
 
-    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date){
+    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files){
         agencies = this.agencyCreate(num_agencies)
         stops = this.stopsCreate(num_stops)
         routes = this.routesCreate(num_routes, num_agencies)
         trips = this.tripsCreate(num_routes, num_trips_per_route)
         stopTimes = this.stopTimesCreate(num_stops, num_trips)
         feedInfo = this.feedInfoCreate(start_date, end_date)
+        rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date)
+        boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stop_times, user_source)
+        riderTrip = this.riderTripCreate(num_riders, trips, num_trips, num_stops)
+        ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips)
+        tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies)
+
+
 
         csvStringify(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]},
         function(err, out){
@@ -574,6 +581,26 @@ module.exports = {
         function(err, out){
             fs.writeFileSync("../feed_creation/feed_info.txt", out)
         })
+        csvStringify(rideFeedInfo, {head: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]},
+        function(err,out){
+            fs.writeFileSync("../feed_creation/ride_feed_info.txt")
+        })
+        csvStringify(boardAlight, {head: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]},
+        function(err,out){
+            fs.writeFileSync("../feed_creation/board_alight.txt")
+        })
+        csvStringify(riderTrip, {head: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]},
+        function(err,out){
+            fs.writeFileSync("../feed_creation/rider_trip.txt")
+        })
+        csvStringify(ridership, {head: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]},
+        function(err,out){
+            fs.writeFileSync("../feed_creation/ridership.txt")
+        })
+        csvStringify(tripCapacity, {head: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]},
+        function(err,out){
+            fs.writeFileSync("../feed_creation/trip_capacity.txt")
+        })
 
         //fs.writeFileSync("../feed_creation/agencies.txt", str_agency)
         //fs.writeFileSync("../feed_creation/stops.txt", str_stops)
@@ -585,4 +612,4 @@ module.exports = {
 
  
 
-module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231)
+module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231,20200304, 0, 2, 6)
