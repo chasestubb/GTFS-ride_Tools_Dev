@@ -330,9 +330,10 @@ http.createServer(function (req, res) {
                     u: ""
                 },
                 routes: [],
-                stops: [],
+                //stops: [],
                 is_gtfs_ride: gtfs_ride_feed,
                 ridership: 0,
+                trips: Info.countTripsPerAgency(agency, routes, trips),
             }
 
             // get the agency's routes
@@ -345,6 +346,7 @@ http.createServer(function (req, res) {
                         desc: route.route_desc,
                         type: route.route_type,
                         ridership: 0,
+                        trips: (Info.tripsPerRoute(route, trips)).length,
                     }
                     if (gtfs_ride_feed){
                         route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
@@ -354,6 +356,7 @@ http.createServer(function (req, res) {
             }
 
             // get the agency's stops
+            /*
             Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
                 var stop_info = {
                     id: stop.stop_id,
@@ -368,6 +371,7 @@ http.createServer(function (req, res) {
                 }
                 agency_info.stops.push(stop_info)
             })
+            */
 
             //console.log(agency_info.stops)
 
@@ -392,7 +396,10 @@ http.createServer(function (req, res) {
             var feed_info_ = {
                 filename: filename,
                 is_gtfs_ride: gtfs_ride_feed,
-                agencies: []
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
             }
 
             // parse agencies' info
@@ -402,7 +409,7 @@ http.createServer(function (req, res) {
                     id: agencies[x].agency_id,
                     name: agencies[x].agency_name,
                     routes: Info.routesPerAgency(agencies[x], routes),
-                    stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
+                    //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
                     ridership: 0,
                 };
                 if (gtfs_ride_feed){
@@ -411,10 +418,29 @@ http.createServer(function (req, res) {
                 feed_info_.agencies.push(agency);
             }
 
+            for (x = 0; x < stops.length; x++){
+                var stop = {
+                    index: x,
+                    id: stops[x].stop_id,
+                    name: stops[x].stop_name,
+                    code: stops[x].stop_code,
+                    desc: stops[x].stop_desc,
+                    pos: [stops[x].stop_lat, stops[x].stop_lon],
+                    zone: (stops[x].zone_id),
+                    ridership: 0,
+                }
+                if (gtfs_ride_feed){
+                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                }
+                feed_info_.stops.push(stop)
+            }
+            
+
             // send object to front-end
             res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
             res.write(JSON.stringify(feed_info_));
             res.end();
+            console.log("Feed info sent to the client")
         }
         
     // FEED INFO -> AGENCY INFO

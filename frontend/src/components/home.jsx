@@ -1,8 +1,13 @@
 import React from 'react'
 import Axios from 'axios'
 
-// FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/fileupload";
+// FOR PRODUCTION, CHANGE THIS URL TO THE SERVER HOST URL
+const HOST = "http://localhost:8080";
+
+// ONLY CHANGE THESE IF YOU ARE CHANGING THEM ON THE SERVER AS WELL
+const path = "/fileupload"
+const url = HOST + path
+
 
 class Home extends React.Component{
 	constructor(props){
@@ -23,24 +28,25 @@ class Home extends React.Component{
 	}
 
 	// uploads the file when user clicks "confirm upload"
-	upload(event){
+	async upload(event){
 		let fd = new FormData();
 		fd.append("file", this.state.file);
 		const config = {headers: {"content-type": "multipart/form-data"}, mode: "no-cors"};
 		//                        required for the file upload to succeed
-		return Axios.post(url, fd, config).then(function(res){
-			console.log(res);
-			//this.setState({parsed_feed: res.data});
+		try {
+			const res = await Axios.post(url, fd, config);
+			console.log(res.data);
+			this.setState({ parsed_feed: res.data });
 			this.props.onUpload(res.data);
-		}).catch(function(err){
-			if (err){
+		}
+		catch (err) {
+			if (err) {
 				console.log(err);
-				if (err.response){
+				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
 				}
-				
 			}
-		});
+		}
 		/* how it should work:
 		   1. client uploads feed to server from home.jsx
 		   2. home.jsx sends the feed as HTTP POST request
@@ -120,7 +126,7 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
-								{/*this.state.parsed_feed ? <span><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null*/}
+								{this.state.parsed_feed ? <span><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
