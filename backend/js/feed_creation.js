@@ -474,7 +474,7 @@ module.exports = {
     return rider_trips;
   },
 
-    ridershipCreate: function(stops, num_stops, num_routes, routes, board_alight, num_riders){
+    ridershipCreate: function(stops, num_stops, num_routes, routes, board_alight, num_riders, trips, num_trips){
         var ridership = [];
         var temp_ridership = {
             total_boardings = 0,
@@ -504,6 +504,11 @@ module.exports = {
                     temp_ridership.trip_id = stops[i].trip_id;
                     temp_ridership.total_boardings == temp_ridership.total_boardings + board_alight.boardings;
                     temp_ridership.total_alightings == temp_ridership.total_alightings + board_alight.alightings;
+                    for ( var k = 0; k < num_trips; k++){
+                        if (trips[k].trip_id == stops[i].stop_id){
+                            temp_ridership.direction_id = trips[k].direction_id;
+                        }
+                    }
                 }
             }
             var rand_route = Math.floor(Math.random() * num_routes);
