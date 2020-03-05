@@ -22,6 +22,10 @@ class FC extends React.Component{
 				trips_per_route: 1,
 				start_date: null,
 				end_date: null,
+				feed_date: null, // just made it the same as start_date
+				user_source: 0, // enum
+				num_riders: 1,
+				files: 6, // because we are generating all files
 			},
 			status: -1,
 		}
@@ -117,6 +121,7 @@ class FC extends React.Component{
 			...this.state.params,
 			start_date: this.strDateToIntDate(this.state.params.start_date),
 			end_date: this.strDateToIntDate(this.state.params.end_date),
+			feed_date: params.start_date
 		}
 		console.log(params)
 		//var postBody = JSON.stringify(params)
@@ -177,6 +182,20 @@ class FC extends React.Component{
 									<tr>
 										<td>Feed end date</td>
 										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.setDate}></input></td>
+									</tr>
+									<tr>
+										<td>Number of riders</td>
+										<td><input name="num_riders" className="fc-input-number" type="number" min={1} value={this.state.params.num_riders} onChange={this.setNumber}></input></td>
+									</tr>
+									<tr>
+										<td>Ridership data collection method</td>
+										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
+											<option value={0}>Manual</option>
+											<option value={1}>Automated Passenger Counter</option>
+											<option value={2}>Automated Fare Collector</option>
+											<option value={3}>Model Estimation</option>
+											<option value={4}>Mixed Source</option>
+										</select></td>
 									</tr>
 								</table>
 								<br/>
