@@ -25,6 +25,8 @@ class FC extends React.Component{
 			status: -1,
 		}
 		this.setNumber = this.setNumber.bind(this)
+		this.setDate = this.setDate.bind(this)
+		this.set = this.set.bind(this)
 		this.submit = this.submit.bind(this)
 	}
 
@@ -34,12 +36,14 @@ class FC extends React.Component{
 			alert("You must enter a positive integer.")
 			this.setState({
 				params: {
+					...this.state.params,
 					[event.target.name]: 1
 				}
 			})
 		} else {
 			this.setState({
 				params: {
+					...this.state.params,
 					[event.target.name]: Math.round(num)
 				}
 			})
@@ -47,9 +51,36 @@ class FC extends React.Component{
 		
 	}
 
+	strDateToIntDate(strDate){
+		var arrDate = strDate.split("-")
+		var intDate = 0
+		intDate += Number(arrDate[0] * 10000)
+		intDate += Number(arrDate[1] * 100)
+		intDate += Number(arrDate[2])
+		return intDate
+	}
+
+	setDate(event){
+		this.setState({
+			params: {
+				...this.state.params,
+				[event.target.name]: event.target.value
+			}
+		})
+	}
+
+	set(event){
+		this.setState({
+			params: {
+				...this.state.params,
+				[event.target.name]: event.target.value
+			}
+		})
+	}
+
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
-		const config = {headers: {"content-type": "application/json"}, mode: "no-cors"};
+		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors", params: this.state.params};
 		try {
 			const res = await Axios.post(postURL, json, config);
 			console.log(res.data);
@@ -70,7 +101,13 @@ class FC extends React.Component{
 	}
 
 	submit(event){
-		var postBody = JSON.stringify(this.state.params)
+		var params = {
+			...this.state.params,
+			start_date: this.strDateToIntDate(this.state.params.start_date),
+			end_date: this.strDateToIntDate(this.state.params.end_date),
+		}
+		console.log(params)
+		var postBody = JSON.stringify(params)
 		this.sendPost(postBody)
 		this.sendGet()
 	}
@@ -116,6 +153,14 @@ class FC extends React.Component{
 									<tr>
 										<td>Number of trips per route</td>
 										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} value={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
+									</tr>
+									<tr>
+										<td>Feed start date</td>
+										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.setDate}></input></td>
+									</tr>
+									<tr>
+										<td>Feed end date</td>
+										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.setDate}></input></td>
 									</tr>
 								</table>
 								<br/>

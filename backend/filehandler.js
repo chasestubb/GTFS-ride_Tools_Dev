@@ -1,8 +1,12 @@
+// built-in modules
 var http = require('http');
 var Url = require('url');
-var formidable = require('formidable'); // A Node.js module for parsing form data, especially file uploads.
-
+var bodyParser = require('body-parser')
 var fs = require('fs');
+
+// third-party modules
+var express = require('express')
+var formidable = require('formidable'); // A Node.js module for parsing form data, especially file uploads.
 var extract = require('extract-zip');
 //var csv = require('csv-parse/lib/sync'); // converting CSV text input into arrays or objects
 var csv_parse = require('csv-parse/lib/sync') // generalized now that we are both using csv-parse + csv-generate
@@ -11,6 +15,11 @@ var csv_generate = require('csv-generate')
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
 
+// express stuff
+var app = express()
+app.use(express.urlencoded())
+app.use(express.json())
+
 // feel free to change the things below, but the values must be consistent with the front-end
 
 // the port for the server to listen to
@@ -18,6 +27,7 @@ const PORT = 8080;
 const CORS = "http://localhost:3000"
 
 // the URL paths, make them consistent with the front-end
+const SERVER_CHECK_URL = "/server_check"
 const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
 const INFO_AGENCY_URL = '/info/agency/';
@@ -307,144 +317,152 @@ http.createServer(function (req, res) {
     // --------------------------------------------------------------------------------
     // FEED INFO
     } else if (req.url.startsWith(INFO_URL)){
-        // PER AGENCY
-        if (req.url.includes("agency")){
-            console.log("FEED INFO -> AGENCY INFO")
-            var q = req.url.split("=");
-            var index = q[1]
-            console.log(index)
-            //var index = req.headers.index;
-            //console.log(req);
-            var agency = agencies[index]
-            var agency_info = {
-                id: agency.agency_id,
-                name: agency.agency_name,
-                url: agency.agency_url,
-                fare_url: agency.agency_fare_url,
-                phone: agency.agency_phone,
-                email: agency.agency_email,
-                hours: {
-                    m: "",
-                    t: "",
-                    w: "",
-                    r: "",
-                    f: "",
-                    s: "",
-                    u: ""
-                },
-                routes: [],
-                //stops: [],
-                is_gtfs_ride: gtfs_ride_feed,
-                ridership: 0,
-                trips: Info.countTripsPerAgency(agency, routes, trips),
-            }
+        if (agencies && routes && trips && stops && stop_times){
+            // PER AGENCY
+            if (req.url.includes("agency")){
+                console.log("FEED INFO -> AGENCY INFO")
+                var q = req.url.split("=");
+                var index = q[1]
+                console.log(index)
+                //var index = req.headers.index;
+                //console.log(req);
+                var agency = agencies[index]
+                var agency_info = {
+                    id: agency.agency_id,
+                    name: agency.agency_name,
+                    url: agency.agency_url,
+                    fare_url: agency.agency_fare_url,
+                    phone: agency.agency_phone,
+                    email: agency.agency_email,
+                    hours: {
+                        m: "",
+                        t: "",
+                        w: "",
+                        r: "",
+                        f: "",
+                        s: "",
+                        u: ""
+                    },
+                    routes: [],
+                    //stops: [],
+                    is_gtfs_ride: gtfs_ride_feed,
+                    ridership: 0,
+                    trips: Info.countTripsPerAgency(agency, routes, trips),
+                }
 
-            // get the agency's routes
-            for (var x = 0; x < routes.length; x++){
-                var route = routes[x];
-                if (route.agency_id === agency.agency_id){
-                    var route_info = {
-                        short_name: route.route_short_name,
-                        long_name: route.route_long_name,
-                        desc: route.route_desc,
-                        type: route.route_type,
+                // get the agency's routes
+                for (var x = 0; x < routes.length; x++){
+                    var route = routes[x];
+                    if (route.agency_id === agency.agency_id){
+                        var route_info = {
+                            short_name: route.route_short_name,
+                            long_name: route.route_long_name,
+                            desc: route.route_desc,
+                            type: route.route_type,
+                            ridership: 0,
+                            trips: (Info.tripsPerRoute(route, trips)).length,
+                        }
+                        if (gtfs_ride_feed){
+                            route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+                        }
+                        agency_info.routes.push(route_info);
+                    }
+                }
+
+                // get the agency's stops
+                /*
+                Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
+                    var stop_info = {
+                        id: stop.stop_id,
+                        name: stop.stop_name,
+                        code: stop.stop_code,
+                        pos: [stop.stop_lat, stop.stop_lon],
+                        zone: stop.zone_id,
                         ridership: 0,
-                        trips: (Info.tripsPerRoute(route, trips)).length,
                     }
                     if (gtfs_ride_feed){
-                        route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+                        stop_info.ridership = Info.countStopRiders(board_alight, stop)
                     }
-                    agency_info.routes.push(route_info);
-                }
-            }
+                    agency_info.stops.push(stop_info)
+                })
+                */
 
-            // get the agency's stops
-            /*
-            Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
-                var stop_info = {
-                    id: stop.stop_id,
-                    name: stop.stop_name,
-                    code: stop.stop_code,
-                    pos: [stop.stop_lat, stop.stop_lon],
-                    zone: stop.zone_id,
-                    ridership: 0,
-                }
+                //console.log(agency_info.stops)
+
+                // send feed type
+                agency_info.is_gtfs_ride = gtfs_ride_feed
+
+                // GTFS-ride specific fields
                 if (gtfs_ride_feed){
-                    stop_info.ridership = Info.countStopRiders(board_alight, stop)
+                    agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
                 }
-                agency_info.stops.push(stop_info)
-            })
-            */
 
-            //console.log(agency_info.stops)
+                //console.log("Index: " + index);
+                //console.log(agency_info);
 
-            // send feed type
-            agency_info.is_gtfs_ride = gtfs_ride_feed
+                res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
+                res.write(JSON.stringify(agency_info));
+                res.end();
+            } else {
+                // general feed info
+                console.log("FEED INFO")
+                // initialize object
+                var feed_info_ = {
+                    filename: filename,
+                    is_gtfs_ride: gtfs_ride_feed,
+                    agencies: [],
+                    stops: [],
+                    num_trips: trips.length,
+                    date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+                }
 
-            // GTFS-ride specific fields
-            if (gtfs_ride_feed){
-                agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
+                // parse agencies' info
+                for (x = 0; x < agencies.length; x++){
+                    var agency = {
+                        index: x,
+                        id: agencies[x].agency_id,
+                        name: agencies[x].agency_name,
+                        routes: Info.routesPerAgency(agencies[x], routes),
+                        //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
+                        ridership: 0,
+                    };
+                    if (gtfs_ride_feed){
+                        agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
+                    }
+                    feed_info_.agencies.push(agency);
+                }
+
+                for (x = 0; x < stops.length; x++){
+                    var stop = {
+                        index: x,
+                        id: stops[x].stop_id,
+                        name: stops[x].stop_name,
+                        code: stops[x].stop_code,
+                        desc: stops[x].stop_desc,
+                        pos: [stops[x].stop_lat, stops[x].stop_lon],
+                        zone: (stops[x].zone_id),
+                        ridership: 0,
+                    }
+                    if (gtfs_ride_feed){
+                        stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                    }
+                    feed_info_.stops.push(stop)
+                }
+                
+
+                // send object to front-end
+                res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+                res.write(JSON.stringify(feed_info_));
+                res.end();
+                console.log("Feed info sent to the client")
             }
-
-            //console.log("Index: " + index);
-            //console.log(agency_info);
-
-            res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
-            res.write(JSON.stringify(agency_info));
-            res.end();
         } else {
-            // general feed info
-            console.log("FEED INFO")
-            // initialize object
-            var feed_info_ = {
-                filename: filename,
-                is_gtfs_ride: gtfs_ride_feed,
-                agencies: [],
-                stops: [],
-                num_trips: trips.length,
-                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
-            }
-
-            // parse agencies' info
-            for (x = 0; x < agencies.length; x++){
-                var agency = {
-                    index: x,
-                    id: agencies[x].agency_id,
-                    name: agencies[x].agency_name,
-                    routes: Info.routesPerAgency(agencies[x], routes),
-                    //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
-                    ridership: 0,
-                };
-                if (gtfs_ride_feed){
-                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
-                }
-                feed_info_.agencies.push(agency);
-            }
-
-            for (x = 0; x < stops.length; x++){
-                var stop = {
-                    index: x,
-                    id: stops[x].stop_id,
-                    name: stops[x].stop_name,
-                    code: stops[x].stop_code,
-                    desc: stops[x].stop_desc,
-                    pos: [stops[x].stop_lat, stops[x].stop_lon],
-                    zone: (stops[x].zone_id),
-                    ridership: 0,
-                }
-                if (gtfs_ride_feed){
-                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
-                }
-                feed_info_.stops.push(stop)
-            }
-            
-
-            // send object to front-end
-            res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
-            res.write(JSON.stringify(feed_info_));
+            res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+            res.write("No file uploaded. Please upload one from the home page.");
             res.end();
-            console.log("Feed info sent to the client")
+            console.log("Client tried to access Feed Info without providing a valid feed.")
         }
+        
         
     // FEED INFO -> AGENCY INFO
     /*} else if (req.url == INFO_AGENCY_URL){
@@ -512,7 +530,14 @@ http.createServer(function (req, res) {
         console.log("FC PARAMS")
         console.log(req.url)
         //console.log(req)
+        var parsedURL = Url.parse(req.url)
+        console.log(parsedURL)
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+        res.end()
+    } else if (req.url == SERVER_CHECK_URL){
+        console.log("Server is alive.")
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+        res.write("TRUE")
         res.end()
     } else {
         console.log("ELSE")

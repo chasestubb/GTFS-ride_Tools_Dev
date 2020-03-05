@@ -1,5 +1,5 @@
 import React from 'react'
-import {Route, useParams} from 'react-router-dom'
+import {Link, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
@@ -86,7 +86,7 @@ class Info_Agency extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800">{this.state.name}</h1>
+							<h1 className="h3 mb-0 text-gray-800"><Link to="/info" className="back-button"><i className="fas fa-chevron-left back-button"></i></Link>{this.state.name}</h1>
 						</div>
 					</div>
 		

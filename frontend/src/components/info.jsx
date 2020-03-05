@@ -4,8 +4,12 @@ import Axios from 'axios'
 //import InfoAgency from "./info-agency"
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/info";
+const HOST = "http://localhost:8080"
+const INFO_URL = "/info"
+const url = HOST + INFO_URL;
 const RIDERSHIP_TIME = "Weekly"
+
+const SERVER_CHECK_URL = "/server_check"
 
 function agency_plural(count){
 	if (count == 1){
@@ -64,6 +68,17 @@ class Info extends React.Component{
 		
 		
 		this.getInfo = this.getInfo.bind(this)
+		this.isServerAlive = this.isServerAlive.bind(this)
+	}
+
+	// sends a test request to the server
+	async isServerAlive(){
+		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
+			console.log(res)
+		}).catch((err) => {
+			console.log("Error: " + err)
+			this.setState({status: -99})
+		})
 	}
 
 	async getInfo(){
@@ -83,6 +98,7 @@ class Info extends React.Component{
 	}
 
 	componentDidMount(){
+		this.isServerAlive();
 		this.getInfo();
 	}
 
@@ -279,6 +295,19 @@ class Info extends React.Component{
 				<div className="row">
 					<h4>Loading feed...</h4><br/><br/>
 				</div>
+			)
+		} else if (this.state.status == -99) {
+			return(
+				<div>
+					<div className="row">
+						<h4>Could not connect to the server.</h4><br/><br/>
+						
+					</div>
+					<div className="row">
+						<Link to="/">Go back to homepage</Link>
+					</div>
+				</div>
+				
 			)
 		} else {
 			return(
