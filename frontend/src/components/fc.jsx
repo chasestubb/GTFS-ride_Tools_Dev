@@ -10,6 +10,33 @@ const postURL = HOST + "/fc/params"
 const getURL = HOST + "/fc/getfile"
 const SERVER_CHECK_URL = "/server_check"
 
+function OutputCard(fileStatus){
+	switch (Number(fileStatus)){
+		case 1:
+			return(
+				<span>Your request has been sent to the server.</span>
+			)
+		case 2:
+			return(
+				<span>The server is has received the request and is now generating the files.</span>
+			)
+		case 3:
+			return(
+				<div>
+					Your feed is ready.
+				</div>
+			)
+		case -1:
+			return(
+				<span>Server unreachable.</span>
+			)
+		default:
+			return(
+				<span>Please fill out the form and click "Generate Feed".</span>
+			)
+	}
+}
+
 class FC extends React.Component{
 	constructor(props){
 		super(props)
@@ -28,6 +55,7 @@ class FC extends React.Component{
 				files: 6, // because we are generating all files
 			},
 			status: -1,
+			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
 		}
 		this.setNumber = this.setNumber.bind(this)
 		this.setDate = this.setDate.bind(this)
@@ -117,11 +145,21 @@ class FC extends React.Component{
 	}
 
 	submit(event){
+		if (this.state.params.start_date == null && this.state.params.end_date == null){
+			alert("Please fill out the start and end dates.")
+			return;
+		} else if (this.state.params.start_date == null){
+			alert("Start date is required.")
+			return;
+		} else if (this.state.params.end_date == null){
+			alert("End date is required.")
+			return;
+		}
 		var params = {
 			...this.state.params,
 			start_date: this.strDateToIntDate(this.state.params.start_date),
 			end_date: this.strDateToIntDate(this.state.params.end_date),
-			feed_date: params.start_date
+			feed_date: this.strDateToIntDate(this.state.params.start_date)
 		}
 		console.log(params)
 		//var postBody = JSON.stringify(params)
@@ -190,7 +228,7 @@ class FC extends React.Component{
 									<tr>
 										<td>Ridership data collection method</td>
 										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
-											<option value={0}>Manual</option>
+											<option value={0}>Manual Counting</option>
 											<option value={1}>Automated Passenger Counter</option>
 											<option value={2}>Automated Fare Collector</option>
 											<option value={3}>Model Estimation</option>
@@ -200,6 +238,20 @@ class FC extends React.Component{
 								</table>
 								<br/>
 								<button onClick={this.submit}>Generate Feed</button>
+							</div>
+						</div>
+					</div>
+
+					{/* Content Column */}
+					<div className="col-lg-6 mb-4">
+
+						{/* Project Card Example */}
+						<div className="card shadow mb-4">
+							<div className="card-header py-3">
+								<h6 className="m-0 font-weight-bold text-primary">Output</h6>
+							</div>
+							<div className="card-body">
+								<OutputCard fileStatus={this.state.fileStatus} />
 							</div>
 						</div>
 					</div>

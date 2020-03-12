@@ -56,476 +56,404 @@ var ride_feed_info = null
 
 var filename = ""
 
-//http.createServer(function (req, res) {
-    //console.log(req.url)
-    
-    // FILE UPLOAD (Receive all files from the frontend) ====================
-    //
-    //if (req.url == UPLOAD_URL) {
-    app.post(UPLOAD_URL, (req, res) => {
-        console.log(req.method + " to " + req.url)
-        var form = new formidable.IncomingForm();
-        form.parse(req, function (err, fields, files) {
-            var oldpath = files.file.path;
-            var newpath = './uploads/' + files.file.name;
-            var noext = (files.file.name).slice(0, -4); // removes the last 4 chars (".zip")
-            filename = noext;
-            fs.rename(oldpath, newpath, function (err) {
-                if (err) throw err;
+// --------------------------------------------------------------------------------
+// FILE UPLOAD (Receive all files from the frontend)
+// adapted from https://www.w3schools.com/nodejs/nodejs_uploadfiles.asp
+app.post(UPLOAD_URL, (req, res) => {
+    console.log(req.method + " to " + req.url)
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        var oldpath = files.file.path;
+        var newpath = './uploads/' + files.file.name;
+        var noext = (files.file.name).slice(0, -4); // removes the last 4 chars (".zip")
+        filename = noext;
+        fs.rename(oldpath, newpath, function (err) {
+            if (err) throw err;
 
-                // extract the files
-                extract(newpath, {dir: (process.cwd() + "/uploads/" + noext)}, function (err) {
-                    if (err){
-                        console.log("Error in extraction: " + err);
-                        res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
-                        res.write("The server could not extract " + noext + ".zip. Check if the file is corrupted or in the wrong format.\n\nDetails:\n" + err);
+            // extract the files
+            extract(newpath, {dir: (process.cwd() + "/uploads/" + noext)}, function (err) {
+                if (err){
+                    console.log("Error in extraction: " + err);
+                    res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
+                    res.write("The server could not extract " + noext + ".zip. Check if the file is corrupted or in the wrong format.\n\nDetails:\n" + err);
+                    res.end();
+                } else {
+                    console.log("\nFiles extracted to " + noext + "/");
+
+                    // check for required files
+                    if (fs.existsSync("uploads/" + noext + "/routes.txt") &&
+                    fs.existsSync("uploads/" + noext + "/agency.txt") && 
+                    fs.existsSync("uploads/" + noext + "/trips.txt") &&
+                    fs.existsSync("uploads/" + noext + "/stops.txt") && 
+                    fs.existsSync("uploads/" + noext + "/stop_times.txt") && 
+                    (fs.existsSync("uploads/" + noext + "/calendar.txt") || fs.existsSync("uploads/" + noext + "/calendar_dates.txt"))){
+                        
+                        // send response to client
+                        res.writeHead(200, {'Content-Type': 'text/html', "Access-Control-Allow-Origin": CORS});
+                        res.write(noext);
                         res.end();
-                    } else {
-                        console.log("\nFiles extracted to " + noext + "/");
 
-                        // check for required files
-                        if (fs.existsSync("uploads/" + noext + "/routes.txt") &&
-                        fs.existsSync("uploads/" + noext + "/agency.txt") && 
-                        fs.existsSync("uploads/" + noext + "/trips.txt") &&
-                        fs.existsSync("uploads/" + noext + "/stops.txt") && 
-                        fs.existsSync("uploads/" + noext + "/stop_times.txt") && 
-                        (fs.existsSync("uploads/" + noext + "/calendar.txt") || fs.existsSync("uploads/" + noext + "/calendar_dates.txt"))){
-                            
-                            // send response to client
-                            res.writeHead(200, {'Content-Type': 'text/html', "Access-Control-Allow-Origin": CORS});
-                            res.write(noext);
-                            res.end();
+                        // read files and parse them
 
-                            // read files and parse them
+                        // GTFS required files ====================
 
-                            // GTFS required files ====================
+                        // ROUTES // AGENCY // TRIPS // STOPS // STOP TIMES // 
+                        routes = csv_parse(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true}) 
+                        agencies = csv_parse(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
+                        trips = csv_parse(fs.readFileSync("uploads/" + noext + "/trips.txt"), {columns: true})
+                        stops = csv_parse(fs.readFileSync("uploads/" + noext + "/stops.txt"), {columns: true})
+                        stop_times = csv_parse(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
 
-                            // ROUTES // AGENCY // TRIPS // STOPS // STOP TIMES // 
-                            routes = csv_parse(fs.readFileSync("uploads/" + noext + "/routes.txt"), {columns: true}) 
-                            agencies = csv_parse(fs.readFileSync("uploads/" + noext + "/agency.txt"), {columns: true})
-                            trips = csv_parse(fs.readFileSync("uploads/" + noext + "/trips.txt"), {columns: true})
-                            stops = csv_parse(fs.readFileSync("uploads/" + noext + "/stops.txt"), {columns: true})
+                        // GTFS conditionally required files ====================
+
+                        // CALENDAR //
+                        if (fs.existsSync("uploads/" + noext + "/calendar.txt")){
+                            calendar = csv_parse(fs.readFileSync("uploads/" + noext + "/calendar.txt"), {columns: true})
+                        } else {
+                            calendar = null
+                        }
+
+                        // CALENDAR DATES //
+                        if (fs.existsSync("uploads/" + noext + "/calendar_dates.txt")){
+                            calendar_dates = csv_parse(fs.readFileSync("uploads/" + noext + "/calendar_dates.txt"), {columns: true})
+                        } else {
+                            calendar_dates = null
+                        }
+
+                        // GTFS optional files ====================
+
+                        // FREQUENCIES //
+                        if (fs.existsSync("uploads/" + noext + "/frequencies.txt")){
+                            frequencies = csv_parse(fs.readFileSync("uploads/" + noext + "/frequencies.txt"), {columns: true})
+                        } else {
+                            frequencies = null
+                        }
+
+                        // FEED INFO //
+                        if (fs.existsSync("uploads/" + noext + "/feed_info.txt")){
+                            feed_info = csv_parse(fs.readFileSync("uploads/" + noext + "/feed_info.txt"), {columns: true})
+                        } else {
+                            feed_info = null
+                        }
+
+                        // STOP TIMES //
+                        if (fs.existsSync("uploads/" + noext + "/stop_times.txt")){
                             stop_times = csv_parse(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
+                        } else {
+                            stop_times = null
+                        }
 
-                            // GTFS conditionally required files ====================
+                        // GTFS-ride files =================
 
-                            // CALENDAR //
-                            if (fs.existsSync("uploads/" + noext + "/calendar.txt")){
-                                calendar = csv_parse(fs.readFileSync("uploads/" + noext + "/calendar.txt"), {columns: true})
+                        // RIDE FEED INFO //
+                        if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
+                            gtfs_ride_feed = true;
+
+                            // GTFS-ride optional files ==============
+
+                            // BOARD ALIGHT //
+                            if (fs.existsSync("uploads/" + noext + "/board_alight.txt")){
+                                board_alight = csv_parse(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
                             } else {
-                                calendar = null
+                                board_alight = null
                             }
 
-                            // CALENDAR DATES //
-                            if (fs.existsSync("uploads/" + noext + "/calendar_dates.txt")){
-                                calendar_dates = csv_parse(fs.readFileSync("uploads/" + noext + "/calendar_dates.txt"), {columns: true})
+                            // TRIP CAPACITY //
+                            if (fs.existsSync("uploads/" + noext + "/trip_capacity.txt")){
+                                trip_capacity = csv_parse(fs.readFileSync("uploads/" + noext + "/trip_capacity.txt"), {columns: true})
                             } else {
-                                calendar_dates = null
+                                trip_capacity = null
                             }
 
-                            // GTFS optional files ====================
-
-                            // FREQUENCIES //
-                            if (fs.existsSync("uploads/" + noext + "/frequencies.txt")){
-                                frequencies = csv_parse(fs.readFileSync("uploads/" + noext + "/frequencies.txt"), {columns: true})
+                            // RIDER TRIP //
+                            if (fs.existsSync("uploads/" + noext + "/rider_trip.txt")){
+                                rider_trip = csv_parse(fs.readFileSync("uploads/" + noext + "/rider_trip.txt"), {columns: true})
                             } else {
-                                frequencies = null
+                                rider_trip = null
                             }
 
-                            // FEED INFO //
-                            if (fs.existsSync("uploads/" + noext + "/feed_info.txt")){
-                                feed_info = csv_parse(fs.readFileSync("uploads/" + noext + "/feed_info.txt"), {columns: true})
+                            // RIDERSHIP //
+                            if (fs.existsSync("uploads/" + noext + "/ridership.txt")){
+                                ridership = csv_parse(fs.readFileSync("uploads/" + noext + "/ridership.txt"), {columns: true})
                             } else {
-                                feed_info = null
+                                ridership = null
                             }
-
-                            // STOP TIMES //
-                            if (fs.existsSync("uploads/" + noext + "/stop_times.txt")){
-                                stop_times = csv_parse(fs.readFileSync("uploads/" + noext + "/stop_times.txt"), {columns: true})
-                            } else {
-                                stop_times = null
-                            }
-
-                            // GTFS-ride files =================
 
                             // RIDE FEED INFO //
                             if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
-                                gtfs_ride_feed = true;
-
-                                // GTFS-ride optional files ==============
-
-                                // BOARD ALIGHT //
-                                if (fs.existsSync("uploads/" + noext + "/board_alight.txt")){
-                                    board_alight = csv_parse(fs.readFileSync("uploads/" + noext + "/board_alight.txt"), {columns: true})
-                                } else {
-                                    board_alight = null
-                                }
-
-                                // TRIP CAPACITY //
-                                if (fs.existsSync("uploads/" + noext + "/trip_capacity.txt")){
-                                    trip_capacity = csv_parse(fs.readFileSync("uploads/" + noext + "/trip_capacity.txt"), {columns: true})
-                                } else {
-                                    trip_capacity = null
-                                }
-
-                                // RIDER TRIP //
-                                if (fs.existsSync("uploads/" + noext + "/rider_trip.txt")){
-                                    rider_trip = csv_parse(fs.readFileSync("uploads/" + noext + "/rider_trip.txt"), {columns: true})
-                                } else {
-                                    rider_trip = null
-                                }
-
-                                // RIDERSHIP //
-                                if (fs.existsSync("uploads/" + noext + "/ridership.txt")){
-                                    ridership = csv_parse(fs.readFileSync("uploads/" + noext + "/ridership.txt"), {columns: true})
-                                } else {
-                                    ridership = null
-                                }
-
-                                // RIDE FEED INFO //
-                                if (fs.existsSync("uploads/" + noext + "/ride_feed_info.txt")){
-                                    ride_feed_info = csv_parse(fs.readFileSync("uploads/" + noext + "/ride_feed_info.txt"), {columns: true})
-                                } else {
-                                    ride_feed_info = null
-                                }
+                                ride_feed_info = csv_parse(fs.readFileSync("uploads/" + noext + "/ride_feed_info.txt"), {columns: true})
                             } else {
-                                gtfs_ride_feed = false
+                                ride_feed_info = null
                             }
-
-                            // console log feed type
-                            if (gtfs_ride_feed){
-                                console.log("GTFS-ride feed parsed: " + noext + ".zip")
-                            } else {
-                                console.log("GTFS feed parsed: " + noext + ".zip")
-                            }
-                         
-
-                        // TEST JS OBJECT CREATION //////////////////////////////////////////////
-                        /*
-                        var num_agency = agencies.length;
-                        var num_routes = routes.length;
-                        console.log("This feed started on " + feed_info[0].feed_start_date + " and ended on " + feed_info[0].feed_end_date);
-                        console.log("Ridership feed began on " + ride_feed_info[0].ride_start_date + " and ended on " + ride_feed_info[0].ride_end_date);
-                        console.log("This feed has " + num_agency + " agencies");
-                        console.log("Included agencies are:");
-                    
-                        for (var i = 0; i < num_agency; i++){
-                            console.log(agencies[i].agency_name + "\n");
+                        } else {
+                            gtfs_ride_feed = false
                         }
-                    
-                        for (var j = 0; j < num_agency; j++){
-                            num_routes = Info.routesPerAgency(agencies[j], routes);
-                            num_stops = Info.stopsPerAgency(agencies[j], routes, trips, stop_times)
-                            var num_ag_riders = Info.countAgencyRiders(agencies[j], board_alight, trips, routes);
-                            var avg_ag_rider = num_ag_riders / 7;
-                            console.log("Agency " + agencies[j].agency_name + " has "+ num_routes + " routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + " boardings and " + avg_ag_rider + " daily riders");
-                            for ( var i = 0; i < num_routes; i++){
-                                if (((agencies[j].agency_id).localeCompare(routes[i].agency_id)) == 0){
-                                    console.log("Route " + routes[i].route_long_name + " within agency");
-                                    var routeRiders = Info.countRouteRiders(routes[j], board_alight, trips);
-                                    console.log("Rider count for this route is " + routeRiders);
-                                    for ( var k = 0; k < trips.length; k++){
-                                        if (((trips[k].route_id).localeCompare(routes[i]).route_id) == 0){
-                                            console.log("Trip within agency " + trips[i].trip_id);
-                                            var tripRiders = Info.countTripRiders(board_alight, trips[k]);
-                                            console.log("Rider count for this trip is " + tripRiders);
-                                            for (var j = 0; j < stop_times.length; j++){
-                                                if (((stop_times[j].trip_id).localeCompare(trips[k].trip_id)) == 0){
-                                                    console.log("Stop within agency " + stop_times[j].stop_id);
-                                                    var stopRiders = Info.countStopRiders(board_alight, stops[j]);
-                                                    console.log("Rider count for this stop: " + stopRiders);
-                                                }
+
+                        // console log feed type
+                        if (gtfs_ride_feed){
+                            console.log("GTFS-ride feed parsed: " + noext + ".zip")
+                        } else {
+                            console.log("GTFS feed parsed: " + noext + ".zip")
+                        }
+                        
+
+                    // TEST JS OBJECT CREATION //////////////////////////////////////////////
+                    /*
+                    var num_agency = agencies.length;
+                    var num_routes = routes.length;
+                    console.log("This feed started on " + feed_info[0].feed_start_date + " and ended on " + feed_info[0].feed_end_date);
+                    console.log("Ridership feed began on " + ride_feed_info[0].ride_start_date + " and ended on " + ride_feed_info[0].ride_end_date);
+                    console.log("This feed has " + num_agency + " agencies");
+                    console.log("Included agencies are:");
+                
+                    for (var i = 0; i < num_agency; i++){
+                        console.log(agencies[i].agency_name + "\n");
+                    }
+                
+                    for (var j = 0; j < num_agency; j++){
+                        num_routes = Info.routesPerAgency(agencies[j], routes);
+                        num_stops = Info.stopsPerAgency(agencies[j], routes, trips, stop_times)
+                        var num_ag_riders = Info.countAgencyRiders(agencies[j], board_alight, trips, routes);
+                        var avg_ag_rider = num_ag_riders / 7;
+                        console.log("Agency " + agencies[j].agency_name + " has "+ num_routes + " routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + " boardings and " + avg_ag_rider + " daily riders");
+                        for ( var i = 0; i < num_routes; i++){
+                            if (((agencies[j].agency_id).localeCompare(routes[i].agency_id)) == 0){
+                                console.log("Route " + routes[i].route_long_name + " within agency");
+                                var routeRiders = Info.countRouteRiders(routes[j], board_alight, trips);
+                                console.log("Rider count for this route is " + routeRiders);
+                                for ( var k = 0; k < trips.length; k++){
+                                    if (((trips[k].route_id).localeCompare(routes[i]).route_id) == 0){
+                                        console.log("Trip within agency " + trips[i].trip_id);
+                                        var tripRiders = Info.countTripRiders(board_alight, trips[k]);
+                                        console.log("Rider count for this trip is " + tripRiders);
+                                        for (var j = 0; j < stop_times.length; j++){
+                                            if (((stop_times[j].trip_id).localeCompare(trips[k].trip_id)) == 0){
+                                                console.log("Stop within agency " + stop_times[j].stop_id);
+                                                var stopRiders = Info.countStopRiders(board_alight, stops[j]);
+                                                console.log("Rider count for this stop: " + stopRiders);
                                             }
                                         }
                                     }
                                 }
-                    
                             }
+                
                         }
-                        for (var k = 0; k < num_routes; k++){
-                            var days = Info.serviceDays(routes[k], trips, calendar);
-                            var route_riders = Info.countRouteRiders(routes[k], board_alight, trips);
-                            console.log("Route " + routes[k].route_long_name + "has active trip service on " + days);
-                            var starts = Info.serviceStart(routes[k], trips, frequencies);
-                            var end = Info.serviceEnd(routes[k], trips, frequencies);
-                            console.log("Route " + routes[k].route_long_name + "has service hours starting at" + starts + "and ending at " + end);
-                            console.log("Route" + routes[k].route_long_name + "has " + route_riders + "riders");
-                    
+                    }
+                    for (var k = 0; k < num_routes; k++){
+                        var days = Info.serviceDays(routes[k], trips, calendar);
+                        var route_riders = Info.countRouteRiders(routes[k], board_alight, trips);
+                        console.log("Route " + routes[k].route_long_name + "has active trip service on " + days);
+                        var starts = Info.serviceStart(routes[k], trips, frequencies);
+                        var end = Info.serviceEnd(routes[k], trips, frequencies);
+                        console.log("Route " + routes[k].route_long_name + "has service hours starting at" + starts + "and ending at " + end);
+                        console.log("Route" + routes[k].route_long_name + "has " + route_riders + "riders");
+                
+                    }
+                    for (var x = 0; x < trips.length; x++){
+                        var num_boardings = Info.countTripRiders(board_alight, trips[x]);
+                        var has_ridership = Info.findTripRecordUse(board_alight, trips[x]);
+                        //var exceptions = Info.serviceException(trips[x], calendar_dates);
+                        var orphan = Info.orphanTrip(trips[x], routes);
+                        var capacities = Info.vehicleCapacity(trips[x], trip_capacity);
+                        if ( orphan == -1){
+                            console.log("Trip " + trips[x].trip_id + "has no routes!");
                         }
-                        for (var x = 0; x < trips.length; x++){
-                            var num_boardings = Info.countTripRiders(board_alight, trips[x]);
-                            var has_ridership = Info.findTripRecordUse(board_alight, trips[x]);
-                            //var exceptions = Info.serviceException(trips[x], calendar_dates);
-                            var orphan = Info.orphanTrip(trips[x], routes);
-                            var capacities = Info.vehicleCapacity(trips[x], trip_capacity);
-                            if ( orphan == -1){
-                                console.log("Trip " + trips[x].trip_id + "has no routes!");
-                            }
-                            if (has_ridership == 0)
-                                console.log("Trip " + trips[x].trip_id + " has ridership data\n");
-                            else if (has_ridership == 1)
-                                console.log("Trip " + trips[x].trip_id + " does not have ridership data\n");
-                    
-                            console.log("Trip " + trips[x].trip_id + "has " + num_boardings + " boardings");
-                            //DEBUG console.log("Trip " + trips[x] + "has execeptions: " + exceptions);
-                            console.log("The vehicles on this trip have the following capacities: " + capacities);
-                            avg_rider = num_boardings / 7;
-                            console.log("The average number of riders per day is " + avg_rider);
-                    
-                            
-                        }
-                    
-                        var avg_trip = trips.length / 7;
-                    
-                        console.log("The average amount of trips per day is " + avg_trip);
-                    
-                        for (var y = 0; y < stops.length; y++){
-                            var has_ridership = Info.findStopRecordUse(board_alight, stops[y]);
-                            var orphan = Info.orphanStop(stops[y], trips);
-                            if (orphan == 1){
-                                console.log("Stop " + stops[y].stop_id + "is not within a trip!");
-                            }
-                            if (has_ridership == 0)
-                                console.log("Stop " + stops[y].stop_id + " has ridership data\n");
-                            else if (has_ridership == 1)
-                                console.log("Trip " + stops[y].stop_id + " does not have ridership data\n");
-                    
-                            var num_boardings = Info.countStopRiders(board_alight, stops[y]);
-                            console.log("Stop " + stops[y].stop_id + "has " + num_boardings + "boardings");
-                            var avg_stop_rider = num_boardings / 7;
-                            console.log("Average number of riders on this stop per day" + avg_stop_rider);
-                        }
-                        */
-                        // END TEST //////////////////////////////////////////////
-
-                        } else { // if the required files do not exist
-                            res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
-                            res.write(noext + ".zip is NOT a valid GTFS feed");
-                            res.end();
-                            console.log(noext + ".zip is NOT a valid GTFS feed");
-                        }
-
+                        if (has_ridership == 0)
+                            console.log("Trip " + trips[x].trip_id + " has ridership data\n");
+                        else if (has_ridership == 1)
+                            console.log("Trip " + trips[x].trip_id + " does not have ridership data\n");
+                
+                        console.log("Trip " + trips[x].trip_id + "has " + num_boardings + " boardings");
+                        //DEBUG console.log("Trip " + trips[x] + "has execeptions: " + exceptions);
+                        console.log("The vehicles on this trip have the following capacities: " + capacities);
+                        avg_rider = num_boardings / 7;
+                        console.log("The average number of riders per day is " + avg_rider);
                 
                         
                     }
-                    //console.log(agency.length)
-                    //console.log(agency[0].agency_name);
-                    //console.log("Agency: " + agency[0].agency_name)
+                
+                    var avg_trip = trips.length / 7;
+                
+                    console.log("The average amount of trips per day is " + avg_trip);
+                
+                    for (var y = 0; y < stops.length; y++){
+                        var has_ridership = Info.findStopRecordUse(board_alight, stops[y]);
+                        var orphan = Info.orphanStop(stops[y], trips);
+                        if (orphan == 1){
+                            console.log("Stop " + stops[y].stop_id + "is not within a trip!");
+                        }
+                        if (has_ridership == 0)
+                            console.log("Stop " + stops[y].stop_id + " has ridership data\n");
+                        else if (has_ridership == 1)
+                            console.log("Trip " + stops[y].stop_id + " does not have ridership data\n");
+                
+                        var num_boardings = Info.countStopRiders(board_alight, stops[y]);
+                        console.log("Stop " + stops[y].stop_id + "has " + num_boardings + "boardings");
+                        var avg_stop_rider = num_boardings / 7;
+                        console.log("Average number of riders on this stop per day" + avg_stop_rider);
+                    }
+                    */
+                    // END TEST //////////////////////////////////////////////
+
+                    } else { // if the required files do not exist
+                        res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
+                        res.write(noext + ".zip is NOT a valid GTFS feed");
+                        res.end();
+                        console.log(noext + ".zip is NOT a valid GTFS feed");
+                    }
+
+            
                     
-                });
+                }
+                //console.log(agency.length)
+                //console.log(agency[0].agency_name);
+                //console.log("Agency: " + agency[0].agency_name)
+                
             });
         });
+    });
+})
 
-    // --------------------------------------------------------------------------------
-    // FEED INFO
-    }) //else if (req.url.startsWith(INFO_URL)){
-    app.get(INFO_URL, (req, res) => {
-        // general feed info
-        console.log("FEED INFO")
-        if (agencies && routes && trips && stops && stop_times){
-            // initialize object
-            var feed_info_ = {
-                filename: filename,
-                is_gtfs_ride: gtfs_ride_feed,
-                agencies: [],
-                stops: [],
-                num_trips: trips.length,
-                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
-            }
-
-            // parse agencies' info
-            for (x = 0; x < agencies.length; x++){
-                var agency = {
-                    index: x,
-                    id: agencies[x].agency_id,
-                    name: agencies[x].agency_name,
-                    routes: Info.routesPerAgency(agencies[x], routes),
-                    //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
-                    ridership: 0,
-                };
-                if (gtfs_ride_feed){
-                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
-                }
-                feed_info_.agencies.push(agency);
-            }
-
-            for (x = 0; x < stops.length; x++){
-                var stop = {
-                    index: x,
-                    id: stops[x].stop_id,
-                    name: stops[x].stop_name,
-                    code: stops[x].stop_code,
-                    desc: stops[x].stop_desc,
-                    pos: [stops[x].stop_lat, stops[x].stop_lon],
-                    zone: (stops[x].zone_id),
-                    ridership: 0,
-                }
-                if (gtfs_ride_feed){
-                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
-                }
-                feed_info_.stops.push(stop)
-            }
-            
-
-            // send object to front-end
-            res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
-            res.write(JSON.stringify(feed_info_));
-            res.end();
-            console.log("Feed info sent to the client")
-        } else { // if the user has not uploaded any valid feed
-            res.writeHead(400, {"Access-Control-Allow-Origin": CORS});
-            res.write("No file uploaded. Please upload one from the home page.");
-            res.end();
-            console.log("Client tried to access Feed Info without providing a valid feed.")
+// --------------------------------------------------------------------------------
+// FEED INFO
+app.get(INFO_URL, (req, res) => {
+    // general feed info
+    console.log("FEED INFO")
+    if (agencies && routes && trips && stops && stop_times){
+        // initialize object
+        var feed_info_ = {
+            filename: filename,
+            is_gtfs_ride: gtfs_ride_feed,
+            agencies: [],
+            stops: [],
+            num_trips: trips.length,
+            date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
         }
-    })
 
-    // AGENCY INFO
-    app.get(INFO_AGENCY_URL, (req, res) => {
-        console.log("FEED INFO -> AGENCY INFO")
-        if (agencies && routes && trips && stops && stop_times){
-            var index = req.params.index
-            console.log(index)
-            //var index = req.headers.index;
-            //console.log(req);
-            var agency = agencies[index]
-            var agency_info = {
-                id: agency.agency_id,
-                name: agency.agency_name,
-                url: agency.agency_url,
-                fare_url: agency.agency_fare_url,
-                phone: agency.agency_phone,
-                email: agency.agency_email,
-                hours: {
-                    m: "",
-                    t: "",
-                    w: "",
-                    r: "",
-                    f: "",
-                    s: "",
-                    u: ""
-                },
-                routes: [],
-                //stops: [],
-                is_gtfs_ride: gtfs_ride_feed,
+        // parse agencies' info
+        for (x = 0; x < agencies.length; x++){
+            var agency = {
+                index: x,
+                id: agencies[x].agency_id,
+                name: agencies[x].agency_name,
+                routes: Info.routesPerAgency(agencies[x], routes),
+                //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
                 ridership: 0,
-                trips: Info.countTripsPerAgency(agency, routes, trips),
-            }
-
-            // get the agency's routes
-            for (var x = 0; x < routes.length; x++){
-                var route = routes[x];
-                if (route.agency_id === agency.agency_id){
-                    var route_info = {
-                        short_name: route.route_short_name,
-                        long_name: route.route_long_name,
-                        desc: route.route_desc,
-                        type: route.route_type,
-                        ridership: 0,
-                        trips: (Info.tripsPerRoute(route, trips)).length,
-                    }
-                    if (gtfs_ride_feed){
-                        route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
-                    }
-                    agency_info.routes.push(route_info);
-                }
-            }
-
-            // get the agency's stops
-            /*
-            Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
-                var stop_info = {
-                    id: stop.stop_id,
-                    name: stop.stop_name,
-                    code: stop.stop_code,
-                    pos: [stop.stop_lat, stop.stop_lon],
-                    zone: stop.zone_id,
-                    ridership: 0,
-                }
-                if (gtfs_ride_feed){
-                    stop_info.ridership = Info.countStopRiders(board_alight, stop)
-                }
-                agency_info.stops.push(stop_info)
-            })
-            */
-
-            //console.log(agency_info.stops)
-
-            // send feed type
-            agency_info.is_gtfs_ride = gtfs_ride_feed
-
-            // GTFS-ride specific fields
+            };
             if (gtfs_ride_feed){
-                agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
+                agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
             }
-
-            //console.log("Index: " + index);
-            //console.log(agency_info);
-
-            res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
-            res.write(JSON.stringify(agency_info));
-            res.end();
-        } else {
-            res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});
-            res.write("No file uploaded. Please upload one from the home page.");
-            res.end();
-            console.log("Client tried to access Feed Info without providing a valid feed.")
+            feed_info_.agencies.push(agency);
         }
-    })
+
+        for (x = 0; x < stops.length; x++){
+            var stop = {
+                index: x,
+                id: stops[x].stop_id,
+                name: stops[x].stop_name,
+                code: stops[x].stop_code,
+                desc: stops[x].stop_desc,
+                pos: [stops[x].stop_lat, stops[x].stop_lon],
+                zone: (stops[x].zone_id),
+                ridership: 0,
+            }
+            if (gtfs_ride_feed){
+                stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+            }
+            feed_info_.stops.push(stop)
+        }
         
-        
-        
-    // FEED INFO -> AGENCY INFO
-    /*} else if (req.url == INFO_AGENCY_URL){
-        console.log("FEED INFO -> AGENCY INFO")
-        //var q = req.url.split("/");
-        //var index = q[q.length - 1]
-        var index = req.headers.index;
-        console.log(req);
+
+        // send object to front-end
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
+        res.write(JSON.stringify(feed_info_));
+        res.end();
+        console.log("Feed info sent to the client")
+    } else { // if the user has not uploaded any valid feed
+        res.writeHead(400, {"Access-Control-Allow-Origin": CORS});
+        res.write("No file uploaded. Please upload one from the home page.");
+        res.end();
+        console.log("Client tried to access Feed Info without providing a valid feed.")
+    }
+})
+
+// AGENCY INFO
+app.get(INFO_AGENCY_URL, (req, res) => {
+    console.log("FEED INFO -> AGENCY INFO")
+    if (agencies && routes && trips && stops && stop_times){
+        var index = req.params.index
+        console.log(index)
+        //var index = req.headers.index;
+        //console.log(req);
         var agency = agencies[index]
         var agency_info = {
+            id: agency.agency_id,
             name: agency.agency_name,
             url: agency.agency_url,
             fare_url: agency.agency_fare_url,
             phone: agency.agency_phone,
             email: agency.agency_email,
             hours: {
-				m: "",
-				t: "",
-				w: "",
-				r: "",
-				f: "",
-				s: "",
-				u: ""
-			},
-            routes: []
+                m: "",
+                t: "",
+                w: "",
+                r: "",
+                f: "",
+                s: "",
+                u: ""
+            },
+            routes: [],
+            //stops: [],
+            is_gtfs_ride: gtfs_ride_feed,
+            ridership: 0,
+            trips: Info.countTripsPerAgency(agency, routes, trips),
         }
 
         // get the agency's routes
-        //var agency_routes = []
-        routes.foreach(route => { // JS equivalent of Python's "for route in routes"
-            if (route.agency_id === agency.agency_id){
-                route_info = {
-                    short_name: route.route_short_name,
-                    long_name: route.route_long_name,
-                    desc: route.route_desc,
-                    type: route.route_type
-                }
-                agency_info.routes.push(route_info);
-            }
-        })
-
         for (var x = 0; x < routes.length; x++){
             var route = routes[x];
             if (route.agency_id === agency.agency_id){
-                route_info = {
+                var route_info = {
                     short_name: route.route_short_name,
                     long_name: route.route_long_name,
                     desc: route.route_desc,
-                    type: route.route_type
+                    type: route.route_type,
+                    ridership: 0,
+                    trips: (Info.tripsPerRoute(route, trips)).length,
+                }
+                if (gtfs_ride_feed){
+                    route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
                 }
                 agency_info.routes.push(route_info);
             }
+        }
+
+        // get the agency's stops
+        /*
+        Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
+            var stop_info = {
+                id: stop.stop_id,
+                name: stop.stop_name,
+                code: stop.stop_code,
+                pos: [stop.stop_lat, stop.stop_lon],
+                zone: stop.zone_id,
+                ridership: 0,
+            }
+            if (gtfs_ride_feed){
+                stop_info.ridership = Info.countStopRiders(board_alight, stop)
+            }
+            agency_info.stops.push(stop_info)
+        })
+        */
+
+        //console.log(agency_info.stops)
+
+        // send feed type
+        agency_info.is_gtfs_ride = gtfs_ride_feed
+
+        // GTFS-ride specific fields
+        if (gtfs_ride_feed){
+            agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
         }
 
         //console.log("Index: " + index);
@@ -533,58 +461,149 @@ var filename = ""
 
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
         res.write(JSON.stringify(agency_info));
-        res.end();*/
+        res.end();
+    } else {
+        res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+        res.write("No file uploaded. Please upload one from the home page.");
+        res.end();
+        console.log("Client tried to access Feed Info without providing a valid feed.")
+    }
+})
     
-    // --------------------------------------------------------------------------------
-    // FEED CREATION - PARAMETERS
-    //} else if (req.url.startsWith(FC_POST_URL)){
-    app.post(FC_POST_URL, (req, res) => {
-        console.log("FC PARAMS")
-        console.log(req.url)
-        //console.log(req)
-        //var parsedURL = Url.parse(req.url)
-        //console.log(parsedURL)
-        console.log(req.body)
-        //var {params} = JSON.parse(req.body)
-        //console.log(params)
-        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
-        res.end()
+    
+    
+// FEED INFO -> AGENCY INFO
+/*} else if (req.url == INFO_AGENCY_URL){
+    console.log("FEED INFO -> AGENCY INFO")
+    //var q = req.url.split("/");
+    //var index = q[q.length - 1]
+    var index = req.headers.index;
+    console.log(req);
+    var agency = agencies[index]
+    var agency_info = {
+        name: agency.agency_name,
+        url: agency.agency_url,
+        fare_url: agency.agency_fare_url,
+        phone: agency.agency_phone,
+        email: agency.agency_email,
+        hours: {
+            m: "",
+            t: "",
+            w: "",
+            r: "",
+            f: "",
+            s: "",
+            u: ""
+        },
+        routes: []
+    }
+
+    // get the agency's routes
+    //var agency_routes = []
+    routes.foreach(route => { // JS equivalent of Python's "for route in routes"
+        if (route.agency_id === agency.agency_id){
+            route_info = {
+                short_name: route.route_short_name,
+                long_name: route.route_long_name,
+                desc: route.route_desc,
+                type: route.route_type
+            }
+            agency_info.routes.push(route_info);
+        }
     })
 
-    // --------------------------------------------------------------------------------
-    // CLIENT CHECKS IF SERVER IS ALIVE
-    //} else if (req.url == SERVER_CHECK_URL){
-    app.get(SERVER_CHECK_URL, (req, res) => {
-        console.log("Server is alive.")
-        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
-        res.write("TRUE")
-        res.end()
-    })
-    
-    app.options("*", (req, res) => {
-        console.log("OPTIONS")
-        res.writeHead(200, {
-            "Access-Control-Allow-Origin": CORS,
-            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        });
-        //res.write("TRUE")
-        res.end()
-    })
+    for (var x = 0; x < routes.length; x++){
+        var route = routes[x];
+        if (route.agency_id === agency.agency_id){
+            route_info = {
+                short_name: route.route_short_name,
+                long_name: route.route_long_name,
+                desc: route.route_desc,
+                type: route.route_type
+            }
+            agency_info.routes.push(route_info);
+        }
+    }
 
-    //} else {
-    app.all("*", (req, res) => {
-        console.log("Client requested something else")
-        console.log(req.method + " to " + req.url)
-        res.writeHead(404, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
-        return res.end();
-    })
+    //console.log("Index: " + index);
+    //console.log(agency_info);
+
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
+    res.write(JSON.stringify(agency_info));
+    res.end();*/
+
+
+/* HOW FEED CREATION WORKS --------------------------------------------------------
+1.  User fills out web form
+2.  User clicks the "Generate Feed" button
+3.  Client sends a POST request that sends the parameters
+4.  Server handles POST request and stores the params
+5.  Server calls the Feed Creation function
+6.  Server sends response that says the feed is being generated
+7.  Client receives the response
+8.  Client sends GET response to request the feed
+9.  Client waits for the feed to be generated
+-- OPTION 1 (preferred):
+10. Server sends file to the client
+11. Client downloads the file
+-- OPTION 2 (if potion 1 does not work):
+10. Server sends file link to the client
+11. Client shows the link on the UI
+12. User clicks on the link
+13. Server sends file to the client
+14. Client downloads the file
+-------------------------------------------------------------------------------- */
+
+// --------------------------------------------------------------------------------
+// FEED CREATION - PARAMETERS
+app.post(FC_POST_URL, (req, res) => {
+    console.log("FC PARAMS")
+    console.log(req.url)
+    //console.log(req)
+    //var parsedURL = Url.parse(req.url)
+    //console.log(parsedURL)
+    var params = req.body
+    console.log(params)
+    //var {params} = JSON.parse(req.body)
+    //console.log(params)
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+    res.end()
+    //console.log("DOES IT GO HERE?") // it does go here
+    Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
+})
+
+// --------------------------------------------------------------------------------
+// CLIENT CHECKS IF SERVER IS ALIVE
+app.get(SERVER_CHECK_URL, (req, res) => {
+    console.log("Server is alive.")
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+    res.write("TRUE")
+    res.end()
+})
+
+// --------------------------------------------------------------------------------
+// HANDLE CORS REQUESTS
+app.options("*", (req, res) => {
+    console.log("OPTIONS: CORS Request")
+    res.writeHead(200, {
+        "Access-Control-Allow-Origin": CORS,
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+    });
+    //res.write("TRUE")
+    res.end()
+})
+
+// --------------------------------------------------------------------------------
+// EVERYTHING ELSE
+app.all("*", (req, res) => {
+    console.log("Client requested something else")
+    console.log(req.method + " to " + req.url)
+    res.writeHead(404, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+    return res.end();
+})
         
-    //}
-//}).listen(PORT);
-//console.log("Listening on port " + PORT);
+
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
 console.log("Files will be extracted to:")
 console.log(process.cwd() + "/uploads/")
-
-// adapted from https://www.w3schools.com/nodejs/nodejs_uploadfiles.asp
