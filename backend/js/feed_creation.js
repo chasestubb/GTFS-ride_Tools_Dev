@@ -31,7 +31,6 @@ var randomLastName = require('random-lastname');
 var csvStringify = require('csv-stringify');
 var csv_stringify = csvStringify({delimiter: ','});
 var fs = require('fs');
-//const isSea = require('is-sea'); - having some issues. This checks whether a lat/lon is on land or in the sea
 // ex. call => randomLastName();
 
 module.exports = {
@@ -189,6 +188,9 @@ module.exports = {
     //     though sequences of stops will not occur in nice paths/make sense
     //   NOTE :: we will need to be able to handle water vs land and we can use
     //     this API -- https://github.com/simonepri/is-sea  
+    //     NOTE :: this was later abandoned due to too many issues with the dependency.
+    //       not only were its dependencies far out of date, we also had an issue
+    //       with using it.   
     //          
     //   User Input: 
     //     number of stops 
@@ -223,13 +225,6 @@ module.exports = {
             randLat = (Math.random() * 180) - 90; // between -90 and 90
             randLon = (Math.random() * 360) - 180; // between -180 and 180
 
-            // check if it is on land or in the sea - deleted due to issues
-            // var check = isSea.get(randLat, randLon);
-            // while(check){
-            //     randLat = Math.floor(Math.random() * 90) - 90;
-            //     randLon = Math.floor(Math.random() * 180) - 180;
-            //     check =isSea.get(randLat, randLon);
-            // }
             temp_stop.stop_lat = randLat;
             temp_stop.stop_lon = randLon;
             stops.push(temp_stop);
@@ -586,7 +581,7 @@ module.exports = {
         var ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
         var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
-        
+
         // CSV STRINGIFY =========================
         csvStringify(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]},
         function(err, out){
