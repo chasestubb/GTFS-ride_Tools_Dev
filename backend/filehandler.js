@@ -55,6 +55,14 @@ var ridership = null
 var ride_feed_info = null
 
 var filename = ""
+var fc_promise = null;
+
+async function feed_creation(params){
+    console.log("Generating feed with params:")
+    console.log(params)
+    Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.num_riders, 6)
+    console.log("Feed successfully created")
+}
 
 // --------------------------------------------------------------------------------
 // FILE UPLOAD (Receive all files from the frontend)
@@ -562,14 +570,21 @@ app.post(FC_POST_URL, (req, res) => {
     //console.log(req)
     //var parsedURL = Url.parse(req.url)
     //console.log(parsedURL)
-    var params = req.body
-    console.log(params)
-    //var {params} = JSON.parse(req.body)
-    //console.log(params)
+    //console.log(req.body)
     res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
     res.end()
     //console.log("DOES IT GO HERE?") // it does go here
-    Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
+    //Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
+    fc_promise = feed_creation(req.body)
+})
+
+// --------------------------------------------------------------------------------
+// FEED CREATION - OUTPUT
+app.get(FC_GET_URL, (req, res) => {
+    console.log("FC GET")
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+    res.write("TRUE")
+    res.end()
 })
 
 // --------------------------------------------------------------------------------
