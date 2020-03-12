@@ -114,7 +114,7 @@ class Info extends React.Component{
 
 					{/* Content Row */}
 					<div className="row">
-						<h4>Click on an agency's card for more info.</h4><br/><br/>
+						<h4>Click on an agency's name for more info.</h4><br/><br/>
 					</div>
 			
 					<div className="row">
@@ -277,7 +277,8 @@ class Info extends React.Component{
 									</div>
 									<div className="card-body">
 										Code: {stop.code ? <strong>{stop.code}</strong> : <em>no data</em>} <br/>
-										Location: {stop.pos ? <strong>{stop.pos[0]}, {stop.pos[1]}</strong> : <em>no data</em>} <br/>
+										Location: {stop.pos ? <a href={"http://www.google.com/maps/place/" + stop.pos[0] + "," + stop.pos[1]} target="_blank"><strong>{stop.pos[0]}, {stop.pos[1]}</strong></a> : <em>no data</em>} <br/>
+										{/*                      ^ opens the coordinates on Google Maps                                       ^ opens it on a new tab */}
 										Description: {stop.desc ? <strong>{stop.desc}</strong> : <em>no data</em>} <br/>
 										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} {stop.ridership ? <strong>{stop.ridership}</strong> : <em>no data</em>} <br/></span> : null}
 									</div>
