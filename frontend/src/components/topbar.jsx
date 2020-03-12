@@ -8,15 +8,15 @@ class Topbar extends React.Component{
 			<nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 			
 			{/* Sidebar Toggle (Topbar) */}
-			<button id="sidebarToggleTop" className="btn btn-link d-md-none rounded-circle mr-3">
+			{/*<button id="sidebarToggleTop" className="btn btn-link d-md-none rounded-circle mr-3">
 				<i className="fa fa-bars"></i>
-			</button>
+			</button>*/}
 
 			<h5 className="h5 mb-0 text-gray-800">
 				{/* Dynamically change page title */}
 				<Switch>
 					<Route exact path="/">
-						GTFS-ride Tools
+						GTFS-ride Tools Home
 					</Route>
 					<Route path="/info">
 						GTFS-ride Feed Info
@@ -46,7 +46,7 @@ class Topbar extends React.Component{
 						GTFS-ride Service Changes
 					</Route>
 					<Route path="*">
-						Not Found
+						GTFS-ride Tools
 					</Route>
 				</Switch>
 			</h5>
@@ -57,7 +57,7 @@ class Topbar extends React.Component{
 				{/* Nav Item - User Information */}
 				<li className="nav-item">
 					<Link className="nav-link" to="/">
-						<span className="mr-2 d-none d-lg-inline text-black-50 small">{this.props.filename ? this.props.filename : <em>No feed uploaded</em>}</span>
+						<span className="mr-2 text-black-50">{this.props.filename ? <span>Feed: <strong className="text-dark">{this.props.filename}</strong></span> : <em>No feed uploaded</em>}</span>
 					</Link>
 				</li>
 

@@ -2,19 +2,19 @@ import React from 'react'
 import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER HOST URL
-const HOST = "http://localhost:8080";
+const HOST = "http://localhost:8080"
+const FILE_UPLOAD_URL = "/fileupload"
+const url = HOST + FILE_UPLOAD_URL;
 
-// ONLY CHANGE THESE IF YOU ARE CHANGING THEM ON THE SERVER AS WELL
-const path = "/fileupload"
-const url = HOST + path
-
+//const SERVER_CHECK_URL = "/server_check"
 
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: "", file: null, parsed_feed: null}; // filename = the name only, without path
+		this.state = {filepath: "", filename: "", file: null, parsed_feed: null, err: null}; // filename = the name only, without path
 		this.fileSelected = this.fileSelected.bind(this);
 		this.upload = this.upload.bind(this);
+		//this.isServerAlive = this.isServerAlive.bind(this)
 	}
 
 	// updates state when user selects a file
@@ -36,11 +36,12 @@ class Home extends React.Component{
 		try {
 			const res = await Axios.post(url, fd, config);
 			console.log(res.data);
-			this.setState({ parsed_feed: res.data });
+			this.setState({ parsed_feed: res.data, err: null });
 			this.props.onUpload(res.data);
 		}
 		catch (err) {
 			if (err) {
+				this.setState({err: err})
 				console.log(err);
 				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
@@ -60,6 +61,10 @@ class Home extends React.Component{
 		*/
 	}
 
+	/*componentDidMount(){
+		this.isServerAlive()
+	}*/
+
 	render () {
 
 		// disable the confirm upload button if the user has no file selected
@@ -76,6 +81,17 @@ class Home extends React.Component{
 				{/*<div className="d-sm-flex align-items-center justify-content-between mb-4">
 					<h1 className="h3 mb-0 text-gray-800"><br />GTFS-ride Tools</h1>
 				</div>*/}
+
+				{/* Server alive notification */}
+				{/*this.state.server_alive
+				?
+					null
+				:
+				<div className="row">
+					<h5>Could not connect to the server.</h5><br/><br/>
+				</div>
+				*/}
+				
 				
 				{/* Content Row */}
 				<div className="row">
@@ -126,7 +142,8 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
-								{this.state.parsed_feed ? <span><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
+								{this.state.err ? <span className="text-danger"><strong>{this.state.err.response ? this.state.err.response.data : this.state.err.toString()}</strong></span> : null }
+								{this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
@@ -143,11 +160,7 @@ class Home extends React.Component{
 								<br /><br />
 							</div>
 						</div>
-					</div>
-	
-					{/* ABOUT GTFS RIDE - Project Card */}
-					<div className="col-lg-6 mb-4">
-	
+
 						{/* Project Card Example 2 */}
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
@@ -158,6 +171,12 @@ class Home extends React.Component{
 							</div>
 						</div>
 					</div>
+	
+					{/* ABOUT GTFS RIDE - Project Card */}
+					{/*<div className="col-lg-6 mb-4">
+	
+						
+					</div>*/}
 	
 				</div>
 			</div>

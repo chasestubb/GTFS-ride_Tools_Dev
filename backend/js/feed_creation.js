@@ -221,6 +221,7 @@ module.exports = {
             temp_stop.stop_name = randomLastName();
             randLat = Math.floor(Math.random() * 90) - 90;
             randLon = Math.floor(Math.random() * 180) - 180;
+
             var check = isSea.get(randLat, randLon);
             while(check){
                 randLat = Math.floor(Math.random() * 90) - 90;
@@ -271,11 +272,11 @@ module.exports = {
     stopTimesCreate: function(num_trips, trips){
         var stop_times = [];
         var temp_times = {
-            trip_id = "",
-            arrival_time = 0,
-            departure_time = 0,
-            stop_id = "",
-            stop_sequence =0,
+            trip_id: "",
+            arrival_time: 0,
+            departure_time: 0,
+            stop_id: "",
+            stop_sequence: 0,
         }
         var min = 0;
         for (var i = 0; i < num_trips; i++){
@@ -283,6 +284,7 @@ module.exports = {
             var a = new Date();
             a.setHours(6);
             a.setMinutes(min);
+
             temp_times.trip_id = trips[rand_trip].trip_id;
             temp_times.arrival_time = a;
             a.setMinutes(min + 2);
@@ -340,7 +342,7 @@ module.exports = {
         return trips;
    },
 
-      // CREATE RIDE_FEED_INFO.TXT
+   // CREATE RIDE_FEED_INFO.TXT
    // ride_files | TBD user input or require all
    // ride_start_date | user-defined
    // ride_end_date | user-defined
@@ -543,17 +545,17 @@ module.exports = {
 
 
     Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files){
-        agencies = this.agencyCreate(num_agencies)
-        stops = this.stopsCreate(num_stops)
-        routes = this.routesCreate(num_routes, num_agencies)
-        trips = this.tripsCreate(num_routes, num_trips_per_route)
-        stopTimes = this.stopTimesCreate(num_stops, num_trips)
-        feedInfo = this.feedInfoCreate(start_date, end_date)
-        rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date)
-        boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stop_times, user_source)
-        riderTrip = this.riderTripCreate(num_riders, trips, num_trips, num_stops)
-        ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips)
-        tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies)
+        var agencies = this.agencyCreate(num_agencies)
+        var stops = this.stopsCreate(num_stops)
+        var routes = this.routesCreate(num_routes, num_agencies)
+        var trips = this.tripsCreate(num_routes, num_trips_per_route)
+        var stopTimes = this.stopTimesCreate(num_stops, num_trips)
+        var feedInfo = this.feedInfoCreate(start_date, end_date)
+        var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date)
+        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stop_times, user_source)
+        var riderTrip = this.riderTripCreate(num_riders, trips, num_trips, num_stops)
+        var ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips)
+        var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies)
 
 
 
@@ -610,6 +612,5 @@ module.exports = {
 };
 
 
- 
 
 module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231,20200304, 0, 2, 6)
