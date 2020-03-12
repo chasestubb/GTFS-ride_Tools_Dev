@@ -7,7 +7,7 @@
 //     to test the GTFS-ride data format, only the *required* elements of 
 //     a GTFS feed will be included. GTFS feeds abound such that test
 //     data is not necessary in lieu of available real-world data.
-//   As for the GTFS-ride feed, *all* five files and all fields within 
+//   As for the GTFS-ride feed, *all* five files and *all* fields within 
 //     them will be included.
 
 // GTFS INCLUDED FILES  ============
@@ -300,7 +300,9 @@ module.exports = {
     // Description: 
     //   generates one line per stop desired by the user
     //   '#' in the examples below will be '1', '2' ... 'n'
-    //   each route is assigned a random number of trips 
+    //   each route is assigned a user-defined number of trips
+    //   this means that each route is served equally, and for the purposes
+    //     of this test feed, that is fine 
     //          
     // User Input: 
     //   number of routes
@@ -316,7 +318,6 @@ module.exports = {
 
     tripsCreate: function(num_routes, num_trips_per_route){
         var trips = [];
-        var temp_routes = [];
         var trips_counter = 1;
         var temp_trip = {
             route_id: "",
@@ -348,24 +349,22 @@ module.exports = {
         return trips;
     },
 
-    // CREATE TRIPS.TXT (GTFS) ================
+    // CREATE RIDE_FEED_INFO.TXT (GTFS-ride) ================
     // Description: 
-    //   generates one line per stop desired by the user
-    //   '#' in the examples below will be '1', '2' ... 'n'
-    //   each route is assigned a random number of trips 
+    //   generates very basic information about the feeds. 
+    //   this is the one file that is required for gtfs-ride, and it is 
+    //     often used to discern whether the feed is gtfs or gtfs-ride
     //          
     // User Input: 
-    //   number of routes
-    //   number of trips per route
+    //   ride_start_date (same as for feed_info.txt)
+    //   ride_end_date (same as for feed_info.txt)
+    //   gtfs_feed_date TODO?
     //
     // Attributes: 
-    // CREATE RIDE_FEED_INFO.TXT
-    // ride_files | All files with always be generated, as specified by ODOT + OSU
-    // ride_start_date | user-defined
-    // ride_end_date | user-defined
-    // gtfs_feed_date | user-defined -- links to feed_info?
-    // default_currency_type | static -- USD
-    // ride_feed_version | static -- v1
+    //   ride_files | All files with always be generated, as specified by ODOT + OSU
+    //   gtfs_feed_date | TODO define???
+    //   default_currency_type | static -- USD
+    //   ride_feed_version | static -- v1
 
     rideFeedInfoCreate: function(files, start_date, end_date, feed_date){
         var ride_feed_info = {
@@ -374,7 +373,7 @@ module.exports = {
             ride_end_date : end_date,
             gtfs_feed_date : feed_date,
             default_currency_type : "USD",
-            ride_feed_version : 1,
+            ride_feed_version : 1.0,
         } 
         if ( files == null ){
             //defaults to all files if not speciified
@@ -384,19 +383,37 @@ module.exports = {
     },
 
 
-    // CREATE BOARD_ALIGHT.TXT
-    // trip_id | static - always "TRIP#"
-    // stop_id | static - always "STOP#"
-    // stop_sequence | algorithm from stop_times
-    // record_use | static - 0  Entry contains complete ridership counts
-    // schedule_relationship | user-defined
-    // boardings |automated based on stop
-    // alightings | automated based on stop
-    // currrent_load | load_count / load_type
-    // load_count | user-defined
-    // load_type | user-defined
-    // rack_down | user-defined
-    // associated vars are all user defined
+    // CREATE BOARD_ALIGHT.TXT (GTFS-ride) ================
+    // Description: 
+    //   Tracks boarding + alighting (getting off) associated information at stop-level OR trip level.
+    //          
+    // User Input: 
+    //   num_boardings
+    //   num_alightings
+    //
+    // Attributes: 
+    //   trip_id | random generate between 0 and num_trips
+    //   stop_id | random generate between 0 and num_stops 
+    //               and check if used in a trip first
+    //               OR if no stop-level ridership information, set all to 0 TODO
+    //   stop_sequence | INPUT received from stop_times
+    //   record_use | static - 0  Entry contains complete ridership counts
+    //   schedule_relationship | user-defined
+    //   boardings |automated based on stop
+    //   alightings | automated based on stop
+    //   currrent_load | load_count / load_type
+    //   load_count | user-defined
+    //   load_type | user-defined
+    //   rack_down | user-defined
+    //   bike-boardings |
+    //   bike-alightings |
+    //   ramp_used |
+    //   ramp_boardings |
+    //   ramp_alightings |
+    //   service_data |
+    //   service_arrival_time |
+    //   service_departure_time |
+    //   source |
 
     // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
     boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times, user_source){
@@ -410,6 +427,7 @@ module.exports = {
             boardings : 0,
             alightings : 0,
             current_load : 0,
+            load_count : 0,
             load_type : 0,
             rack_down : 0,
             bike_boardings : 0,
@@ -421,7 +439,7 @@ module.exports = {
             service_arrival_time : 0,
             service_departure_time : 0,
             source : user_source,  
-        }
+        };
 
         var min = 0;
         for (var i = 0; i < num_trips; i++){
@@ -544,7 +562,7 @@ module.exports = {
     },
 
     tripCapacityCreate: function(trips, num_trips, agencies, num_agencies){
-        var trip_capacities = {};
+        var trip_capacities = [];
         
         var temp_trip = {
             agency_id : "",
@@ -575,11 +593,11 @@ module.exports = {
         var trips = this.tripsCreate(num_routes, num_trips_per_route);
         var stopTimes = this.stopTimesCreate(num_trips, trips);
         var feedInfo = this.feedInfoCreate(start_date, end_date);
-        var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date);
-        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source);
-        var riderTrip = this.riderTripCreate(num_riders, trips, num_trips, num_stops);
-        var ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
-        var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
+        // var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date);
+        // var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source);
+        // var riderTrip = this.riderTripCreate(num_riders, trips, num_trips, num_stops);
+        // var ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
+        // var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
 
         // CSV STRINGIFY =========================
@@ -607,26 +625,26 @@ module.exports = {
         function(err, out){
             fs.writeFileSync("../feed_creation/feed_info.txt", out);
         });
-        csvStringify(rideFeedInfo, {head: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]},
-        function(err,out){
-            fs.writeFileSync("../feed_creation/ride_feed_info.txt");
-        });
-        csvStringify(boardAlight, {head: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]},
-        function(err,out){
-            fs.writeFileSync("../feed_creation/board_alight.txt");
-        });
-        csvStringify(riderTrip, {head: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]},
-        function(err,out){
-            fs.writeFileSync("../feed_creation/rider_trip.txt");
-        });
-        csvStringify(ridership, {head: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]},
-        function(err,out){
-            fs.writeFileSync("../feed_creation/ridership.txt");
-        });
-        csvStringify(tripCapacity, {head: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]},
-        function(err,out){
-            fs.writeFileSync("../feed_creation/trip_capacity.txt");
-        });
+        // csvStringify(rideFeedInfo, {head: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]},
+        // function(err,out){
+        //     fs.writeFileSync("../feed_creation/ride_feed_info.txt");
+        // });
+        // csvStringify(boardAlight, {head: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]},
+        // function(err,out){
+        //     fs.writeFileSync("../feed_creation/board_alight.txt");
+        // });
+        // csvStringify(riderTrip, {head: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]},
+        // function(err,out){
+        //     fs.writeFileSync("../feed_creation/rider_trip.txt");
+        // });
+        // csvStringify(ridership, {head: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]},
+        // function(err,out){
+        //     fs.writeFileSync("../feed_creation/ridership.txt");
+        // });
+        // csvStringify(tripCapacity, {head: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]},
+        // function(err,out){
+        //     fs.writeFileSync("../feed_creation/trip_capacity.txt");
+        // });
 
         //fs.writeFileSync("../feed_creation/agencies.txt", str_agency)
         //fs.writeFileSync("../feed_creation/stops.txt", str_stops)
