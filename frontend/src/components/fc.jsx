@@ -141,7 +141,11 @@ class FC extends React.Component{
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
 	async sendGet(){
-
+		Axios.get(getURL, null).then((res) => {
+			console.log(res)
+		}).catch((err) => {
+			console.log("ERROR " + err)
+		})
 	}
 
 	submit(event){
@@ -157,6 +161,7 @@ class FC extends React.Component{
 		}
 		var params = {
 			...this.state.params,
+			trips: (this.state.params.trips_per_route * this.state.params.routes),
 			start_date: this.strDateToIntDate(this.state.params.start_date),
 			end_date: this.strDateToIntDate(this.state.params.end_date),
 			feed_date: this.strDateToIntDate(this.state.params.start_date)
@@ -165,7 +170,7 @@ class FC extends React.Component{
 		//var postBody = JSON.stringify(params)
 		//this.sendPost(postBody)
 		this.sendPost(params)
-		this.sendGet()
+		//this.sendGet()
 	}
 	
 	componentDidMount(){
@@ -205,10 +210,10 @@ class FC extends React.Component{
 										<td>Number of stops</td>
 										<td><input name="stops" className="fc-input-number" type="number" min={1} value={this.state.params.stops} onChange={this.setNumber}></input></td>
 									</tr>
-									<tr>
+									{/*<tr>
 										<td>Number of trips (total)</td>
 										<td><input name="trips" className="fc-input-number" type="number" min={1} value={this.state.params.trips} onChange={this.setNumber}></input></td>
-									</tr>
+									</tr>*/}
 									<tr>
 										<td>Number of trips per route</td>
 										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} value={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>

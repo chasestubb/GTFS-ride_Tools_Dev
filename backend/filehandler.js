@@ -32,7 +32,7 @@ const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
 const INFO_AGENCY_URL = '/info/agency/:index';
 const FC_POST_URL = '/fc/params'
-const FC_GET_URL = 'fc/getfile'
+const FC_GET_URL = '/fc/getfile'
 
 
 
@@ -55,6 +55,16 @@ var ridership = null
 var ride_feed_info = null
 
 var filename = ""
+
+//var fc_filename
+
+function feed_creation(params){
+    console.log("Generating feed with params:")
+    console.log(params)
+    var fc_filename = Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.num_riders, 6)
+    console.log("Feed successfully created")
+    return fc_filename
+}
 
 // --------------------------------------------------------------------------------
 // FILE UPLOAD (Receive all files from the frontend)
@@ -543,7 +553,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
 7.  Client receives the response
 8.  Client sends GET response to request the feed
 9.  Client waits for the feed to be generated
--- OPTION 1 (preferred):
+-- OPTION 1 (preferred): -- DIDN'T WORK
 10. Server sends file to the client
 11. Client downloads the file
 -- OPTION 2 (if potion 1 does not work):
@@ -556,20 +566,54 @@ app.get(INFO_AGENCY_URL, (req, res) => {
 
 // --------------------------------------------------------------------------------
 // FEED CREATION - PARAMETERS
-app.post(FC_POST_URL, (req, res) => {
+app.post(FC_POST_URL, async (req, res) => {
     console.log("FC PARAMS")
     console.log(req.url)
     //console.log(req)
     //var parsedURL = Url.parse(req.url)
     //console.log(parsedURL)
-    var params = req.body
-    console.log(params)
-    //var {params} = JSON.parse(req.body)
-    //console.log(params)
-    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
-    res.end()
+    //console.log(req.body)
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+    
+    var fc_file = feed_creation(req.body)
+    var fc_filepath = process.cwd() + "/" + fc_file
+
+    //res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
+    res.download(fc_filepath, function(err){
+        if (err){
+            //res.writeHead(500);
+            res.write(String(err))
+            console.log("Error sending file: " + err)
+            res.end()
+        } else {
+            //res.writeHead(200);
+            console.log("File sent to client")
+            res.end()
+        }
+    })
+    //res.end()
     //console.log("DOES IT GO HERE?") // it does go here
-    Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
+    //Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
+    
+})
+
+// --------------------------------------------------------------------------------
+// FEED CREATION - OUTPUT
+app.get(FC_GET_URL, async (req, res) => {
+    console.log("FC GET")
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, /*'Content-Type': 'text/plain'*/});
+    //res.write("TRUE")
+    //res.download(fc_filename)
+    var fc_filepath = process.cwd() + await fc_filename
+    res.sendFile(fc_filepath, function(err){
+        if (err){
+            console.log("Error sending file: " + err)
+        } else {
+            console.log("File sent to client")
+        }
+    })
+    res.end()
 })
 
 // --------------------------------------------------------------------------------
@@ -588,7 +632,7 @@ app.options("*", (req, res) => {
     res.writeHead(200, {
         "Access-Control-Allow-Origin": CORS,
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Headers": "Content-Type, Content-Disposition",
     });
     //res.write("TRUE")
     res.end()

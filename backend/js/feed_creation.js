@@ -35,7 +35,9 @@ var csvStringifySync = require('csv-stringify/lib/sync')
 var fs = require('fs');
 var zip = require('cross-zip')
 
-var FILEPATH = "../feed_creation/"
+var FILEPATH = "feed_creation/"
+var FILENAME = "fc.zip"
+//var FILEPATH = "./"
 
 
 module.exports = {
@@ -667,6 +669,8 @@ module.exports = {
             fs.writeFileSync("../feed_creation/trip_capacity.txt");
         });*/
 
+
+        //console.log(process.cwd())
         // WRITE THE FILES =========================
         fs.writeFileSync(FILEPATH + "agencies.txt", agenciesCSV)
         fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV)
@@ -681,12 +685,18 @@ module.exports = {
         //fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================
-        zip.zipSync(FILEPATH, FILEPATH + "feed_creation.zip")
+        var current_dir = process.cwd() // save current working dir
+        process.chdir(FILEPATH) // change dir
+        zip.zipSync("./", "./" + FILENAME) // zip the files
+        process.chdir(current_dir) // undo change dir
+
+        // RETURN THE ZIP FILENAME
+        return (FILEPATH + FILENAME)
     }
 
 };
 
 
 // test function
-module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231,20200304, 0, 2, 6)
+//module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231,20200304, 0, 2, 6)
 //console.log(module.exports.tripsCreate(10, 5));
