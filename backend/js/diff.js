@@ -6,7 +6,7 @@ module.exports = {
 //all functions will return [a,d]
 
     checkAgencies:function (feed1_agencies, feed2_agencies){
-        //returns agencies that are not in both feeds
+        // returns agencies that are not in both feeds
         var diff = [];
         for (var i = 0; i < feed1_agencies.length; i++){
             if(feed2_agencies.indexOf(feed1_agencies[i]) === -1){
@@ -21,7 +21,7 @@ module.exports = {
     },
 
     checkFeedType: function(feed1_ride_feed_info, feed2_ride_feed_info){
-        //returns true if the feed types are the same
+        // returns true if the feed types are the same type
         if (!(feed1_ride_feed_info == null)){ //both ride feeds
             if (!(feed2_ride_feed_info == null))
                 return true;
