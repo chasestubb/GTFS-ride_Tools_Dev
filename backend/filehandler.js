@@ -1,8 +1,12 @@
+// built-in modules
 var http = require('http');
 var Url = require('url');
-var formidable = require('formidable'); // A Node.js module for parsing form data, especially file uploads.
-
+//var bodyParser = require('body-parser')
 var fs = require('fs');
+
+// third-party modules
+var express = require('express')
+var formidable = require('formidable'); // A Node.js module for parsing form data, especially file uploads.
 var extract = require('extract-zip');
 //var csv = require('csv-parse/lib/sync'); // converting CSV text input into arrays or objects
 var csv_parse = require('csv-parse/lib/sync') // generalized now that we are both using csv-parse + csv-generate
@@ -11,6 +15,11 @@ var csv_generate = require('csv-generate')
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
 
+// express stuff
+var app = express()
+app.use(express.urlencoded())
+app.use(express.json())
+
 // feel free to change the things below, but the values must be consistent with the front-end
 
 // the port for the server to listen to
@@ -18,9 +27,12 @@ const PORT = 8080;
 const CORS = "http://localhost:3000"
 
 // the URL paths, make them consistent with the front-end
+const SERVER_CHECK_URL = "/server_check"
 const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
-const INFO_AGENCY_URL = '/info/agency/';
+const INFO_AGENCY_URL = '/info/agency/:index';
+const FC_POST_URL = '/fc/params'
+const FC_GET_URL = 'fc/getfile'
 
 
 
@@ -44,12 +56,14 @@ var ride_feed_info = null
 
 var filename = ""
 
-http.createServer(function (req, res) {
-    console.log(req.url)
+//http.createServer(function (req, res) {
+    //console.log(req.url)
     
     // FILE UPLOAD (Receive all files from the frontend) ====================
     //
-    if (req.url == UPLOAD_URL) {
+    //if (req.url == UPLOAD_URL) {
+    app.post(UPLOAD_URL, (req, res) => {
+        console.log(req.method + " to " + req.url)
         var form = new formidable.IncomingForm();
         form.parse(req, function (err, fields, files) {
             var oldpath = files.file.path;
@@ -302,13 +316,75 @@ http.createServer(function (req, res) {
             });
         });
 
+    // --------------------------------------------------------------------------------
     // FEED INFO
-    } else if (req.url.startsWith(INFO_URL)){
-        // PER AGENCY
-        if (req.url.includes("agency")){
-            console.log("FEED INFO -> AGENCY INFO")
-            var q = req.url.split("=");
-            var index = q[1]
+    }) //else if (req.url.startsWith(INFO_URL)){
+    app.get(INFO_URL, (req, res) => {
+        // general feed info
+        console.log("FEED INFO")
+        if (agencies && routes && trips && stops && stop_times){
+            // initialize object
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+            }
+
+            // parse agencies' info
+            for (x = 0; x < agencies.length; x++){
+                var agency = {
+                    index: x,
+                    id: agencies[x].agency_id,
+                    name: agencies[x].agency_name,
+                    routes: Info.routesPerAgency(agencies[x], routes),
+                    //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
+                    ridership: 0,
+                };
+                if (gtfs_ride_feed){
+                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
+                }
+                feed_info_.agencies.push(agency);
+            }
+
+            for (x = 0; x < stops.length; x++){
+                var stop = {
+                    index: x,
+                    id: stops[x].stop_id,
+                    name: stops[x].stop_name,
+                    code: stops[x].stop_code,
+                    desc: stops[x].stop_desc,
+                    pos: [stops[x].stop_lat, stops[x].stop_lon],
+                    zone: (stops[x].zone_id),
+                    ridership: 0,
+                }
+                if (gtfs_ride_feed){
+                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                }
+                feed_info_.stops.push(stop)
+            }
+            
+
+            // send object to front-end
+            res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
+            res.write(JSON.stringify(feed_info_));
+            res.end();
+            console.log("Feed info sent to the client")
+        } else { // if the user has not uploaded any valid feed
+            res.writeHead(400, {"Access-Control-Allow-Origin": CORS});
+            res.write("No file uploaded. Please upload one from the home page.");
+            res.end();
+            console.log("Client tried to access Feed Info without providing a valid feed.")
+        }
+    })
+
+    // AGENCY INFO
+    app.get(INFO_AGENCY_URL, (req, res) => {
+        console.log("FEED INFO -> AGENCY INFO")
+        if (agencies && routes && trips && stops && stop_times){
+            var index = req.params.index
             console.log(index)
             //var index = req.headers.index;
             //console.log(req);
@@ -390,58 +466,14 @@ http.createServer(function (req, res) {
             res.write(JSON.stringify(agency_info));
             res.end();
         } else {
-            // general feed info
-            console.log("FEED INFO")
-            // initialize object
-            var feed_info_ = {
-                filename: filename,
-                is_gtfs_ride: gtfs_ride_feed,
-                agencies: [],
-                stops: [],
-                num_trips: trips.length,
-                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
-            }
-
-            // parse agencies' info
-            for (x = 0; x < agencies.length; x++){
-                var agency = {
-                    index: x,
-                    id: agencies[x].agency_id,
-                    name: agencies[x].agency_name,
-                    routes: Info.routesPerAgency(agencies[x], routes),
-                    //stops: Info.stopsPerAgency(agencies[x], routes, trips, stop_times),
-                    ridership: 0,
-                };
-                if (gtfs_ride_feed){
-                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
-                }
-                feed_info_.agencies.push(agency);
-            }
-
-            for (x = 0; x < stops.length; x++){
-                var stop = {
-                    index: x,
-                    id: stops[x].stop_id,
-                    name: stops[x].stop_name,
-                    code: stops[x].stop_code,
-                    desc: stops[x].stop_desc,
-                    pos: [stops[x].stop_lat, stops[x].stop_lon],
-                    zone: (stops[x].zone_id),
-                    ridership: 0,
-                }
-                if (gtfs_ride_feed){
-                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
-                }
-                feed_info_.stops.push(stop)
-            }
-            
-
-            // send object to front-end
-            res.writeHead(200, {"Access-Control-Allow-Origin": "http://localhost:3000"});
-            res.write(JSON.stringify(feed_info_));
+            res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+            res.write("No file uploaded. Please upload one from the home page.");
             res.end();
-            console.log("Feed info sent to the client")
+            console.log("Client tried to access Feed Info without providing a valid feed.")
         }
+    })
+        
+        
         
     // FEED INFO -> AGENCY INFO
     /*} else if (req.url == INFO_AGENCY_URL){
@@ -503,17 +535,55 @@ http.createServer(function (req, res) {
         res.write(JSON.stringify(agency_info));
         res.end();*/
     
-    } else {
-        console.log("ELSE")
-        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/html'});
-        /*res.write('<form action="fileupload" method="post" enctype="multipart/form-data">');
-        res.write('<input type="file" name="filetoupload"><br>');
-        res.write('<input type="submit">');
-        res.write('</form>');*/
+    // --------------------------------------------------------------------------------
+    // FEED CREATION - PARAMETERS
+    //} else if (req.url.startsWith(FC_POST_URL)){
+    app.post(FC_POST_URL, (req, res) => {
+        console.log("FC PARAMS")
+        console.log(req.url)
+        //console.log(req)
+        //var parsedURL = Url.parse(req.url)
+        //console.log(parsedURL)
+        console.log(req.body)
+        //var {params} = JSON.parse(req.body)
+        //console.log(params)
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+        res.end()
+    })
+
+    // --------------------------------------------------------------------------------
+    // CLIENT CHECKS IF SERVER IS ALIVE
+    //} else if (req.url == SERVER_CHECK_URL){
+    app.get(SERVER_CHECK_URL, (req, res) => {
+        console.log("Server is alive.")
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+        res.write("TRUE")
+        res.end()
+    })
+    
+    app.options("*", (req, res) => {
+        console.log("OPTIONS")
+        res.writeHead(200, {
+            "Access-Control-Allow-Origin": CORS,
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        });
+        //res.write("TRUE")
+        res.end()
+    })
+
+    //} else {
+    app.all("*", (req, res) => {
+        console.log("Client requested something else")
+        console.log(req.method + " to " + req.url)
+        res.writeHead(404, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
         return res.end();
-    }
-}).listen(PORT);
-console.log("Listening on port " + PORT);
+    })
+        
+    //}
+//}).listen(PORT);
+//console.log("Listening on port " + PORT);
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
 console.log("Files will be extracted to:")
 console.log(process.cwd() + "/uploads/")
 

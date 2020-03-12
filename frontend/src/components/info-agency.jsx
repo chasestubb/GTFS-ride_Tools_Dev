@@ -1,9 +1,9 @@
 import React from 'react'
-import {Route, useParams} from 'react-router-dom'
+import {Link, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/info/";
+const url = "http://localhost:8080/info/agency/";
 const RIDERSHIP_TIME = "Weekly"
 
 function get_route_type(type){
@@ -53,12 +53,13 @@ class Info_Agency extends React.Component{
 			is_gtfs_ride: false,
 			ridership: 0,
 			trips: 0,
+			err: null,
 		}
 	}
 
 	getInfo(){
-		console.log("getInfo()")
-		Axios.get(url, {params: {agency: this.props.index}}).then((res) => {
+		console.log("getInfo(" + url + this.props.index + ")")
+		Axios.get(url + this.props.index, /*{params: {agency: this.props.index}}*/).then((res) => {
 			console.log(res)
 			/*this.setState({
 				filename: res.data.filename,
@@ -66,9 +67,10 @@ class Info_Agency extends React.Component{
 				agency_list: res.data.agencies
 			})*/
 			this.setState(res.data)
-			this.setState({status: res.status})
+			this.setState({status: res.status, err: null})
 		}).catch(function(err){
 			console.log("Error: " + err)
+			this.setState({err: err})
 		})
 	}
 
@@ -84,7 +86,7 @@ class Info_Agency extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800">{this.state.name}</h1>
+							<h1 className="h3 mb-0 text-gray-800"><Link to="/info" className="back-button"><i className="fas fa-chevron-left back-button"></i></Link>{this.state.name}</h1>
 						</div>
 					</div>
 		
@@ -269,7 +271,7 @@ class Info_Agency extends React.Component{
 									</div>
 									<div className="card-body">
 										Description: <strong>{route.desc}</strong> <br/>
-										Type: <strong>{get_route_type(route.type)}</strong> <br/>
+										Type: {get_route_type(route.type)} <br/>
 										Trips: <strong>{route.trips}</strong> <br/>
 										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + route.ridership : null} <br/>
 									</div>
@@ -281,6 +283,12 @@ class Info_Agency extends React.Component{
 					
 				</div>
 		
+			)
+		} else if (this.state.err) {
+			return(
+				<div className="row">
+					<h4>{this.state.err}</h4><br/><br/>
+				</div>
 			)
 		} else {
 			return(
