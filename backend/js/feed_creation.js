@@ -36,6 +36,7 @@ var fs = require('fs');
 var zip = require('cross-zip')
 
 var FILEPATH = "feed_creation/"
+var FILENAME = "fc.zip"
 //var FILEPATH = "./"
 
 
@@ -667,8 +668,11 @@ module.exports = {
         // ZIP ALL FILES =========================
         var current_dir = process.cwd() // save current working dir
         process.chdir(FILEPATH) // change dir
-        zip.zipSync("./", "./fc.zip") // zip the files
+        zip.zipSync("./", "./" + FILENAME) // zip the files
         process.chdir(current_dir) // undo change dir
+
+        // RETURN THE ZIP FILENAME
+        return (FILEPATH + FILENAME)
     }
 
 };
