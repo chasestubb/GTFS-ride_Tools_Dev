@@ -31,6 +31,7 @@ const SERVER_CHECK_URL = "/server_check"
 const UPLOAD_URL = '/fileupload';
 const INFO_URL = '/info';
 const INFO_AGENCY_URL = '/info/agency/:index';
+const INFO_ROUTE_URL = '/info/route/:index';
 const FC_POST_URL = '/fc/params'
 const FC_GET_URL = '/fc/getfile'
 
@@ -424,6 +425,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
             var route = routes[x];
             if (route.agency_id === agency.agency_id){
                 var route_info = {
+                    index: x,
                     short_name: route.route_short_name,
                     long_name: route.route_long_name,
                     desc: route.route_desc,
@@ -480,7 +482,81 @@ app.get(INFO_AGENCY_URL, (req, res) => {
     }
 })
     
-    
+// ROUTE INFO
+app.get(INFO_ROUTE_URL, (req, res) => {
+    console.log("FEED INFO -> ROUTE INFO")
+    if (agencies && routes && trips && stops && stop_times){
+        var index = req.params.index
+        console.log(index)
+        //var index = req.headers.index;
+        //console.log(req);
+        var route = routes[index]
+        var route_info = {
+            id: route.route_id,
+            short_name: route.route_short_name,
+            long_name: route.route_long_name,
+            url: route.route_url,
+            span: {
+                m: "",
+                t: "",
+                w: "",
+                r: "",
+                f: "",
+                s: "",
+                u: ""
+            },
+            trips: [],
+            //stops: [],
+            is_gtfs_ride: gtfs_ride_feed,
+            ridership: 0,
+            //trips: Info.countTripsPerAgency(agency, routes, trips),
+        }
+
+        // get the route's trips
+        for (var x = 0; x < trips.length; x++){
+            var trip = trips[x];
+            if (trips.route_id == route.route_id){
+                var trip_info = {
+                    index: x,
+                    id: trip.trip_id,
+                    days: "",
+                    start_time: "",
+                    end_time: "",
+                    headsign: trip.headsign,
+                    name: trip.short_name,
+                    direction: trip.direction_id,
+                    block: trip.block_id,
+                    ridership: 0,
+                }
+                if (gtfs_ride_feed){
+                    trip_info.ridership = Info.countTripRiders(board_alight, trip)
+                }
+                route_info.trips.push(trip_info)
+            }
+        }
+
+
+        // send feed type
+        agency_info.is_gtfs_ride = gtfs_ride_feed
+
+        // GTFS-ride specific fields
+        if (gtfs_ride_feed){
+            agency_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+        }
+
+        //console.log("Index: " + index);
+        //console.log(route_info);
+
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
+        res.write(JSON.stringify(agency_info));
+        res.end();
+    } else {
+        res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});
+        res.write("No file uploaded. Please upload one from the home page.");
+        res.end();
+        console.log("Client tried to access Feed Info without providing a valid feed.")
+    }
+})
     
 // FEED INFO -> AGENCY INFO
 /*} else if (req.url == INFO_AGENCY_URL){

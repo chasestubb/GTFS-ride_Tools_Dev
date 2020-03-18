@@ -267,7 +267,7 @@ class Info_Agency extends React.Component{
 		
 								<div className="card shadow mb-4">
 									<div className="card-header py-3">
-										<h6 className="m-0 font-weight-bold text-primary"><strong>{route.short_name}</strong>{(route.short_name && route.long_name) ? " - " : null}{route.long_name}</h6>
+										<h6 className="m-0 font-weight-bold text-primary"><Link to={"/info/route/" + route.index}><strong>{route.short_name}</strong>{(route.short_name && route.long_name) ? " - " : null}{route.long_name}</Link></h6>
 									</div>
 									<div className="card-body">
 										Description: <strong>{route.desc}</strong> <br/>
