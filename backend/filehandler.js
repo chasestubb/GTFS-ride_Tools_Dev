@@ -543,6 +543,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
     res.end();*/
 
 
+
 /* HOW FEED CREATION WORKS --------------------------------------------------------
 1.  User fills out web form
 2.  User clicks the "Generate Feed" button
@@ -574,8 +575,6 @@ app.post(FC_POST_URL, async (req, res) => {
     //console.log(parsedURL)
     //console.log(req.body)
     res.setHeader("Access-Control-Allow-Origin", CORS);
-    res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
-    res.setHeader("Content-Type", "application/zip")
     
     var fc_file = feed_creation(req.body)
     var fc_filepath = process.cwd() + "/" + fc_file
@@ -603,9 +602,11 @@ app.post(FC_POST_URL, async (req, res) => {
 // FEED CREATION - OUTPUT
 app.get(FC_GET_URL, async (req, res) => {
     console.log("FC GET")
-    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, /*'Content-Type': 'text/plain'*/});
-    //res.write("TRUE")
-    //res.download(fc_filename)
+    //res.writeHead(200, {"Access-Control-Allow-Origin": CORS, /*'Content-Type': 'text/plain'*/});
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+    res.setHeader("Content-Type", "application/zip")
+    
     var fc_filepath = process.cwd() + await fc_filename
     res.sendFile(fc_filepath, function(err){
         if (err){

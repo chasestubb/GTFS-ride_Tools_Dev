@@ -128,7 +128,7 @@ class FC extends React.Component{
 	}
 
 	// currently unused due to regex problems
-	setFilename(event){
+	/*setFilename(event){
 		var name = event.target.value
 		if (name.search(/[/\\\?%\*:|\"<>]/g)){
 			alert("These characters are not allowed in filenames:\n/ \\ ? % * : | \" < >")
@@ -137,7 +137,7 @@ class FC extends React.Component{
 				zip_filename: name
 			})
 		}
-	}
+	}*/
 
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
@@ -175,6 +175,20 @@ class FC extends React.Component{
 		})
 	}
 
+	/* THE SUBMISSION PROCEDURE NEEDS TO BE CHANGED
+	   GET request should only be called after POST request has received a response
+	   New procedure:
+	   1.  User fills out form
+	   2.  User clicks submit
+	   3.  Client transforms data
+	   4.  Client sends POST data to server
+	   5.  Server processes data
+	   6.  Server writes data to vars
+	   7.  Server responds to POST
+	   8.  Client receives POST
+	   9.  Client sends GET
+	   10. 
+	*/
 	submit(event){
 		if (this.state.params.start_date == null && this.state.params.end_date == null){
 			alert("Please fill out the start and end dates.")
