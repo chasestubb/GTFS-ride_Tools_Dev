@@ -14,6 +14,7 @@ class DiffUpload extends React.Component{
 			file2_fromHome: false,
 		}
 		this.set = this.set.bind(this)
+		this.setChecked = this.setChecked.bind(this)
 		this.fileSelected = this.fileSelected.bind(this)
 		this.upload = this.upload.bind(this)
 	}
@@ -22,6 +23,13 @@ class DiffUpload extends React.Component{
 		this.setState({
 			...this.state,
 			[event.target.name]: event.target.value
+		})
+	}
+
+	setChecked(event){
+		this.setState({
+			...this.state,
+			[event.target.name]: event.target.checked
 		})
 	}
 
@@ -94,12 +102,14 @@ class DiffUpload extends React.Component{
 							<div className="card-body">
 								<strong>1. Choose a feed file<br/></strong>
 								<input type="file" name="file1" accept=".zip" onChange={this.fileSelected}/><br/>
-								<input type="checkbox" name="file1_fromHome" onChange={this.set}>Use the file uploaded from home</input>
-								<br/>
+								<input type="checkbox" name="file1_fromHome" onChange={this.setChecked} checked={this.state.file1_fromHome} />Use the file uploaded from home
+								<br/><br />
 								<strong>2. Choose another feed file<br/></strong>
 								<input type="file" name="file2" accept=".zip" onChange={this.fileSelected}/><br/>
-								<input type="checkbox" name="file2_fromHome" onChange={this.set}>Use the file uploaded from home</input>
-								<br/>
+								<input type="checkbox" name="file2_fromHome" onChange={this.setChecked} checked={this.state.file2_fromHome} />Use the file uploaded from home
+								<br/><br />
+								<strong>3. Upload the selected files</strong><br/>
+								{uploadConfirmBtn}
 							</div>
 						</div>
 					</div>
