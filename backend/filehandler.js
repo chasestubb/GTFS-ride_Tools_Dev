@@ -10,7 +10,7 @@ var formidable = require('formidable'); // A Node.js module for parsing form dat
 var extract = require('extract-zip');
 //var csv = require('csv-parse/lib/sync'); // converting CSV text input into arrays or objects
 var csv_parse = require('csv-parse/lib/sync') // generalized now that we are both using csv-parse + csv-generate
-var csv_generate = require('csv-generate')
+//var csv_generate = require('csv-generate')
 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
@@ -575,6 +575,7 @@ app.post(FC_POST_URL, async (req, res) => {
     //console.log(req.body)
     res.setHeader("Access-Control-Allow-Origin", CORS);
     res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+    res.setHeader("Content-Type", "application/zip")
     
     var fc_file = feed_creation(req.body)
     var fc_filepath = process.cwd() + "/" + fc_file
