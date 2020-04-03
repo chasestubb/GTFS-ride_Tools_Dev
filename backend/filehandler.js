@@ -666,6 +666,7 @@ app.post(FC_POST_URL, async (req, res) => {
     res.write("Params received")
     res.end()
     //console.log("DOES IT GO HERE?") // it does go here
+})
 
 // --------------------------------------------------------------------------------
 // FEED CREATION - OUTPUT
