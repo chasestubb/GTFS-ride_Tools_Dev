@@ -57,15 +57,17 @@ var ride_feed_info = null
 
 var filename = ""
 
-//var fc_filename
 
-function feed_creation(params){
+var fc_promise
+
+async function feed_creation(params){
     console.log("Generating feed with params:")
     console.log(params)
     var fc_filename = Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.num_riders, 6)
     console.log("Feed successfully created")
     return fc_filename
 }
+
 
 // --------------------------------------------------------------------------------
 // FILE UPLOAD (Receive all files from the frontend)
@@ -652,26 +654,34 @@ app.post(FC_POST_URL, async (req, res) => {
     //console.log(req.body)
     res.setHeader("Access-Control-Allow-Origin", CORS);
     
-    var fc_file = feed_creation(req.body)
-    var fc_filepath = process.cwd() + "/" + fc_file
+    //var fc_file = feed_creation(req.body)
+    //var fc_filepath = process.cwd() + "/" + fc_file
 
     //res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
-    res.download(fc_filepath, function(err){
-        if (err){
+    //res.download(fc_filepath, function(err){
+        /*if (err){
             //res.writeHead(500);
             res.write(String(err))
-            console.log("Error sending file: " + err)
+            console.log(err)
             res.end()
         } else {
             //res.writeHead(200);
-            console.log("File sent to client")
+            console.log("Params received")
             res.end()
-        }
-    })
+        }*/
+    //})
     //res.end()
+    //fc_file = feed_creation(req.body)
+    fc_promise = new Promise((resolve, reject) => {
+        console.log("Params received")
+        resolve (feed_creation(req.body))
+    })
+    res.writeHead(200)
+    res.end()
     //console.log("DOES IT GO HERE?") // it does go here
     //Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
-    
+    //fc_filepath = process.cwd() + "/" + fc_file
+    //pubsub.pub();
 })
 
 // --------------------------------------------------------------------------------
@@ -679,19 +689,41 @@ app.post(FC_POST_URL, async (req, res) => {
 app.get(FC_GET_URL, async (req, res) => {
     console.log("FC GET")
     //res.writeHead(200, {"Access-Control-Allow-Origin": CORS, /*'Content-Type': 'text/plain'*/});
+    
+    /*pubsub.sub(() => {
+        res.setHeader("Access-Control-Allow-Origin", CORS);
+        res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+        res.setHeader("Content-Type", "application/zip")
+
+        //var fc_filepath = process.cwd() + await fc_filename
+        res.sendFile(fc_filepath, function(err){
+            if (err){
+                console.log("Error sending file: " + err)
+            } else {
+                console.log("File sent to client")
+            }
+        })
+        res.end()
+    })*/
+    
     res.setHeader("Access-Control-Allow-Origin", CORS);
     res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
     res.setHeader("Content-Type", "application/zip")
-    
-    var fc_filepath = process.cwd() + await fc_filename
-    res.sendFile(fc_filepath, function(err){
+
+
+    var fc_filename = await fc_promise
+    console.log(fc_filename)
+    var fc_filepath = process.cwd() + "/" + fc_filename
+    res.download(fc_filepath, function(err){
         if (err){
             console.log("Error sending file: " + err)
         } else {
             console.log("File sent to client")
         }
+        res.end()
     })
-    res.end()
+    
+    
 })
 
 // --------------------------------------------------------------------------------

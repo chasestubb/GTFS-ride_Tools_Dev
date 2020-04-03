@@ -1,5 +1,6 @@
 import React from 'react'
 import Axios from 'axios'
+import fileDownload from 'js-file-download'
 
 // set this to true if the program should prohibit start date to be later than end date, set it to false to allow
 const CHECK_DATE = true
@@ -127,35 +128,24 @@ class FC extends React.Component{
 		})
 	}
 
-	// currently unused due to regex problems
-	/*setFilename(event){
-		var name = event.target.value
-		if (name.search(/[/\\\?%\*:|\"<>]/g)){
-			alert("These characters are not allowed in filenames:\n/ \\ ? % * : | \" < >")
-		} else {
-			this.setState({
-				zip_filename: name
-			})
-		}
-	}*/
-
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
 		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors"/*, params: this.state.params*/};
-		await Axios.post(postURL, {...json, responseType: "blob"}, config).then((res) => {
-			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
-			let a = document.createElement("a");
-			let downloadUrl = window.URL.createObjectURL(blob)
-			let filename = this.state.zip_filename + ".zip"
-			let disposition = res.headers["Content-Disposition"]
-			if (typeof a.download === "undefined") {
+		await Axios.post(postURL, {...json}, config).then((res) => {
+			//let blob = new Blob([res.data], {type:res.headers['Content-Type']})
+			//let a = document.createElement("a");
+			//let downloadUrl = window.URL.createObjectURL(blob)
+			//let filename = this.state.zip_filename + ".zip"
+			//let disposition = res.headers["Content-Disposition"]
+			//fileDownload(blob, "fc.zip")
+			/*if (typeof a.download === "undefined") {
 				window.location.href = downloadUrl
 			} else {
 				a.href = downloadUrl;
 				a.download = filename;
 				document.body.appendChild(a);
 				a.click();
-			}
+			}*/
 		}).catch ((err) => {
 			if (err) {
 				console.log(err);
@@ -168,8 +158,15 @@ class FC extends React.Component{
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
 	async sendGet(){
-		Axios.get(getURL, null).then((res) => {
+		Axios.get(getURL, {
+			// options:
+			responseType: "arraybuffer"
+		}).then((res) => {
 			console.log(res)
+			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
+			if (blob){
+				fileDownload(blob, "fc.zip")
+			}
 		}).catch((err) => {
 			console.log("ERROR " + err)
 		})
@@ -216,8 +213,10 @@ class FC extends React.Component{
 		console.log(params)
 		//var postBody = JSON.stringify(params)
 		//this.sendPost(postBody)
-		this.sendPost(params)
-		//this.sendGet()
+		this.sendPost(params).then(() => {
+			this.sendGet()
+		})
+		
 	}
 	
 	componentDidMount(){
