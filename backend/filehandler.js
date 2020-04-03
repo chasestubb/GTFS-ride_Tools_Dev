@@ -60,6 +60,8 @@ var filename = ""
 
 var fc_promise
 
+// asynchronously call Feed_Creation.Feed_Creation()
+// Feed_Creation.Feed_Creation() is completely synchronous so we only need to wait for one thing
 async function feed_creation(params){
     console.log("Generating feed with params:")
     console.log(params)
@@ -654,35 +656,16 @@ app.post(FC_POST_URL, async (req, res) => {
     //console.log(req.body)
     res.setHeader("Access-Control-Allow-Origin", CORS);
     
-    //var fc_file = feed_creation(req.body)
-    //var fc_filepath = process.cwd() + "/" + fc_file
-
-    //res.writeHead(200, {"Access-Control-Allow-Origin": CORS});
-    //res.download(fc_filepath, function(err){
-        /*if (err){
-            //res.writeHead(500);
-            res.write(String(err))
-            console.log(err)
-            res.end()
-        } else {
-            //res.writeHead(200);
-            console.log("Params received")
-            res.end()
-        }*/
-    //})
-    //res.end()
-    //fc_file = feed_creation(req.body)
+    // make promise for generating feed file (async)
+    // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
     fc_promise = new Promise((resolve, reject) => {
         console.log("Params received")
-        resolve (feed_creation(req.body))
+        resolve (feed_creation(req.body)) // generate the feed file and resolve the promise when done
     })
     res.writeHead(200)
+    res.write("Params received")
     res.end()
     //console.log("DOES IT GO HERE?") // it does go here
-    //Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date)
-    //fc_filepath = process.cwd() + "/" + fc_file
-    //pubsub.pub();
-})
 
 // --------------------------------------------------------------------------------
 // FEED CREATION - OUTPUT
@@ -690,29 +673,15 @@ app.get(FC_GET_URL, async (req, res) => {
     console.log("FC GET")
     //res.writeHead(200, {"Access-Control-Allow-Origin": CORS, /*'Content-Type': 'text/plain'*/});
     
-    /*pubsub.sub(() => {
-        res.setHeader("Access-Control-Allow-Origin", CORS);
-        res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
-        res.setHeader("Content-Type", "application/zip")
-
-        //var fc_filepath = process.cwd() + await fc_filename
-        res.sendFile(fc_filepath, function(err){
-            if (err){
-                console.log("Error sending file: " + err)
-            } else {
-                console.log("File sent to client")
-            }
-        })
-        res.end()
-    })*/
-    
     res.setHeader("Access-Control-Allow-Origin", CORS);
     res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
     res.setHeader("Content-Type", "application/zip")
 
-
+    // wait for feed creation to finish
+    // promise will be filename when resolved
+    // feed creation needs to be called before response is sent to the client because fc_promise will be empty (i.e. not a promise) otherwise
     var fc_filename = await fc_promise
-    console.log(fc_filename)
+    //console.log(fc_filename)
     var fc_filepath = process.cwd() + "/" + fc_filename
     res.download(fc_filepath, function(err){
         if (err){
@@ -720,9 +689,8 @@ app.get(FC_GET_URL, async (req, res) => {
         } else {
             console.log("File sent to client")
         }
-        res.end()
+        res.end() // res.end() is here to prevent the connection from being closed while the download is incomplete
     })
-    
     
 })
 

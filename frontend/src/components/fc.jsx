@@ -132,20 +132,6 @@ class FC extends React.Component{
 	async sendPost(json){
 		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors"/*, params: this.state.params*/};
 		await Axios.post(postURL, {...json}, config).then((res) => {
-			//let blob = new Blob([res.data], {type:res.headers['Content-Type']})
-			//let a = document.createElement("a");
-			//let downloadUrl = window.URL.createObjectURL(blob)
-			//let filename = this.state.zip_filename + ".zip"
-			//let disposition = res.headers["Content-Disposition"]
-			//fileDownload(blob, "fc.zip")
-			/*if (typeof a.download === "undefined") {
-				window.location.href = downloadUrl
-			} else {
-				a.href = downloadUrl;
-				a.download = filename;
-				document.body.appendChild(a);
-				a.click();
-			}*/
 		}).catch ((err) => {
 			if (err) {
 				console.log(err);
