@@ -1,6 +1,9 @@
 import React from 'react'
 import Axios from 'axios'
+import fileDownload from 'js-file-download'
 
+// set this to true if the program should prohibit start date to be later than end date, set it to false to allow
+const CHECK_DATE = true
 
 // FOR PRODUCTION, CHANGE THIS TO THE SERVER HOST
 const HOST = "http://localhost:8080"
@@ -56,9 +59,11 @@ class FC extends React.Component{
 			},
 			status: -1,
 			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
+			zip_filename: "gtfs-ride",
 		}
 		this.setNumber = this.setNumber.bind(this)
 		this.setDate = this.setDate.bind(this)
+		//this.setFilename = this.setFilename.bind(this)
 		this.set = this.set.bind(this)
 		this.submit = this.submit.bind(this)
 		this.isServerAlive = this.isServerAlive.bind(this)
@@ -95,6 +100,7 @@ class FC extends React.Component{
 		
 	}
 
+	// converts "2019-12-31" to 20191231
 	strDateToIntDate(strDate){
 		var arrDate = strDate.split("-")
 		var intDate = 0
@@ -125,29 +131,47 @@ class FC extends React.Component{
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
 		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors"/*, params: this.state.params*/};
-		try {
-			const res = await Axios.post(postURL, json, config);
-			console.log(res.data);
-		}
-		catch (err) {
+		await Axios.post(postURL, {...json}, config).then((res) => {
+		}).catch ((err) => {
 			if (err) {
 				console.log(err);
 				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
 				}
 			}
-		}
+		})
 	}
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
 	async sendGet(){
-		Axios.get(getURL, null).then((res) => {
+		Axios.get(getURL, {
+			// options:
+			responseType: "arraybuffer"
+		}).then((res) => {
 			console.log(res)
+			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
+			if (blob){
+				fileDownload(blob, "fc.zip")
+			}
 		}).catch((err) => {
 			console.log("ERROR " + err)
 		})
 	}
 
+	/* THE SUBMISSION PROCEDURE NEEDS TO BE CHANGED
+	   GET request should only be called after POST request has received a response
+	   New procedure:
+	   1.  User fills out form
+	   2.  User clicks submit
+	   3.  Client transforms data
+	   4.  Client sends POST data to server
+	   5.  Server processes data
+	   6.  Server writes data to vars
+	   7.  Server responds to POST
+	   8.  Client receives POST
+	   9.  Client sends GET
+	   10. 
+	*/
 	submit(event){
 		if (this.state.params.start_date == null && this.state.params.end_date == null){
 			alert("Please fill out the start and end dates.")
@@ -159,18 +183,26 @@ class FC extends React.Component{
 			alert("End date is required.")
 			return;
 		}
+		var start = this.strDateToIntDate(this.state.params.start_date)
+		var end = this.strDateToIntDate(this.state.params.end_date)
+		if ((start > end) && CHECK_DATE){
+			alert("End date cannot be earlier than start date.")
+			return;
+		}
 		var params = {
 			...this.state.params,
 			trips: (this.state.params.trips_per_route * this.state.params.routes),
-			start_date: this.strDateToIntDate(this.state.params.start_date),
-			end_date: this.strDateToIntDate(this.state.params.end_date),
-			feed_date: this.strDateToIntDate(this.state.params.start_date)
+			start_date: start,
+			end_date: end,
+			feed_date: start
 		}
 		console.log(params)
 		//var postBody = JSON.stringify(params)
 		//this.sendPost(postBody)
-		this.sendPost(params)
-		//this.sendGet()
+		this.sendPost(params).then(() => {
+			this.sendGet()
+		})
+		
 	}
 	
 	componentDidMount(){
@@ -240,6 +272,10 @@ class FC extends React.Component{
 											<option value={4}>Mixed Source</option>
 										</select></td>
 									</tr>
+									{/*<tr>
+										<td>Output file name</td>
+										<td><input name="zip_filename" className="" type="r" value={this.state.zip_filename} onChange={this.setFilename}></input></td>
+									</tr>*/}
 								</table>
 								<br/>
 								<button onClick={this.submit}>Generate Feed</button>

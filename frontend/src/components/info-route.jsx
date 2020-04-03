@@ -3,43 +3,60 @@ import {Link, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/info/agency/";
+const url = "http://localhost:8080/info/route/";
 const RIDERSHIP_TIME = "Weekly"
 
 function get_route_type(type){
 	switch(Number(type)){ // no break because of the return statements
 		case 0:
-			return(<span><strong>light rail</strong></span>)
+			return(<span>Light Rail</span>)
 		case 1:
-			return(<span><strong>rail rapid transit</strong></span>)
+			return(<span>Rail Rapid Transit</span>)
 		case 2:
-			return(<span><strong>rail</strong></span>)
+			return(<span>Rail</span>)
 		case 3:
-			return(<span><strong>bus</strong></span>)
+			return(<span>Bus</span>)
 		case 4:
-			return(<span><strong>ferry</strong></span>)
+			return(<span>Ferry</span>)
 		case 5:
-			return(<span><strong>cable tram</strong></span>)
+			return(<span>Cable Tram</span>)
 		case 6:
-			return(<span><strong>cable-suspended lift</strong></span>)
+			return(<span>Cable-Suspended Lift</span>)
 		case 7:
-			return(<span><strong>furnicular</strong></span>)
+			return(<span>Furnicular</span>)
 		default:
 			return(<span><em>unknown</em></span>)
 	}
 }
 
-class Info_Agency extends React.Component{
+function get_fgcolor(bgcolor){
+	var rgb = String(bgcolor)
+	var r = parseInt(rgb.slice(0,1), 16)
+	var g = parseInt(rgb.slice(2,3), 16)
+	var b = parseInt(rgb.slice(4,5), 16)
+	var lum = 0.3*r + 0.59*g + 0.11*b
+	if (lum < 128){
+		return "FFFFFF"
+	} else {
+		return "000000"
+	}
+}
+
+class Info_Route extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
 			status: -1,
-			name: "",
+			short_name: "",
+			long_name: "",
+			desc: "",
+			type: -1,
 			url: "",
-			fare_url: "",
-			phone: "",
-			email: "",
-			hours: {
+			bgcolor: "",
+			fgcolor: "",
+			min_headway: -1,
+			variations: -1,
+			span: {
 				m: "",
 				t: "",
 				w: "",
@@ -48,11 +65,9 @@ class Info_Agency extends React.Component{
 				s: "",
 				u: ""
 			},
-			routes: [],
-			stops: [],
+			trips: [],
 			is_gtfs_ride: false,
 			ridership: 0,
-			trips: 0,
 			err: null,
 		}
 	}
@@ -78,6 +93,25 @@ class Info_Agency extends React.Component{
 		this.getInfo();
 	}
 
+	RouteColor(){
+		var bgcolor = ""
+		var fgcolor = ""
+		if (this.state.bgcolor){ // if route has background color specified
+
+			bgcolor = this.state.bgcolor
+			if (this.state.fgcolor) { // if route has text color specified
+				fgcolor = this.state.fgcolor
+				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor} / {fgcolor}</strong></span>)
+			} else { // if route has no text color
+				fgcolor = get_fgcolor(bgcolor)
+				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor}</strong></span>)
+			}
+			
+		} else { // if route has no background color
+			return (<em>no color specified</em>)
+		}
+	}
+
 	render(){
 		if (this.state.status == 200){
 			return (
@@ -86,7 +120,7 @@ class Info_Agency extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800"><Link to="/info" className="back-button"><i className="fas fa-chevron-left back-button"></i></Link>{this.state.name}</h1>
+							<h1 className="h3 mb-0 text-gray-800"><Link to="/info" className="back-button"><i className="fas fa-chevron-left back-button"></i></Link><strong>{this.state.short_name}</strong> - {this.state.long_name}</h1>
 						</div>
 					</div>
 		
@@ -98,8 +132,8 @@ class Info_Agency extends React.Component{
 								<div className="card-body">
 									<div className="row no-gutters align-items-center">
 										<div className="col mr-2">
-											<div className="text-xs font-weight-bold text-info text-uppercase mb-1">Routes</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">{(this.state.routes).length}</div>
+											<div className="text-xs font-weight-bold text-info text-uppercase mb-1">Type</div>
+											<div className="h5 mb-0 font-weight-bold text-gray-800">{get_route_type(this.state.type)}</div>
 										</div>
 										<div className="col-auto">
 											<i className="fas fa-route fa-2x text-gray-300"></i>
@@ -133,7 +167,7 @@ class Info_Agency extends React.Component{
 									<div className="row no-gutters align-items-center">
 										<div className="col mr-2">
 											<div className="text-xs font-weight-bold text-success text-uppercase mb-1">Trips</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.trips}</div>
+											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.trips.length}</div>
 										</div>
 										<div className="col-auto">
 											<i className="fas fa-arrow-circle-right fa-2x text-gray-300"></i>
@@ -246,34 +280,39 @@ class Info_Agency extends React.Component{
 							{/* Project Card Example */}
 							<div className="card shadow mb-4">
 								<div className="card-header py-3">
-									<h6 className="m-0 font-weight-bold text-primary">Agency Info</h6>
+									<h6 className="m-0 font-weight-bold text-primary">Route Info</h6>
 								</div>
 								<div className="card-body">
-									Name: <strong>{this.state.name}</strong> <br/>
+									Short Name: {this.state.short_name ? <strong>{this.state.short_name}</strong> : "none provided"} <br/>
+									Long Name: {this.state.long_name ? <strong>{this.state.long_name}</strong> : "none provided"} <br/>
+									Description: {this.state.desc ? <strong>{this.state.desc}</strong> : "no description provided"} <br/>
 									Website: {this.state.url ? <a href={this.state.url}><strong>{this.state.url}</strong></a> : "no website provided"} <br/>
-									Contact: {this.state.phone ? <strong>{this.state.phone}</strong> : "no phone number provided"} / {this.state.email ? <strong>{this.state.email}</strong> : "no email address provided"}
+									Color: {this.RouteColor}<br/>
+									Variations: {this.state.variations}<br/>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div className="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 className="h3 mb-0 text-gray-800">Routes ({(this.state.routes).length})</h1>
+						<h1 className="h3 mb-0 text-gray-800">Trips ({(this.state.trips).length})</h1>
 					</div>
 					<div className="row">
 		
 						{/* Content Column - ROUTES */}
-						{this.state.routes.map(route => 
+						{this.state.trips.map(trip => 
 							<div className="col-lg-6 mb-4">
 		
 								<div className="card shadow mb-4">
 									<div className="card-header py-3">
-										<h6 className="m-0 font-weight-bold text-primary"><Link to={"/info/route/" + route.index}><strong>{route.short_name}</strong>{(route.short_name && route.long_name) ? " - " : null}{route.long_name}</Link></h6>
+										<h6 className="m-0 font-weight-bold text-primary"><strong>{trip.short_name ? trip.short_name : trip.id}</strong></h6>
 									</div>
 									<div className="card-body">
-										Description: <strong>{route.desc}</strong> <br/>
-										Type: {get_route_type(route.type)} <br/>
-										Trips: <strong>{route.trips}</strong> <br/>
-										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + route.ridership : null} <br/>
+										Days: <strong>{trip.days}</strong> <br/>
+										Start time: <strong>{trip.start_time}</strong> <br/>
+										End time: <strong>{trip.end_time}</strong> <br/>
+										Headsign: <strong>{trip.headsign}</strong> <br/>
+										Direction: <strong>{trip.direction}</strong> <br/>
+										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + trip.ridership : null} <br/>
 									</div>
 								</div>
 							</div>
@@ -300,4 +339,4 @@ class Info_Agency extends React.Component{
 		
 	}
 }
-export default Info_Agency
+export default Info_Route

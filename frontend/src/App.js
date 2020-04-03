@@ -20,6 +20,7 @@ import Merge from "./components/merge" // merge (formerly "ridership merge")
 import RA from "./components/ra"       // ridership anomaly
 import SC from "./components/sc"       // service changes
 import InfoAgency from './components/info-agency' // agency view of info
+import InfoRoute from './components/info-route'   // route view of info
 
 // other contents
 import Error404 from "./components/404"
@@ -57,6 +58,11 @@ import Error404 from "./components/404"
 function AgencyInfo(){
 	const {index} = useParams();
 	return <InfoAgency index={index}/>
+}
+
+function RouteInfo(){
+	const {index} = useParams();
+	return <InfoRoute index={index}/>
 }
 
 class App extends React.Component{
@@ -167,6 +173,9 @@ class App extends React.Component{
 									</Route>*/}
 									<Route path="/info/agency/:index">
 										<AgencyInfo/>
+									</Route>
+									<Route path="/info/route/:index">
+										<RouteInfo/>
 									</Route>
 									<Route path="/info">
 										<Info filename={this.state.filename}/>
