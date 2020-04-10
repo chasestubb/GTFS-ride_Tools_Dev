@@ -14,7 +14,6 @@
     "express": "^4.17.1",
     "extract-zip": "^1.6.7",
     "formidable": "^1.2.1",
-    "is-sea": "^0.3.1",
     "nan": "^2.14.0",
     "random-lastname": "^1.0.1"
   }
