@@ -349,13 +349,13 @@ module.exports = {
     stopTimesCreate: function(num_trips, trips, num_stops, num_routes, num_trips_per_route){
         var stop_times = [];
         var stop_sequence_list = [];
-        var stop_time_entry = {
-            trip_id: "",
-            arrival_time: "",
-            departure_time: "",
-            stop_id: "",
-            stop_sequence: 0,
-        };
+        // var stop_time_entry = {
+        //     trip_id: "",
+        //     arrival_time: "",
+        //     departure_time: "",
+        //     stop_id: "",
+        //     stop_sequence: 0,
+        // };
         var min = 0;
         var count = 1;
 
@@ -377,11 +377,10 @@ module.exports = {
 
             // FOR EACH TRIP (in one set - of size defined by user in trips per route)
             for (var j = 1; j <= num_trips_per_route; j++){
-                console.log("TRIP: " + count);
                  
                 // reset values prior to creating values for a single trip
-                stop_time_entry.arrival_time = "00:00:00";
-                stop_time_entry.departure_time = "05:55:00";
+                var local_arr_time = "00:00:00";
+                var local_dep_time = "05:55:00";
                 
                 // REPEAT STOP SEQUENCE for each trip in the route
                 // counter to ensure we generate the proper number of stops for a trip
@@ -390,15 +389,26 @@ module.exports = {
                     
                     var count2 = count;
 
+                    // increment times accordingly
+                    local_arr_time = incrementTime(local_dep_time, 5);
+                    local_dep_time = incrementTime(local_arr_time, 2);
+
                     // GENERATE A LINE (represents a single stop time)
-                    stop_time_entry.trip_id = "TRIP" + count2; // trip id
-                    stop_time_entry.stop_id = stop_sequence_list[c]; // stop id (taken from the sequence generated)
-                    stop_time_entry.arrival_time = incrementTime(stop_time_entry.departure_time, 5); // arrival time begins at 06:00:00
-                    stop_time_entry.departure_time = incrementTime(stop_time_entry.arrival_time, 2); // departure time begins at 06:02:00
-                    stop_time_entry.stop_sequence = c; // the stop sequence #
+                    var stop_time_entry = {			  
+                        trip_id: "TRIP" + count2, // trip id			  
+                        arrival_time: local_arr_time, // arrival time begins at 06:00:00 			  
+                        departure_time: local_dep_time, // departure time begins at 06:02:00 			  
+                        stop_id: stop_sequence_list[c], // stop id (taken from the sequence generated)	  
+                        stop_sequence: c + 1,		   	
+                    };
+                    
+                    // stop_time_entry.trip_id = "TRIP" + count2; // trip id
+                    // stop_time_entry.stop_id = stop_sequence_list[c]; // stop id (taken from the sequence generated)
+                    // stop_time_entry.arrival_time = incrementTime(stop_time_entry.departure_time, 5); // arrival time begins at 06:00:00
+                    // stop_time_entry.departure_time = incrementTime(stop_time_entry.arrival_time, 2); // departure time begins at 06:02:00
+                    // stop_time_entry.stop_sequence = c; // the stop sequence #
 
                     // PUSH LINE TO ARRAY
-                    console.log("boomtown :: " + stop_time_entry.arrival_time);
                     stop_times.push(stop_time_entry); 
                 }
 
