@@ -31,17 +31,49 @@ var randomLastName = require('random-lastname');
 var randordinal_converter = require('number-to-words'); // ex ordinal_converter.toOrdinal(21); => “21st”
 var csvStringify = require('csv-stringify');
 var csv_stringify = csvStringify({delimiter: ','});
-var csvStringifySync = require('csv-stringify/lib/sync')
+var csvStringifySync = require('csv-stringify/lib/sync');
 var fs = require('fs');
-var zip = require('cross-zip')
+var zip = require('cross-zip');
 
-var FILEPATH = "feed_creation/"
-var FILENAME = "fc.zip"
+var FILEPATH = "feed_creation/";
+var FILENAME = "fc.zip";
 //var FILEPATH = "./"
 
+ // GET RANDOM INT INCLUSIVE ================
+ function getRandomIntInclusive (min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+};
+
+// PAD NUMBER SIZE TO TWO DIGITS
+function pad(num) {
+    var s = num + "";
+    while (s.length < 2) s = "0" + s;
+    return s;
+}
+
+// TIME INCREMENTER ========================
+function incrementTime (input_time, amount) {
+
+    // receive input hours, minutes, seconds
+    var time = input_time.split(":");
+    var hours = Number(time[0]);
+    var minutes = Number(time[1]);
+    var seconds = Number(time[2]);
+
+    total_minutes = hours * 60 + minutes;
+    total_minutes = total_minutes + amount;
+
+    output_hours = Math.floor(total_minutes / 60);
+    output_hours = output_hours % 24; // account for 24 hours in day
+    output_minutes = total_minutes % 60;
+
+    // seconds remains the same
+    return (pad(output_hours) + ":" + pad(output_minutes) + ":" + pad(seconds));
+}
 
 module.exports = {
-
     // AGENCY.TXT CREATE (GTFS) ================
     // Description: 
     //   generates one line per agency desired by the user
@@ -63,7 +95,8 @@ module.exports = {
             agency_name: "",
             agency_url: "",
             agency_timezone: "",
-        }
+        };
+
         for (var i = 1; i <= num_agencies; i++){
             temp_agency = {
                 agency_id: "",
@@ -198,7 +231,7 @@ module.exports = {
                 route_type: -1,
             };
             temp_route.route_id = "ROUTE" + i;
-            var rand_agency = Math.floor(Math.random() * Number(num_agencies)) + 1;
+            var rand_agency = getRandomIntInclusive(1, num_agencies);
             temp_route.agency_id = "AGENCY" + rand_agency;
 
             rand_name1 = randomLastName();
@@ -257,12 +290,12 @@ module.exports = {
             };
 
             // generate random street (ex "21st") and name (ex "Jefferson")
-            randNumber = (Math.random() * 199) + 1; // between 1 and 200
+            randNumber = getRandomIntInclusive(1, 200); // between 1 and 200
             randOrdinal = randordinal_converter.toOrdinal(randNumber);
             randName = randomLastName();
             temp_stop.stop_name = randOrdinal + " and " + randName;
 
-            // Math.random() :: generate a number between 0 and 1
+            // Math.random() :: generate a float between 0 and 1
             temp_stop.stop_id = "STOP" + i;
             randLatRaw = (Math.random() * 180) - 90; // between -90 and 90
             randLat = parseFloat(randLatRaw.toFixed(6)); // round to six decimal points
@@ -301,7 +334,10 @@ module.exports = {
     //   number of trips
     //
     // Importantly, we will use the above to calculate stops per route, so we can 
-    //   assign the right number of stops to each trip 
+    //   assign the right number of stops to each trip.
+    // This number is being calculated, and yet a stop sequence is also currently being
+    //   capped at 100 stops per stop sequence
+    // TODO :: add variable from user for max stops per route
     //
     // Attributes: 
     //   trip_id         | static - always "TRIP#"          
@@ -310,50 +346,63 @@ module.exports = {
     //   stop_id         | static - references a stop (randomized)
     //   stop_sequence   | algorithm - see desc above
 
-    stopTimesCreate: function(num_trips, trips, num_stops, num_routes){
+    stopTimesCreate: function(num_trips, trips, num_stops, num_routes, num_trips_per_route){
         var stop_times = [];
         var stop_sequence_list = [];
-        var temp_times = {
+        var stop_time_entry = {
             trip_id: "",
-            arrival_time: 0,
-            departure_time: 0,
+            arrival_time: "",
+            departure_time: "",
             stop_id: "",
             stop_sequence: 0,
         };
         var min = 0;
+        var count = 1;
 
         // get number of stops per route. also get remainder so we can add to last trip
         num_stops_per_route = num_routes / num_stops;
         remainder = num_routes % num_stops; 
 
-        for (var i = 1; i <= num_trips; i++){
-             // reset
-             temp_times = {
-                trip_id: "",
-                arrival_time: 0,
-                departure_time: 0,
-                stop_id: "",
-                stop_sequence: 0
-            };
+        // FOR EACH TRIP IN FEED
+        while (count <= num_trips) {
 
-            // for a route, do x trips per route (defined by user initially)
+            // GENERATE STOP SEQUENCE for a set of trips belonging to the same route
+            // e.g. [STOP5, STOP56, STOP98, STOP6...]
+            stop_sequence_list = []; // empty the list for new sequence
+            for(var k = 1; k <= num_stops_per_route || k <= 100; k++){ // TODO - make this cap user defined
+                // get random stop ID for each index of the stop sequence list
+                randStopID = getRandomIntInclusive(1, num_stops); // between 1 and num_stops
+                stop_sequence_list.push("STOP" + randStopID);
+            }
+
+            // FOR EACH TRIP (in one set - of size defined by user in trips per route)
             for (var j = 1; j <= num_trips_per_route; j++){
-
-                // all trips from this loop will have the same stop sequence
-                // GENERATE STOP SEQUENCE
-                stop_sequence_list = [];
-                for(var k = 1; k <= num_stops_per_route; k++){
-                    // get random stop ID for each index of the stop sequence list
-                    randStopID = (Math.random() * (num_stops - 1)) + 1;
-                    stop_sequence_list.push("STOP" + randStopID);
-                }
-
+                console.log("TRIP: " + count);
+                 
+                // reset values prior to creating values for a single trip
+                stop_time_entry.arrival_time = "00:00:00";
+                stop_time_entry.departure_time = "05:55:00";
+                
                 // REPEAT STOP SEQUENCE for each trip in the route
                 // counter to ensure we generate the proper number of stops for a trip
-                for (var c = 1; c <= num_trips_per_route; c++){
-                    temp_times.stop_sequence = c;
-                    stop_times.push(temp_times);
+                for (var c = 0; c < stop_sequence_list.length; c++){
+                    //console.log("printing a line for [" + c + "] in stop sequence list");
+                    
+                    var count2 = count;
+
+                    // GENERATE A LINE (represents a single stop time)
+                    stop_time_entry.trip_id = "TRIP" + count2; // trip id
+                    stop_time_entry.stop_id = stop_sequence_list[c]; // stop id (taken from the sequence generated)
+                    stop_time_entry.arrival_time = incrementTime(stop_time_entry.departure_time, 5); // arrival time begins at 06:00:00
+                    stop_time_entry.departure_time = incrementTime(stop_time_entry.arrival_time, 2); // departure time begins at 06:02:00
+                    stop_time_entry.stop_sequence = c; // the stop sequence #
+
+                    // PUSH LINE TO ARRAY
+                    console.log("boomtown :: " + stop_time_entry.arrival_time);
+                    stop_times.push(stop_time_entry); 
                 }
+
+                count = count + 1; // account for a new trip
             }
         }
        return stop_times;
@@ -403,7 +452,7 @@ module.exports = {
                 temp_trip.route_id = "ROUTE" + i;
                 temp_trip.service_id = "BASE_CALENDAR";
                 temp_trip.trip_id = "TRIP" + trips_counter;
-                temp_trip.direction_id = Math.round(Math.random()); // generates 0 or 1 with equal probability
+                temp_trip.direction_id = getRandomIntInclusive(0,1); // generates 0 or 1 with equal probability
                 trips_counter = trips_counter + 1;
 
                 trips.push(temp_trip);
@@ -507,7 +556,7 @@ module.exports = {
 
         var min = 0;
         for (var i = 0; i < num_trips; i++){
-            var rand_trip = Math.floor(Math.random() * num_trips);
+            var rand_trip = getRandomIntInclusive(1, num_trips);
             var a = new Date();
             a.setHours(6);
             a.setMinutes(min);
@@ -557,11 +606,11 @@ module.exports = {
 
         for (var i = 0; i < num_riders; i++){
             temp_rider.rider_id = "RIDER" + i;
-            var rand_stop = Math.floor(Math.random() * num_stops);
-            var rand_stop2 = Math.floor(Math.random() * num_stops);
+            var rand_stop = getRandomIntInclusive(1, num_stops); 
+            var rand_stop2 = getRandomIntInclusive(1, num_stops);
             temp_rider.boarding_stop_id = rand_stop;
             temp_rider.alighting_stop_id = rand_stop2;
-            var rand_trip = Math.floor(Math.random() * num_trips);
+            var rand_trip = getRandomIntInclusive(1, num_trips);
             var a = new Date();
             a.setHours(6);
             a.setMinutes(min);
@@ -616,7 +665,7 @@ module.exports = {
                     }
                 }
             }
-            var rand_route = Math.floor(Math.random() * num_routes);
+            var rand_route = getRandomIntInclusive(1, num_routes);
             var rand_id = routes[rand_route].route_id;
             temp_ridership.route_id = rand_id;
             ridership.push(temp_ridership);
@@ -641,7 +690,7 @@ module.exports = {
         
         for (var i = 0; i < num_trips; i++){
             temp_trip.trip_id = trips[i];
-            var rand_agency_index = Math.floor(Math.random() * num_agencies);
+            var rand_agency_index = getRandomIntInclusive(1, num_agencies);
             var rand_agency = agencies[rand_agency_index].agency_id;
             temp_trip.agency_id = rand_agency;
             trip_capacities.push(temp_trip);
@@ -657,7 +706,7 @@ module.exports = {
         var stops = this.stopsCreate(num_stops);
         var routes = this.routesCreate(num_routes, num_agencies);
         var trips = this.tripsCreate(num_routes, num_trips_per_route);
-        var stopTimes = this.stopTimesCreate(num_trips, trips);
+        var stopTimes = this.stopTimesCreate(num_trips, trips, num_stops, num_routes, num_trips_per_route);
         var feedInfo = this.feedInfoCreate(start_date, end_date);
         //var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date);
         //var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source);
@@ -729,12 +778,12 @@ module.exports = {
 
         //console.log(process.cwd())
         // WRITE THE FILES =========================
-        fs.writeFileSync(FILEPATH + "agencies.txt", agenciesCSV)
-        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV)
-        fs.writeFileSync(FILEPATH + "routes.txt", routesCSV)
-        fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV)
-        fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV)
-        fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV)
+        fs.writeFileSync(FILEPATH + "agencies.txt", agenciesCSV);
+        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
+        fs.writeFileSync(FILEPATH + "routes.txt", routesCSV);
+        fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
+        fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
+        fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
         //fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV)
         //fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
         //fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
@@ -742,13 +791,13 @@ module.exports = {
         //fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================
-        var current_dir = process.cwd() // save current working dir
-        process.chdir(FILEPATH) // change dir
-        zip.zipSync("./", "./" + FILENAME) // zip the files
-        process.chdir(current_dir) // undo change dir
+        var current_dir = process.cwd(); // save current working dir
+        process.chdir(FILEPATH); // change dir
+        zip.zipSync("./", "./" + FILENAME); // zip the files
+        process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
-        return (FILEPATH + FILENAME)
+        return (FILEPATH + FILENAME);
     }
 
 };
