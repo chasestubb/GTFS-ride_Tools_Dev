@@ -26,5 +26,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# ignore the feeds the user uploads (server storage)
 /backend/uploads/*
 
+# ignore the feeds created by feed creation
+/backend/feed_creation/* 
