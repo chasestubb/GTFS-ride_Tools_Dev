@@ -11030,4 +11030,12 @@ img {
 
 .back-button{
   width: 1em;
+  background: none;
+  border: none;
+  text-align: left;
+  color: #4e73df;
+}
+
+.back-button:hover{
+  color: #224abe;
 }
