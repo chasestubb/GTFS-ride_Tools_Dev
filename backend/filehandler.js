@@ -405,7 +405,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
             //stops: [],
             is_gtfs_ride: gtfs_ride_feed,
             ridership: 0,
-            //trips: Info.countTripsPerAgency(agency, routes, trips),
         }
 
         // get the route's trips
