@@ -372,7 +372,7 @@ module.exports = {
             // GENERATE STOP SEQUENCE for a set of trips belonging to the same route
             // e.g. [STOP5, STOP56, STOP98, STOP6...]
             stop_sequence_list = []; // empty the list for new sequence
-            for(var k = 1; k <= num_stops_per_route || k <= 100000; k++){ // TODO - make this cap user defined
+            for(var k = 1; k <= num_stops_per_route && k <= 100000; k++){ // TODO - make this cap user defined
                 // get random stop ID for each index of the stop sequence list
                 randStopID = getRandomIntInclusive(1, num_stops); // between 1 and num_stops
                 stop_sequence_list.push("STOP" + randStopID);
