@@ -1,3 +1,5 @@
+// info-route.jsx shows the route-level info
+
 import React from 'react'
 import {Link, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
@@ -6,8 +8,9 @@ import Axios from 'axios'
 const url = "http://localhost:8080/info/route/";
 const RIDERSHIP_TIME = "Weekly"
 
+// get the route type (route type is an enum on the standard)
 function get_route_type(type){
-	switch(Number(type)){ // no break because of the return statements
+	switch(Number(type)){ // no break statements because all cases return at the end
 		case 0:
 			return(<span>Light Rail</span>)
 		case 1:
@@ -29,12 +32,13 @@ function get_route_type(type){
 	}
 }
 
+// finds whether the text color should be white or black (based on the background color) if it is not provided in the feed
 function get_fgcolor(bgcolor){
 	var rgb = String(bgcolor)
 	var r = parseInt(rgb.slice(0,1), 16)
 	var g = parseInt(rgb.slice(2,3), 16)
 	var b = parseInt(rgb.slice(4,5), 16)
-	var lum = 0.3*r + 0.59*g + 0.11*b
+	var lum = 0.2126*r + 0.7152*g + 0.0722*b
 	if (lum < 128){
 		return "FFFFFF"
 	} else {
@@ -72,16 +76,12 @@ class Info_Route extends React.Component{
 		}
 	}
 
+	// get data from the server
 	getInfo(){
 		console.log("getInfo(" + url + this.props.index + ")")
-		Axios.get(url + this.props.index, /*{params: {agency: this.props.index}}*/).then((res) => {
+		Axios.get(url + this.props.index).then((res) => {
 			console.log(res)
-			/*this.setState({
-				filename: res.data.filename,
-				is_gtfs_ride: res.data.is_gtfs_ride,
-				agency_list: res.data.agencies
-			})*/
-			this.setState(res.data)
+			this.setState(res.data) // store the agency data on the local state
 			this.setState({status: res.status, err: null})
 		}).catch(function(err){
 			console.log("Error: " + err)
@@ -89,10 +89,12 @@ class Info_Route extends React.Component{
 		})
 	}
 
+	// get the data on page load
 	componentDidMount(){
 		this.getInfo();
 	}
 
+	// show route colors with the colors specified on the feed (if exists)
 	RouteColor(){
 		var bgcolor = ""
 		var fgcolor = ""
@@ -101,9 +103,9 @@ class Info_Route extends React.Component{
 			bgcolor = this.state.bgcolor
 			if (this.state.fgcolor) { // if route has text color specified
 				fgcolor = this.state.fgcolor
-				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor} / {fgcolor}</strong></span>)
+				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor} / {fgcolor}</strong></span>) // show something like "012345 / AFAFAF"
 			} else { // if route has no text color
-				fgcolor = get_fgcolor(bgcolor)
+				fgcolor = get_fgcolor(bgcolor) // calculate the best foreground color (black/white)
 				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor}</strong></span>)
 			}
 			
@@ -126,7 +128,7 @@ class Info_Route extends React.Component{
 		
 					<div className="row">
 		
-						{/* Routes */}
+						{/* Route type */}
 						<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-primary shadow h-100 py-2">
 								<div className="card-body">
@@ -142,25 +144,8 @@ class Info_Route extends React.Component{
 								</div>
 							</div>
 						</div>
-		
-						{/* Stops */}{/*
-						<div className="col-xl-3 col-md-6 mb-4">
-							<div className="card border-left-dark shadow h-100 py-2">
-								<div className="card-body">
-									<div className="row no-gutters align-items-center">
-										<div className="col mr-2">
-											<div className="text-xs font-weight-bold text-dark text-uppercase mb-1">Stops</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">{this.state.stops.length}</div>
-										</div>
-										<div className="col-auto">
-											<i className="fas fa-sign fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>*/}
 
-						{/* Average daily trips */}
+						{/* Number of trips */}
 						<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-success shadow h-100 py-2">
 								<div className="card-body">
@@ -177,7 +162,7 @@ class Info_Route extends React.Component{
 							</div>
 						</div>
 		
-						{/* Average daily riderships */}
+						{/* Riderships */}
 						<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-accent shadow h-100 py-2">
 								<div className="card-body">
@@ -197,40 +182,6 @@ class Info_Route extends React.Component{
 								</div>
 							</div>
 						</div>
-		
-						{/* Busiest route */}{/*
-						<div className="col-xl-3 col-md-6 mb-4">
-							<div className="card border-left-warning shadow h-100 py-2">
-								<div className="card-body">
-									<div className="row no-gutters align-items-center">
-										<div className="col mr-2">
-											<div className="text-xs font-weight-bold text-warning text-uppercase mb-1">Busiest Route</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">A</div>
-										</div>
-										<div className="col-auto">
-											<i className="fas fa-route fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>*/}
-		
-						{/* Busiest stop */}{/*
-						<div className="col-xl-3 col-md-6 mb-4">
-							<div className="card border-left-danger shadow h-100 py-2">
-								<div className="card-body">
-									<div className="row no-gutters align-items-center">
-										<div className="col mr-2">
-											<div className="text-xs font-weight-bold text-danger text-uppercase mb-1">Busiest Stop</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">Transit Center</div>
-										</div>
-										<div className="col-auto">
-											<i className="fas fa-map-pin fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>*/}
 		
 						{/* Service days */}
 						<div className="col-xl-3 col-md-6 mb-4">
@@ -277,7 +228,7 @@ class Info_Route extends React.Component{
 						{/* Content Column */}
 						<div className="col-lg-6 mb-4">
 		
-							{/* Project Card Example */}
+							{/* General route info */}
 							<div className="card shadow mb-4">
 								<div className="card-header py-3">
 									<h6 className="m-0 font-weight-bold text-primary">Route Info</h6>

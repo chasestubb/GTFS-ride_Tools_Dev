@@ -1,5 +1,6 @@
-import React from 'react'
+// THIS FILE IS NO LONGER USED IN FAVOR OF SIDEBAR2.JSX
 
+import React from 'react'
 
 class Sidebar extends React.Component{
 	constructor(props){

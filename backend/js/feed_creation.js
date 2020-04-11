@@ -804,10 +804,10 @@ module.exports = {
         // fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================
-        var current_dir = process.cwd(); // save current working dir
-        process.chdir(FILEPATH); // change dir
-        zip.zipSync("./", "./" + FILENAME); // zip the files
-        process.chdir(current_dir); // undo change dir
+        var current_dir = process.cwd() // save current working dir
+        process.chdir(FILEPATH) // change dir
+        zip.zipSync("./*.txt", "./" + FILENAME) // zip the files
+        process.chdir(current_dir) // undo change dir
 
         // RETURN THE ZIP FILENAME
         return (FILEPATH + FILENAME);

@@ -1,3 +1,5 @@
+// info-agency.jsx shows the agency-level info
+
 import React from 'react'
 import {Link, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
@@ -6,8 +8,9 @@ import Axios from 'axios'
 const url = "http://localhost:8080/info/agency/";
 const RIDERSHIP_TIME = "Weekly"
 
+// get the route type (route type is an enum on the standard)
 function get_route_type(type){
-	switch(Number(type)){ // no break because of the return statements
+	switch(Number(type)){ // no break statements because all cases return at the end
 		case 0:
 			return(<span><strong>light rail</strong></span>)
 		case 1:
@@ -57,16 +60,12 @@ class Info_Agency extends React.Component{
 		}
 	}
 
+	// get data from the server
 	getInfo(){
 		console.log("getInfo(" + url + this.props.index + ")")
-		Axios.get(url + this.props.index, /*{params: {agency: this.props.index}}*/).then((res) => {
+		Axios.get(url + this.props.index).then((res) => {
 			console.log(res)
-			/*this.setState({
-				filename: res.data.filename,
-				is_gtfs_ride: res.data.is_gtfs_ride,
-				agency_list: res.data.agencies
-			})*/
-			this.setState(res.data)
+			this.setState(res.data) // store the agency data on the local state
 			this.setState({status: res.status, err: null})
 		}).catch(function(err){
 			console.log("Error: " + err)
@@ -74,6 +73,7 @@ class Info_Agency extends React.Component{
 		})
 	}
 
+	// get the data on page load
 	componentDidMount(){
 		this.getInfo();
 	}
@@ -109,8 +109,8 @@ class Info_Agency extends React.Component{
 							</div>
 						</div>
 		
-						{/* Stops */}{/*
-						<div className="col-xl-3 col-md-6 mb-4">
+						{/* Stops -- SEE EXPLANATION ON INFO.JSX ON WHY THE "STOPS PER AGENCY" LIST IS NO LONGER USED */}
+						{/*<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-dark shadow h-100 py-2">
 								<div className="card-body">
 									<div className="row no-gutters align-items-center">
@@ -163,40 +163,6 @@ class Info_Agency extends React.Component{
 								</div>
 							</div>
 						</div>
-		
-						{/* Busiest route */}{/*
-						<div className="col-xl-3 col-md-6 mb-4">
-							<div className="card border-left-warning shadow h-100 py-2">
-								<div className="card-body">
-									<div className="row no-gutters align-items-center">
-										<div className="col mr-2">
-											<div className="text-xs font-weight-bold text-warning text-uppercase mb-1">Busiest Route</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">A</div>
-										</div>
-										<div className="col-auto">
-											<i className="fas fa-route fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>*/}
-		
-						{/* Busiest stop */}{/*
-						<div className="col-xl-3 col-md-6 mb-4">
-							<div className="card border-left-danger shadow h-100 py-2">
-								<div className="card-body">
-									<div className="row no-gutters align-items-center">
-										<div className="col mr-2">
-											<div className="text-xs font-weight-bold text-danger text-uppercase mb-1">Busiest Stop</div>
-											<div className="h5 mb-0 font-weight-bold text-gray-800">Transit Center</div>
-										</div>
-										<div className="col-auto">
-											<i className="fas fa-map-pin fa-2x text-gray-300"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>*/}
 		
 						{/* Service days */}
 						<div className="col-xl-3 col-md-6 mb-4">
@@ -284,12 +250,16 @@ class Info_Agency extends React.Component{
 				</div>
 		
 			)
+		
+		// if the server returns an error
 		} else if (this.state.err) {
 			return(
 				<div className="row">
 					<h4>{this.state.err}</h4><br/><br/>
 				</div>
 			)
+		
+		// if the server has not responded yet
 		} else {
 			return(
 				<div className="row">

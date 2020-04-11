@@ -1,3 +1,5 @@
+// home.jsx contains the home page (not including the topbar and sidebar), also includes the file upload interface
+
 import React from 'react'
 import Axios from 'axios'
 
@@ -29,17 +31,18 @@ class Home extends React.Component{
 
 	// uploads the file when user clicks "confirm upload"
 	async upload(event){
+		// Axios sends the file as a part of FormData
 		let fd = new FormData();
 		fd.append("file", this.state.file);
 		const config = {headers: {"content-type": "multipart/form-data"}, mode: "no-cors"};
 		//                        required for the file upload to succeed
 		try {
-			const res = await Axios.post(url, fd, config);
+			const res = await Axios.post(url, fd, config); // send form data
 			console.log(res.data);
 			this.setState({ parsed_feed: res.data, err: null });
 			this.props.onUpload(res.data);
 		}
-		catch (err) {
+		catch (err) { // if the server returns an error
 			if (err) {
 				this.setState({err: err})
 				console.log(err);
@@ -142,7 +145,9 @@ class Home extends React.Component{
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
+								{/* if the server returns an error   then (if the error contains a message   then show the message   else show the raw response)   else show nothing */}
 								{this.state.err ? <span className="text-danger"><strong>{this.state.err.response ? this.state.err.response.data : this.state.err.toString()}</strong></span> : null }
+								{/* if the upload is successful   then show a message   else show nothing */}
 								{this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.

@@ -13,38 +13,12 @@ const postURL = HOST + "/fc/params"
 const getURL = HOST + "/fc/getfile"
 const SERVER_CHECK_URL = "/server_check"
 
-function OutputCard(fileStatus){
-	switch (Number(fileStatus)){
-		case 1:
-			return(
-				<span>Your request has been sent to the server.</span>
-			)
-		case 2:
-			return(
-				<span>The server is has received the request and is now generating the files.</span>
-			)
-		case 3:
-			return(
-				<div>
-					Your feed is ready.
-				</div>
-			)
-		case -1:
-			return(
-				<span>Server unreachable.</span>
-			)
-		default:
-			return(
-				<span>Please fill out the form and click "Generate Feed".</span>
-			)
-	}
-}
 
 class FC extends React.Component{
 	constructor(props){
 		super(props)
 		this.state = {
-			params: {
+			params: { // form data goes here
 				agencies: 1,
 				routes: 1,
 				stops: 1,
@@ -59,45 +33,75 @@ class FC extends React.Component{
 			},
 			status: -1,
 			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
-			zip_filename: "gtfs-ride",
+			zip_filename: "fc", // the resulting zip file name (without extension)
 		}
 		this.setNumber = this.setNumber.bind(this)
 		this.setDate = this.setDate.bind(this)
-		//this.setFilename = this.setFilename.bind(this)
 		this.set = this.set.bind(this)
 		this.submit = this.submit.bind(this)
 		this.isServerAlive = this.isServerAlive.bind(this)
+		this.errCheck = this.errCheck.bind(this)
+		this.statusText = this.statusText.bind(this)
 	}
 
+	// sends a test request to the server to check if the server is up
 	async isServerAlive(){
 		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
 			console.log(res)
-			this.setState({status: res.status})
+			this.setState({status: res.status, fileStatus: 0})
 		}).catch((err) => {
 			console.log("Error: " + err)
-			this.setState({status: -99})
+			this.setState({status: -99, fileStatus: -1})
 		})
 	}
 
-	setNumber(event){
-		var num = Number(event.target.value)
-		if (num < 1){
-			alert("You must enter a positive integer.")
-			this.setState({
-				params: {
-					...this.state.params,
-					[event.target.name]: 1
-				}
-			})
+	// checks for input errors, returns a string if the input is invalid, returns null if the server is valid
+	errCheck(){
+		var input = this.state.params
+		var errmsg = ""
+		if (input.agencies < 1){
+			errmsg += "Number of agencies must be at least 1.\n"
+		}
+		if (input.routes < 1){
+			errmsg += "Number of routes must be at least 1.\n"
+		}
+		if (input.stops < 1){
+			errmsg += "Number of stops must be at least 1.\n"
+		}
+		if (input.trips < 1){
+			errmsg += "Number of trips must be at least 1.\n"
+		}
+		if (input.trips_per_route < 1){
+			errmsg += "Number of trips per route must be at least 1.\n"
+		}
+		if (input.start_date == null || input.end_date == null){
+			errmsg += "Both start date and end date must be filled.\n"
 		} else {
-			this.setState({
-				params: {
-					...this.state.params,
-					[event.target.name]: Math.round(num)
-				}
-			})
+			var start = this.strDateToIntDate(this.state.params.start_date) // convert date representations to int
+			var end = this.strDateToIntDate(this.state.params.end_date)
+			if ((start > end) && CHECK_DATE){
+				errmsg += "End date cannot be earlier than start date.\n"
+			}
 		}
 		
+		// if there are no errors
+		if (errmsg == ""){
+			return null
+		} else { // if there are errors
+			alert(errmsg)
+			return errmsg
+		}
+	}
+
+	// changes the state based on the input field's name
+	setNumber(event){
+		var num = Number(event.target.value)
+		this.setState({
+			params: {
+				...this.state.params,
+				[event.target.name]: Math.round(num)
+			}
+		})
 	}
 
 	// converts "2019-12-31" to 20191231
@@ -130,7 +134,7 @@ class FC extends React.Component{
 
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
-		const config = {/*headers: {"content-type": "application/json"},*/ mode: "no-cors"/*, params: this.state.params*/};
+		const config = {mode: "no-cors"};
 		await Axios.post(postURL, {...json}, config).then((res) => {
 		}).catch ((err) => {
 			if (err) {
@@ -140,69 +144,75 @@ class FC extends React.Component{
 				}
 			}
 		})
+		this.setState({fileStatus: 1})
 	}
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
 	async sendGet(){
 		Axios.get(getURL, {
-			// options:
 			responseType: "arraybuffer"
 		}).then((res) => {
 			console.log(res)
+			this.setState({fileStatus: 3})
 			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
 			if (blob){
-				fileDownload(blob, "fc.zip")
+				fileDownload(blob, this.state.zip_filename + ".zip")
 			}
 		}).catch((err) => {
 			console.log("ERROR " + err)
 		})
 	}
 
-	/* THE SUBMISSION PROCEDURE NEEDS TO BE CHANGED
-	   GET request should only be called after POST request has received a response
-	   New procedure:
+	/* Submits the form data to the server and wait for the server to respond
+	   Procedure:
 	   1.  User fills out form
 	   2.  User clicks submit
 	   3.  Client transforms data
 	   4.  Client sends POST data to server
 	   5.  Server processes data
 	   6.  Server writes data to vars
+	   7.  Server starts creating the feed
 	   7.  Server responds to POST
 	   8.  Client receives POST
 	   9.  Client sends GET
-	   10. 
+	   10. Server waits until feed is done
+	   11. Server sends completed feed to the client
+	   12. Client receives the feed
+	   13. Client downloads the feed to the user's computer
 	*/
 	submit(event){
-		if (this.state.params.start_date == null && this.state.params.end_date == null){
-			alert("Please fill out the start and end dates.")
-			return;
-		} else if (this.state.params.start_date == null){
-			alert("Start date is required.")
-			return;
-		} else if (this.state.params.end_date == null){
-			alert("End date is required.")
-			return;
+		if (this.errCheck() === null){ // if there are no errors on the input
+			var start = this.strDateToIntDate(this.state.params.start_date) // convert date representations to int
+			var end = this.strDateToIntDate(this.state.params.end_date)
+			var params = { // add other parameters and rename some
+				...this.state.params,
+				trips: (this.state.params.trips_per_route * this.state.params.routes),
+				start_date: start,
+				end_date: end,
+				feed_date: start
+			}
+			console.log(params)
+			this.sendPost(params).then(() => { // send params then get file
+				this.setState({fileStatus: 2})
+				this.sendGet() // GET request should only be called after POST request has received a response
+			})
 		}
-		var start = this.strDateToIntDate(this.state.params.start_date)
-		var end = this.strDateToIntDate(this.state.params.end_date)
-		if ((start > end) && CHECK_DATE){
-			alert("End date cannot be earlier than start date.")
-			return;
+	}
+
+	// changes the status text displayed on the "output status" card
+	statusText(){
+		switch (Number(this.state.fileStatus)){
+			case 1:
+				return("Your request has been sent to the server.")
+			case 2:
+				return("The server is has received the request and is now generating the files.")
+			case 3:
+				return("Your feed is ready. Check your browser's download section.")
+			case -1:
+				return("Server unreachable.")
+			default:
+				return("Please fill out the form and click \"Generate Feed\".")
 		}
-		var params = {
-			...this.state.params,
-			trips: (this.state.params.trips_per_route * this.state.params.routes),
-			start_date: start,
-			end_date: end,
-			feed_date: start
-		}
-		console.log(params)
-		//var postBody = JSON.stringify(params)
-		//this.sendPost(postBody)
-		this.sendPost(params).then(() => {
-			this.sendGet()
-		})
-		
 	}
 	
 	componentDidMount(){
@@ -242,10 +252,6 @@ class FC extends React.Component{
 										<td>Number of stops</td>
 										<td><input name="stops" className="fc-input-number" type="number" min={1} value={this.state.params.stops} onChange={this.setNumber}></input></td>
 									</tr>
-									{/*<tr>
-										<td>Number of trips (total)</td>
-										<td><input name="trips" className="fc-input-number" type="number" min={1} value={this.state.params.trips} onChange={this.setNumber}></input></td>
-									</tr>*/}
 									<tr>
 										<td>Number of trips per route</td>
 										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} value={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
@@ -272,10 +278,6 @@ class FC extends React.Component{
 											<option value={4}>Mixed Source</option>
 										</select></td>
 									</tr>
-									{/*<tr>
-										<td>Output file name</td>
-										<td><input name="zip_filename" className="" type="r" value={this.state.zip_filename} onChange={this.setFilename}></input></td>
-									</tr>*/}
 								</table>
 								<br/>
 								<button onClick={this.submit}>Generate Feed</button>
@@ -289,10 +291,10 @@ class FC extends React.Component{
 						{/* Project Card Example */}
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
-								<h6 className="m-0 font-weight-bold text-primary">Output</h6>
+								<h6 className="m-0 font-weight-bold text-primary">Output Status</h6>
 							</div>
 							<div className="card-body">
-								<OutputCard fileStatus={this.state.fileStatus} />
+								{this.statusText()}
 							</div>
 						</div>
 					</div>
