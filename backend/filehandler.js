@@ -391,7 +391,13 @@ app.get(INFO_ROUTE_URL, (req, res) => {
             id: route.route_id,
             short_name: route.route_short_name,
             long_name: route.route_long_name,
-            url: route.route_url,
+            desc: route.route_desc,
+			type: route.route_type,
+			url: route.route_url,
+			bgcolor: route.route_color,
+			fgcolor: route.route_text_color,
+			min_headway: 0,
+			variations: 0,
             span: {
                 m: "",
                 t: "",
@@ -432,15 +438,15 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 
 
         // send feed type
-        agency_info.is_gtfs_ride = gtfs_ride_feed
+        route_info.is_gtfs_ride = gtfs_ride_feed
 
         // GTFS-ride specific fields
         if (gtfs_ride_feed){
-            agency_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+            route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
         }
 
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
-        res.write(JSON.stringify(agency_info));
+        res.write(JSON.stringify(route_info));
         res.end();
     } else {
         res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});
