@@ -95,6 +95,7 @@ class FC extends React.Component{
 
 	// changes the state based on the input field's name
 	setNumber(event){
+		this.setState({fileStatus: 0})
 		var num = Number(event.target.value)
 		this.setState({
 			params: {
@@ -115,6 +116,7 @@ class FC extends React.Component{
 	}
 
 	setDate(event){
+		this.setState({fileStatus: 0})
 		this.setState({
 			params: {
 				...this.state.params,
@@ -124,6 +126,7 @@ class FC extends React.Component{
 	}
 
 	set(event){
+		this.setState({fileStatus: 0})
 		this.setState({
 			params: {
 				...this.state.params,
