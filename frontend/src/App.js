@@ -1,3 +1,5 @@
+// App.js is the starting point of the client-side code.
+
 import React from 'react';
 import './App.css';
 import {Switch, Route, useParams} from 'react-router-dom'
@@ -24,108 +26,33 @@ import InfoRoute from './components/info-route'   // route view of info
 
 // other contents
 import Error404 from "./components/404"
-//import InfoDetail from './components/info-detail';
 
 
-/*function content(nav){
-	if (nav === "home"){
-		return (<Home/>);
-	} else if (nav === "info") {
-		return (<Info/>);
-	} else if (nav === "fc") {
-		return (<FC/>);
-	} else if (nav === "ns") {
-		return (<NS/>);
-	} else if (nav === "diff") {
-		return (<Diff/>);
-	} else if (nav === "clean") {
-		return (<Clean/>);
-	} else if (nav === "ts") {
-		return (<TS/>);
-	} else if (nav === "merge") {
-		return (<Merge/>);
-	} else if (nav === "as") {
-		return (<AS/>);
-	} else if (nav === "ra") {
-		return (<RA/>);
-	} else if (nav === "sc") {
-		return (<SC/>);
-	} else {
-		return (<Error404/>);
-	}
-}*/
 
+// show agency info based on the index
+// index is determined by the agency's position on agency.txt
+// first agency has the index of 0, second agency with index 1, third with 2, etc
 function AgencyInfo(){
 	const {index} = useParams();
 	return <InfoAgency index={index}/>
 }
 
+// show route info based on the index
+// index is determined by the route's position on routes.txt, not by the route's position on the agency screen
+// first route has the index of 0, second route with index 1, third with 2, etc
 function RouteInfo(){
 	const {index} = useParams();
 	return <InfoRoute index={index}/>
 }
 
+// TODO: show the same with stops and trips
+
 class App extends React.Component{
 	constructor(props){ 
 		super(props);
-		//this.state = {nav: "home", title: "GTFS-ride Tools"};
-		//this.navChange = this.navChange.bind(this); // required to make onNavChange={this.navChange} work
 		this.state = {filename: ""};
 		this.setFilename = this.setFilename.bind(this);
 	}
-
-	// handles receiving data from the sidebar
-	// selectedNav is where the item from sidebar.jsx -> Sidebar -> navigate(item) received
-	// no longer used in favor of using React Router
-	/*navChange(selectedNav) {
-
-		// set the navigation state of the page
-		this.setState({nav: selectedNav});
-
-		// dynamically change the page title on the topbar
-		// selectedNav and this.state.nav use the same naming convention as the sidebar nav buttons
-		switch (selectedNav){
-			case "home":
-				this.setState({title: "GTFS-ride Tools"});
-				break;
-			case "info":
-				this.setState({title: "GTFS-ride Feed Info"});
-				break;
-			case "fc":
-				this.setState({title: "GTFS-ride Test Feed Creation"});
-				break;
-			case "ns":
-				this.setState({title: "GTFS-ride Network State"});
-				break;
-			case "diff":
-				this.setState({title: "GTFS-ride Diff"});
-				break;
-			case "clean":
-				this.setState({title: "GTFS-ride Clean"});
-				break;
-			case "ts":
-				this.setState({title: "GTFS-ride Split"});
-				break;
-			//case "tm":
-			//	this.setState({title: "GTFS-ride Time Merge"});
-			//	break;
-			case "merge":
-				this.setState({title: "GTFS-ride Merge"});
-				break;
-			//case "as":
-			//	this.setState({title: "GTFS-ride Agency Split"});
-			//	break;
-			case "ra":
-				this.setState({title: "GTFS-ride Ridership Anomaly"});
-				break;
-			case "sc":
-				this.setState({title: "GTFS-ride Service Changes"});
-				break;
-			default: // 404
-				this.setState({title: "Not Found"});
-				break;
-		}
-	}*/
 
 	setFilename(name){
 		this.setState({filename: name});
@@ -133,23 +60,13 @@ class App extends React.Component{
 
 	render(){
 
-		/*let content;
-		if (this.state.nav === "home"){
-			content = <Home></Home>;
-		} else if (this.state.nav === "info") {
-			content = <Info></Info>;
-		}*/
-		//let contentPreview = content(this.state.nav);
-
 		return (
 			<div id="page-top">
 
 				{/* Page Wrapper */}
 				<div id="wrapper">
 
-					{/* see explanation on sidebar.jsx */}
-					{/*<Sidebar defaultNav={this.state.nav} onNavChange={this.navChange}/>*/}
-					{/* onNavChange also exists in sidebar.jsx -> Sidebar -> navigate(item)*/}
+					{/* The sidebar */}
 					<Sidebar/>
 			
 					{/* Content Wrapper */}
@@ -163,47 +80,69 @@ class App extends React.Component{
 							{/* Begin Page Content */}
 							<div className="container-fluid">
 			
-								{/*contentPreview*/}
+								{/* Selects the page displayed on the main app based on the URL path */}
 								<Switch>
+									{/* Home page */}
 									<Route exact path="/">
 										<Home onUpload={this.setFilename}/>
 									</Route>
-									{/*<Route path="/info-agency">
-										<InfoAgency/>
-									</Route>*/}
+
+									{/* Agency-level info */}
 									<Route path="/info/agency/:index">
 										<AgencyInfo/>
 									</Route>
+
+									{/* Route-level info */}
 									<Route path="/info/route/:index">
 										<RouteInfo/>
 									</Route>
+
+									{/* Feed-level info */}
 									<Route path="/info">
 										<Info filename={this.state.filename}/>
 									</Route>
+
+									{/* Test feed creation */}
 									<Route path="/fc">
 										<FC/>
 									</Route>
+
+									{/* Network state */}
 									<Route path="/ns">
 										<NS/>
 									</Route>
+
+									{/* Diff */}
 									<Route path="/diff">
 										<Diff/>
 									</Route>
+
+									{/* Clean */}
 									<Route path="/clean">
 										<Clean/>
 									</Route>
+
+									{/* Split */}
 									<Route path="/split">
 										<Split/>
 									</Route>
+
+									{/* Merge */}
 									<Route path="/merge">
 										<Merge/>
 									</Route>
+
+									{/* Ridership anomaly */}
 									<Route path="/ra">
 										<RA/>
 									</Route>
+
+									{/* Service changes */}
 									<Route path="/sc">
 										<SC/>
 									</Route>
+
+									{/* everything else */}
 									<Route path="/">
 										<Error404/>
 									</Route>
@@ -237,8 +176,8 @@ class App extends React.Component{
 					<i className="fa fa-angle-up"></i>
 				</a>
 			
-				{/* Logout Modal*/}
-				<div className="modal fade" id="logoutModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				{/* Logout Modal -- unused*/}
+				{/*<div className="modal fade" id="logoutModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 					<div className="modal-dialog" role="document">
 						<div className="modal-content">
 							<div className="modal-header">
@@ -254,7 +193,7 @@ class App extends React.Component{
 							</div>
 						</div>
 					</div>
-				</div>
+				</div>*/}
 			
 				{/* Bootstrap core JavaScript*/}
 				<script src="vendor/jquery/jquery.min.js"></script>

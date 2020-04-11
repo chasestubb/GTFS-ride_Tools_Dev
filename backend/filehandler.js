@@ -8,9 +8,7 @@ var fs = require('fs');
 var express = require('express')
 var formidable = require('formidable'); // A Node.js module for parsing form data, especially file uploads.
 var extract = require('extract-zip');
-//var csv = require('csv-parse/lib/sync'); // converting CSV text input into arrays or objects
-var csv_parse = require('csv-parse/lib/sync') // generalized now that we are both using csv-parse + csv-generate
-//var csv_generate = require('csv-generate')
+var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
@@ -212,104 +210,6 @@ app.post(UPLOAD_URL, (req, res) => {
                         }
                         
 
-                    // TEST JS OBJECT CREATION //////////////////////////////////////////////
-                    /*
-                    var num_agency = agencies.length;
-                    var num_routes = routes.length;
-                    console.log("This feed started on " + feed_info[0].feed_start_date + " and ended on " + feed_info[0].feed_end_date);
-                    console.log("Ridership feed began on " + ride_feed_info[0].ride_start_date + " and ended on " + ride_feed_info[0].ride_end_date);
-                    console.log("This feed has " + num_agency + " agencies");
-                    console.log("Included agencies are:");
-                
-                    for (var i = 0; i < num_agency; i++){
-                        console.log(agencies[i].agency_name + "\n");
-                    }
-                
-                    for (var j = 0; j < num_agency; j++){
-                        num_routes = Info.routesPerAgency(agencies[j], routes);
-                        num_stops = Info.stopsPerAgency(agencies[j], routes, trips, stop_times)
-                        var num_ag_riders = Info.countAgencyRiders(agencies[j], board_alight, trips, routes);
-                        var avg_ag_rider = num_ag_riders / 7;
-                        console.log("Agency " + agencies[j].agency_name + " has "+ num_routes + " routes" + " and " + num_stops + " stops\n" + "and " + num_ag_riders + " boardings and " + avg_ag_rider + " daily riders");
-                        for ( var i = 0; i < num_routes; i++){
-                            if (((agencies[j].agency_id).localeCompare(routes[i].agency_id)) == 0){
-                                console.log("Route " + routes[i].route_long_name + " within agency");
-                                var routeRiders = Info.countRouteRiders(routes[j], board_alight, trips);
-                                console.log("Rider count for this route is " + routeRiders);
-                                for ( var k = 0; k < trips.length; k++){
-                                    if (((trips[k].route_id).localeCompare(routes[i]).route_id) == 0){
-                                        console.log("Trip within agency " + trips[i].trip_id);
-                                        var tripRiders = Info.countTripRiders(board_alight, trips[k]);
-                                        console.log("Rider count for this trip is " + tripRiders);
-                                        for (var j = 0; j < stop_times.length; j++){
-                                            if (((stop_times[j].trip_id).localeCompare(trips[k].trip_id)) == 0){
-                                                console.log("Stop within agency " + stop_times[j].stop_id);
-                                                var stopRiders = Info.countStopRiders(board_alight, stops[j]);
-                                                console.log("Rider count for this stop: " + stopRiders);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                
-                        }
-                    }
-                    for (var k = 0; k < num_routes; k++){
-                        var days = Info.serviceDays(routes[k], trips, calendar);
-                        var route_riders = Info.countRouteRiders(routes[k], board_alight, trips);
-                        console.log("Route " + routes[k].route_long_name + "has active trip service on " + days);
-                        var starts = Info.serviceStart(routes[k], trips, frequencies);
-                        var end = Info.serviceEnd(routes[k], trips, frequencies);
-                        console.log("Route " + routes[k].route_long_name + "has service hours starting at" + starts + "and ending at " + end);
-                        console.log("Route" + routes[k].route_long_name + "has " + route_riders + "riders");
-                
-                    }
-                    for (var x = 0; x < trips.length; x++){
-                        var num_boardings = Info.countTripRiders(board_alight, trips[x]);
-                        var has_ridership = Info.findTripRecordUse(board_alight, trips[x]);
-                        //var exceptions = Info.serviceException(trips[x], calendar_dates);
-                        var orphan = Info.orphanTrip(trips[x], routes);
-                        var capacities = Info.vehicleCapacity(trips[x], trip_capacity);
-                        if ( orphan == -1){
-                            console.log("Trip " + trips[x].trip_id + "has no routes!");
-                        }
-                        if (has_ridership == 0)
-                            console.log("Trip " + trips[x].trip_id + " has ridership data\n");
-                        else if (has_ridership == 1)
-                            console.log("Trip " + trips[x].trip_id + " does not have ridership data\n");
-                
-                        console.log("Trip " + trips[x].trip_id + "has " + num_boardings + " boardings");
-                        //DEBUG console.log("Trip " + trips[x] + "has execeptions: " + exceptions);
-                        console.log("The vehicles on this trip have the following capacities: " + capacities);
-                        avg_rider = num_boardings / 7;
-                        console.log("The average number of riders per day is " + avg_rider);
-                
-                        
-                    }
-                
-                    var avg_trip = trips.length / 7;
-                
-                    console.log("The average amount of trips per day is " + avg_trip);
-                
-                    for (var y = 0; y < stops.length; y++){
-                        var has_ridership = Info.findStopRecordUse(board_alight, stops[y]);
-                        var orphan = Info.orphanStop(stops[y], trips);
-                        if (orphan == 1){
-                            console.log("Stop " + stops[y].stop_id + "is not within a trip!");
-                        }
-                        if (has_ridership == 0)
-                            console.log("Stop " + stops[y].stop_id + " has ridership data\n");
-                        else if (has_ridership == 1)
-                            console.log("Trip " + stops[y].stop_id + " does not have ridership data\n");
-                
-                        var num_boardings = Info.countStopRiders(board_alight, stops[y]);
-                        console.log("Stop " + stops[y].stop_id + "has " + num_boardings + "boardings");
-                        var avg_stop_rider = num_boardings / 7;
-                        console.log("Average number of riders on this stop per day" + avg_stop_rider);
-                    }
-                    */
-                    // END TEST //////////////////////////////////////////////
-
                     } else { // if the required files do not exist
                         res.writeHead(415, {"Access-Control-Allow-Origin": CORS});
                         res.write(noext + ".zip is NOT a valid GTFS feed");
@@ -320,9 +220,6 @@ app.post(UPLOAD_URL, (req, res) => {
             
                     
                 }
-                //console.log(agency.length)
-                //console.log(agency[0].agency_name);
-                //console.log("Agency: " + agency[0].agency_name)
                 
             });
         });
@@ -398,8 +295,6 @@ app.get(INFO_AGENCY_URL, (req, res) => {
     if (agencies && routes && trips && stops && stop_times){
         var index = req.params.index
         console.log(index)
-        //var index = req.headers.index;
-        //console.log(req);
         var agency = agencies[index]
         var agency_info = {
             id: agency.agency_id,
@@ -445,6 +340,10 @@ app.get(INFO_AGENCY_URL, (req, res) => {
         }
 
         // get the agency's stops
+        /* we have decided to not list the stops by agency because it is slow
+           (when testing, TriMet's feed took more than 3 minutes to list when filtered by agency but it took about 20 seconds to list all stops in the feed)
+           this is because getting stops by agency requires joining 4 different tables (agency, routes, trips, stops)				
+        */
         /*
         Info.findStopByAgency(agency_info.id, routes, trips, stop_times, stops).map(stop => {
             var stop_info = {
@@ -462,8 +361,6 @@ app.get(INFO_AGENCY_URL, (req, res) => {
         })
         */
 
-        //console.log(agency_info.stops)
-
         // send feed type
         agency_info.is_gtfs_ride = gtfs_ride_feed
 
@@ -471,9 +368,6 @@ app.get(INFO_AGENCY_URL, (req, res) => {
         if (gtfs_ride_feed){
             agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
         }
-
-        //console.log("Index: " + index);
-        //console.log(agency_info);
 
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
         res.write(JSON.stringify(agency_info));
@@ -492,8 +386,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
     if (agencies && routes && trips && stops && stop_times){
         var index = req.params.index
         console.log(index)
-        //var index = req.headers.index;
-        //console.log(req);
         var route = routes[index]
         var route_info = {
             id: route.route_id,
@@ -548,9 +440,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
             agency_info.ridership = Info.countRouteRiders(route, board_alight, trips)
         }
 
-        //console.log("Index: " + index);
-        //console.log(route_info);
-
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
         res.write(JSON.stringify(agency_info));
         res.end();
@@ -562,67 +451,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
     }
 })
     
-// FEED INFO -> AGENCY INFO
-/*} else if (req.url == INFO_AGENCY_URL){
-    console.log("FEED INFO -> AGENCY INFO")
-    //var q = req.url.split("/");
-    //var index = q[q.length - 1]
-    var index = req.headers.index;
-    console.log(req);
-    var agency = agencies[index]
-    var agency_info = {
-        name: agency.agency_name,
-        url: agency.agency_url,
-        fare_url: agency.agency_fare_url,
-        phone: agency.agency_phone,
-        email: agency.agency_email,
-        hours: {
-            m: "",
-            t: "",
-            w: "",
-            r: "",
-            f: "",
-            s: "",
-            u: ""
-        },
-        routes: []
-    }
-
-    // get the agency's routes
-    //var agency_routes = []
-    routes.foreach(route => { // JS equivalent of Python's "for route in routes"
-        if (route.agency_id === agency.agency_id){
-            route_info = {
-                short_name: route.route_short_name,
-                long_name: route.route_long_name,
-                desc: route.route_desc,
-                type: route.route_type
-            }
-            agency_info.routes.push(route_info);
-        }
-    })
-
-    for (var x = 0; x < routes.length; x++){
-        var route = routes[x];
-        if (route.agency_id === agency.agency_id){
-            route_info = {
-                short_name: route.route_short_name,
-                long_name: route.route_long_name,
-                desc: route.route_desc,
-                type: route.route_type
-            }
-            agency_info.routes.push(route_info);
-        }
-    }
-
-    //console.log("Index: " + index);
-    //console.log(agency_info);
-
-    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
-    res.write(JSON.stringify(agency_info));
-    res.end();*/
-
-
 
 /* HOW FEED CREATION WORKS --------------------------------------------------------
 1.  User fills out web form
@@ -650,10 +478,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 app.post(FC_POST_URL, async (req, res) => {
     console.log("FC PARAMS")
     console.log(req.url)
-    //console.log(req)
-    //var parsedURL = Url.parse(req.url)
-    //console.log(parsedURL)
-    //console.log(req.body)
     res.setHeader("Access-Control-Allow-Origin", CORS);
     
     // make promise for generating feed file (async)
@@ -665,7 +489,6 @@ app.post(FC_POST_URL, async (req, res) => {
     res.writeHead(200)
     res.write("Params received")
     res.end()
-    //console.log("DOES IT GO HERE?") // it does go here
 })
 
 // --------------------------------------------------------------------------------
@@ -682,7 +505,6 @@ app.get(FC_GET_URL, async (req, res) => {
     // promise will be filename when resolved
     // feed creation needs to be called before response is sent to the client because fc_promise will be empty (i.e. not a promise) otherwise
     var fc_filename = await fc_promise
-    //console.log(fc_filename)
     var fc_filepath = process.cwd() + "/" + fc_filename
     res.download(fc_filepath, function(err){
         if (err){

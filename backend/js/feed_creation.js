@@ -668,7 +668,7 @@ module.exports = {
         // ZIP ALL FILES =========================
         var current_dir = process.cwd() // save current working dir
         process.chdir(FILEPATH) // change dir
-        zip.zipSync("./", "./" + FILENAME) // zip the files
+        zip.zipSync("./*.txt", "./" + FILENAME) // zip the files
         process.chdir(current_dir) // undo change dir
 
         // RETURN THE ZIP FILENAME

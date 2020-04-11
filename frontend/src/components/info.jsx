@@ -1,7 +1,8 @@
+// info.jsx shows the general feed info
+
 import React from 'react'
 import {Link, Switch, Route, useParams} from 'react-router-dom'
 import Axios from 'axios'
-//import InfoAgency from "./info-agency"
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const HOST = "http://localhost:8080"
@@ -19,12 +20,18 @@ function agency_plural(count){
 	}
 }
 
+// format the date
 function date_formatter(date_int){
 	var date = String(date_int)
 	var year = date.substr(0, 4)
 	var month = date.substr(4, 2)
 	var day = date.substr(6, 2)
-	return (year + "-" + month + "-" + day)
+
+	// feel free to edit the date format on the next line
+	var formatted_date = year + "-" + month + "-" + day
+	// date and month will always be a 2-digit number, year will always be the complete year (e.g.: 2017)
+
+	return (formatted_date)
 }
 
 class Info extends React.Component{
@@ -40,38 +47,12 @@ class Info extends React.Component{
 			num_trips: 0,
 			date: [],
 		}
-		/*this.state = { // mock data
-			filename : "mockdata.zip",
-			is_gtfs_ride : true,
-			agency_list : [
-				{
-					name: "No Name Transit",
-					routes: 3,
-					stops: 100,
-					span: "Mon-Sat 6AM-10PM",
-					ridership: 7500
-				}, {
-					name: "Another Transit Agency",
-					routes: 20,
-					stops: 800,
-					span: "Every day 5AM-2AM",
-					ridership: "No data"
-				}, {
-					name: "Statewide Intercity Lines",
-					routes: 11,
-					stops: 75,
-					span: "Every day 24 hours",
-					ridership: "10000"
-				}
-			]
-		}*/
-		
 		
 		this.getInfo = this.getInfo.bind(this)
 		this.isServerAlive = this.isServerAlive.bind(this)
 	}
 
-	// sends a test request to the server
+	// sends a test request to the server to check if the server is up
 	async isServerAlive(){
 		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
 			console.log(res)
@@ -81,10 +62,11 @@ class Info extends React.Component{
 		})
 	}
 
+	// get the feed info from the server
 	async getInfo(){
 		Axios.get(url).then((res) => {
 			console.log(res)
-			this.setState({
+			this.setState({ // store the feed info in the local state
 				status: res.status,
 				filename: res.data.filename,
 				is_gtfs_ride: res.data.is_gtfs_ride,
@@ -93,7 +75,6 @@ class Info extends React.Component{
 				num_trips: res.data.num_trips,
 				date: [date_formatter(res.data.date[0]), date_formatter(res.data.date[1])],
 			})
-			//this.setState(res.data)
 		})
 	}
 
@@ -101,10 +82,6 @@ class Info extends React.Component{
 		this.isServerAlive();
 		this.getInfo();
 	}
-
-	/*componentDidUpdate(){
-		console.log(this.state)
-	}*/
 
 	render(){
 		console.log(this.state)
@@ -187,7 +164,7 @@ class Info extends React.Component{
 							</div>
 						</div>
 
-						{/* START DATE */}
+						{/* FEED START DATE */}
 						<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-warning shadow h-100 py-2">
 								<div className="card-body">
@@ -204,7 +181,7 @@ class Info extends React.Component{
 							</div>
 						</div>
 
-						{/* END DATE */}
+						{/* FEED END DATE */}
 						<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-secondary shadow h-100 py-2">
 								<div className="card-body">
@@ -226,24 +203,8 @@ class Info extends React.Component{
 					
 					{/* Content Row */}
 					<div className="row">
-		
-						{/* Content Column */}
-						{/*<div className="col-lg-6 mb-4">*/}
-		
-							{/* Project Card Example */}
-							{/*<div className="card shadow mb-4">
-								<div className="card-header py-3">
-									<h6 className="m-0 font-weight-bold text-primary">General Feed Information</h6>
-								</div>
-								<div className="card-body">
-									File name: <strong>{this.state.filename}</strong><br/>
-									Feed type: <strong>{this.state.is_gtfs_ride ? "GTFS-ride" : "GTFS"}</strong><br/>
-									Contains <strong>{this.state.agency_list.length}</strong> {agency_plural(this.state.agency_list.length)}.<br/>
-									Click on an agency's name to view detailed info.
-								</div>
-							</div>
-						</div>*/}
-		
+				
+					{/* shows the list of agencies in the feed */}
 					{this.state.agency_list.map(agency => 
 						<div className="col-lg-6 mb-4">
 		
@@ -268,6 +229,11 @@ class Info extends React.Component{
 					<div className="row">
 		
 						{/* Content Column - STOPS */}
+						{/* shows the list of all stops in the feed
+						    we have decided to not list the stops by agency because it is slow
+						    (when testing, TriMet's feed took more than 3 minutes to list when filtered by agency but it took about 20 seconds to list all stops in the feed)
+						    this is because getting stops by agency requires joining 4 different tables (agency, routes, trips, stops)
+						*/}
 						{this.state.stop_list.map(stop => 
 							<div className="col-lg-6 mb-4">
 		
@@ -291,12 +257,16 @@ class Info extends React.Component{
 			</div>
 		
 			)
+		
+		// if the server is alive but has not returned a response yet
 		} else if (this.state.status == -1 && this.props.filename) {
 			return(
 				<div className="row">
 					<h4>Loading feed...</h4><br/><br/>
 				</div>
 			)
+		
+		// if the server is not alive
 		} else if (this.state.status == -99) {
 			return(
 				<div>
@@ -310,6 +280,8 @@ class Info extends React.Component{
 				</div>
 				
 			)
+		
+		// if the user has not uploaded a valid feed yet
 		} else {
 			return(
 				<div className="row">
