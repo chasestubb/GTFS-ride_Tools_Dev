@@ -7,6 +7,12 @@
 /frontend/node_modules
 /backend/node_modules
 
+# for our project, it is not a big deal to have the
+#  package-lock in the gitignore. It sometimes gave
+#  us nasty merge conflicts too.
+/backend/package-lock.json
+/frontend/package-lock.json
+
 # testing
 /coverage
 
