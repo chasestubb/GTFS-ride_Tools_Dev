@@ -141,7 +141,7 @@ class Info_Route extends React.Component{
 											<div className="h5 mb-0 font-weight-bold text-gray-800">{get_route_type(this.state.type)}</div>
 										</div>
 										<div className="col-auto">
-											<i className="fas fa-route fa-2x text-gray-300"></i>
+											<i className="fas fa-train fa-2x text-gray-300"></i>
 										</div>
 									</div>
 								</div>

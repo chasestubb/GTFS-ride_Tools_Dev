@@ -74,6 +74,9 @@ class Info extends React.Component{
 				stop_list: res.data.stops,
 				num_trips: res.data.num_trips,
 				date: [date_formatter(res.data.date[0]), date_formatter(res.data.date[1])],
+			}).catch((err) => {
+				console.log("Error: " + err)
+				this.setState({status: res.status})
 			})
 		})
 	}
