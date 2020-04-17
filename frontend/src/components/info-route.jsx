@@ -237,13 +237,13 @@ class Info_Route extends React.Component{
 									<h6 className="m-0 font-weight-bold text-primary">Route Info</h6>
 								</div>
 								<div className="card-body">
-									Short Name: {this.state.short_name ? <strong>{this.state.short_name}</strong> : "none provided"} <br/>
-									Long Name: {this.state.long_name ? <strong>{this.state.long_name}</strong> : "none provided"} <br/>
-									Description: {this.state.desc ? <strong>{this.state.desc}</strong> : "no description provided"} <br/>
-									Website: {this.state.url ? <a href={this.state.url}><strong>{this.state.url}</strong></a> : "no website provided"} <br/>
+									Short Name: {this.state.short_name ? <strong>{this.state.short_name}</strong> : <em>none provided</em>} <br/>
+									Long Name: {this.state.long_name ? <strong>{this.state.long_name}</strong> : <em>none provided</em>} <br/>
+									Description: {this.state.desc ? <strong>{this.state.desc}</strong> : <em>no description provided</em>} <br/>
+									Website: {this.state.url ? <a href={this.state.url}><strong>{this.state.url}</strong></a> : <em>no website provided</em>} <br/>
 									{/*Color: <RouteColor bg={this.state.bgcolor} fg={this.state.fgcolor} /><br/>*/}
 									Color: {RouteColor(this.state.bgcolor, this.state.fgcolor)}<br/>
-									Variations: {this.state.variations}<br/>
+									Variations: <strong>{this.state.variations}</strong><br/>
 								</div>
 							</div>
 						</div>
@@ -267,7 +267,7 @@ class Info_Route extends React.Component{
 										End time: <strong>{trip.end_time}</strong> <br/>
 										Headsign: <strong>{trip.headsign}</strong> <br/>
 										Direction: <strong>{trip.direction}</strong> <br/>
-										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + trip.ridership : null} <br/>
+										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} <strong>{trip.ridership}</strong></span> : null} <br/>
 									</div>
 								</div>
 							</div>

@@ -26,14 +26,17 @@ class FC extends React.Component{
 				trips_per_route: 1,
 				start_date: null,
 				end_date: null,
-				feed_date: null, // just made it the same as start_date
-				user_source: 0, // enum
+				feed_date: null, // just make it the same as start_date
+				user_source: 1, // enum
 				num_riders: 1,
+				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
+				service_days: 0, // enum -- defines the service days of the week
 				files: 6, // because we are generating all files
 			},
 			status: -1,
 			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
 			zip_filename: "fc", // the resulting zip file name (without extension)
+			err: "",
 		}
 		this.setNumber = this.setNumber.bind(this)
 		this.setDate = this.setDate.bind(this)
@@ -142,6 +145,7 @@ class FC extends React.Component{
 		}).catch ((err) => {
 			if (err) {
 				console.log(err);
+				this.setState({err: err, fileStatus: -2})
 				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
 				}
@@ -161,8 +165,10 @@ class FC extends React.Component{
 			if (blob){
 				fileDownload(blob, this.state.zip_filename + ".zip")
 			}
+			this.state.err = ""
 		}).catch((err) => {
 			console.log("ERROR " + err)
+			this.setState({err: err, fileStatus: -2})
 		})
 	}
 
@@ -213,6 +219,8 @@ class FC extends React.Component{
 				return("Your feed is ready. Check your browser's download section.")
 			case -1:
 				return("Server unreachable.")
+			case -2:
+				return this.state.err
 			default:
 				return("Please fill out the form and click \"Generate Feed\".")
 		}
@@ -245,19 +253,19 @@ class FC extends React.Component{
 								<table>
 									<tr>
 										<td>Number of agencies</td>
-										<td><input name="agencies" className="fc-input-number" type="number" min={1} value={this.state.params.agencies} onChange={this.setNumber}></input></td>
+										<td><input name="agencies" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of routes</td>
-										<td><input name="routes" className="fc-input-number" type="number" min={1} value={this.state.params.routes} onChange={this.setNumber}></input></td>
+										<td><input name="routes" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of stops</td>
-										<td><input name="stops" className="fc-input-number" type="number" min={1} value={this.state.params.stops} onChange={this.setNumber}></input></td>
+										<td><input name="stops" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of trips per route</td>
-										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} value={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
+										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Feed start date</td>
@@ -269,14 +277,32 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Number of riders</td>
-										<td><input name="num_riders" className="fc-input-number" type="number" min={1} value={this.state.params.num_riders} onChange={this.setNumber}></input></td>
+										<td><input name="num_riders" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
-										<td>Ridership data collection method</td>
+										<td>Service pattern </td>
+										<td><select name="service_days" value={this.state.params.service_days} onChange={this.set}>
+											<option value={0}>7 days per week</option>
+											<option value={1}>Weekdays only</option>
+											<option value={2}>Weekdays + Saturdays</option>
+											<option value={3}>Weekdays + Sundays</option>
+											<option value={4}>Weekends only</option>
+										</select></td>
+									</tr>
+									<tr>
+										<td>Service pattern defined in </td>
+										<td><select name="calendar_type" value={this.state.params.calendar_type} onChange={this.set}>
+											<option value={0}>calendar.txt only</option>
+											<option value={1}>calendar_dates.txt only</option>
+											<option value={2}>Both files (recommended)</option>
+										</select></td>
+									</tr>
+									<tr>
+										<td>Ridership data collection method </td>
 										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
-											<option value={0}>Manual Counting</option>
 											<option value={1}>Automated Passenger Counter</option>
 											<option value={2}>Automated Fare Collector</option>
+											<option value={0}>Manual Counting</option>
 											<option value={3}>Model Estimation</option>
 											<option value={4}>Mixed Source</option>
 										</select></td>

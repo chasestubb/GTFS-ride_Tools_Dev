@@ -239,7 +239,7 @@ class Info_Agency extends React.Component{
 										Description: <strong>{route.desc}</strong> <br/>
 										Type: {get_route_type(route.type)} <br/>
 										Trips: <strong>{route.trips}</strong> <br/>
-										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + route.ridership : null} <br/>
+										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} <strong>{route.ridership}</strong></span> : null} <br/>
 									</div>
 								</div>
 							</div>

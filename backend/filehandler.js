@@ -397,7 +397,7 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 			bgcolor: route.route_color,
 			fgcolor: route.route_text_color,
 			min_headway: 0,
-			variations: 0,
+			variations: 1,
             span: {
                 m: "",
                 t: "",
@@ -408,7 +408,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
                 u: ""
             },
             trips: [],
-            //stops: [],
             is_gtfs_ride: gtfs_ride_feed,
             ridership: 0,
         }
@@ -416,7 +415,7 @@ app.get(INFO_ROUTE_URL, (req, res) => {
         // get the route's trips
         for (var x = 0; x < trips.length; x++){
             var trip = trips[x];
-            if (trips.route_id == route.route_id){
+            if (trip.route_id == route.route_id){
                 var trip_info = {
                     index: x,
                     id: trip.trip_id,
