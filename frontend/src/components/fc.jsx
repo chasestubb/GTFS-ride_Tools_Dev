@@ -13,6 +13,33 @@ const postURL = HOST + "/fc/params"
 const getURL = HOST + "/fc/getfile"
 const SERVER_CHECK_URL = "/server_check"
 
+/* ENUM VALUES
+
+	user_source:
+	see GTFS-ride documentation
+
+	calendar_type:
+	0 = calendar.txt only
+	1 = calendar_dates.txt only
+	2 = both (default)
+
+	service_days:
+	0 = every day
+	1 = weekdays only
+	2 = weekdays + sat
+	3 = Weekdays + sun
+	4 = weekends only
+
+	fileStatus:
+	0 = no requests sent
+	1 = request sent to server
+	2 = server received the request and is now processing it
+	3 = file ready
+	-1 = server unreachable
+	-2 = other errors
+
+*/
+
 
 class FC extends React.Component{
 	constructor(props){
@@ -21,7 +48,7 @@ class FC extends React.Component{
 			params: { // form data goes here
 				agencies: 1,
 				routes: 1,
-				stops: 1,
+				stops: 2,
 				trips: 1,
 				trips_per_route: 1,
 				start_date: null,
@@ -31,10 +58,10 @@ class FC extends React.Component{
 				num_riders: 1,
 				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
 				service_days: 0, // enum -- defines the service days of the week
-				files: 6, // because we are generating all files
+				files: 6, // always 6 because we are generating all GTFS-ride files
 			},
 			status: -1,
-			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
+			fileStatus: 0, // see the "enum values" section above
 			zip_filename: "fc", // the resulting zip file name (without extension)
 			err: "",
 		}
@@ -157,13 +184,13 @@ class FC extends React.Component{
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
 	async sendGet(){
 		Axios.get(getURL, {
-			responseType: "arraybuffer"
+			responseType: "arraybuffer" // response is a binary file, do not parse as string
 		}).then((res) => {
 			console.log(res)
 			this.setState({fileStatus: 3})
 			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
 			if (blob){
-				fileDownload(blob, this.state.zip_filename + ".zip")
+				fileDownload(blob, this.state.zip_filename + ".zip") // send for download
 			}
 			this.state.err = ""
 		}).catch((err) => {
@@ -253,19 +280,19 @@ class FC extends React.Component{
 								<table>
 									<tr>
 										<td>Number of agencies</td>
-										<td><input name="agencies" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
+										<td><input name="agencies" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.agencies} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of routes</td>
-										<td><input name="routes" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
+										<td><input name="routes" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.routes} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of stops</td>
-										<td><input name="stops" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
+										<td><input name="stops" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.stops} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of trips per route</td>
-										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
+										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Feed start date</td>
@@ -277,7 +304,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Number of riders</td>
-										<td><input name="num_riders" className="fc-input-number" type="number" min={1} defaultValue={1} onChange={this.setNumber}></input></td>
+										<td><input name="num_riders" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.num_riders} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Service pattern </td>
