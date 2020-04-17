@@ -66,7 +66,7 @@ class FC extends React.Component{
 			err: "",
 		}
 		this.setNumber = this.setNumber.bind(this)
-		this.setDate = this.setDate.bind(this)
+		//this.setDate = this.setDate.bind(this)
 		this.set = this.set.bind(this)
 		this.submit = this.submit.bind(this)
 		this.isServerAlive = this.isServerAlive.bind(this)
@@ -123,7 +123,20 @@ class FC extends React.Component{
 		}
 	}
 
-	// changes the state based on the input field's name
+	// sets a parameter based on the name attribute on the HTML element
+	// if the HTML code looks like <input name="xyz" onChange={this.set}/>
+	// then this function modifies this.state.params.xyz
+	set(event){
+		this.setState({fileStatus: 0})
+		this.setState({
+			params: {
+				...this.state.params,
+				[event.target.name]: event.target.value
+			}
+		})
+	}
+
+	// same as set but converts the input to number and rounds it
 	setNumber(event){
 		this.setState({fileStatus: 0})
 		var num = Number(event.target.value)
@@ -145,7 +158,8 @@ class FC extends React.Component{
 		return intDate
 	}
 
-	setDate(event){
+	// same as set but for dates
+	/*setDate(event){
 		this.setState({fileStatus: 0})
 		this.setState({
 			params: {
@@ -153,17 +167,7 @@ class FC extends React.Component{
 				[event.target.name]: event.target.value
 			}
 		})
-	}
-
-	set(event){
-		this.setState({fileStatus: 0})
-		this.setState({
-			params: {
-				...this.state.params,
-				[event.target.name]: event.target.value
-			}
-		})
-	}
+	}*/
 
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
@@ -296,11 +300,11 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Feed start date</td>
-										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.setDate}></input></td>
+										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.set}></input></td>
 									</tr>
 									<tr>
 										<td>Feed end date</td>
-										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.setDate}></input></td>
+										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.set}></input></td>
 									</tr>
 									<tr>
 										<td>Number of riders</td>
