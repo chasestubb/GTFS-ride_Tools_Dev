@@ -30,6 +30,7 @@ class FC extends React.Component{
 				user_source: 0, // enum
 				num_riders: 1,
 				files: 6, // because we are generating all files
+				operation_days : 0,
 			},
 			status: -1,
 			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
@@ -276,6 +277,16 @@ class FC extends React.Component{
 											<option value={2}>Automated Fare Collector</option>
 											<option value={3}>Model Estimation</option>
 											<option value={4}>Mixed Source</option>
+										</select></td>
+									</tr>
+									<tr>
+										<td>Usual days of operation</td>
+										<td><select name="operation_days" value={this.state.params.operation_days} onChange={this.set}>
+											<option value={0}>Weekends</option>
+											<option value={1}>Weekdays</option>
+											<option value={2}>Weekdays and Saturday</option>
+											<option value={3}>Weekdays and Sunday</option>
+											<option value={4}>Everyday</option>
 										</select></td>
 									</tr>
 								</table>

@@ -132,18 +132,76 @@ module.exports = {
     //   start_date       | static - always "20000101" = Jan 1, 2000
     //   end_date         | static - always "20500101" = Jan 1, 2050
 
-    calendarCreate: function(){
-        var calendar = {
-            service_id: "BASE_CALENDAR",
-            monday: 1,
-            tuesday: 1,
-            wednesday: 1,
-            thursday: 1,
-            friday: 1,
-            saturday: 1,
-            sunday: 1,
-            start_date: 2000101,
-            end_date: 20500101,
+    calendarCreate: function(operation_days, start_date_input, end_date_input){
+        if (operation_days == 0){
+            var calendar = {
+                service_id: "WEEKEND_CALENDAR",
+                monday: 0,
+                tuesday: 0,
+                wednesday: 0,
+                thursday: 0,
+                friday: 0,
+                saturday: 1,
+                sunday: 1,
+                start_date: start_date_input,
+                end_date: end_date_input,
+            }
+        }
+        if (operation_days == 1){
+            var calendar = {
+                service_id: "WEEKDAY_CALENDAR",
+                monday: 1,
+                tuesday: 1,
+                wednesday: 1,
+                thursday: 1,
+                friday: 1,
+                saturday: 0,
+                sunday: 0,
+                start_date: start_date_input,
+                end_date: start_date_input,
+            }
+        }
+        if (operation_days == 2){
+            var calendar = {
+                service_id: "SATURDAY_CALENDAR",
+                monday: 1,
+                tuesday: 1,
+                wednesday: 1,
+                thursday: 1,
+                friday: 1,
+                saturday: 1,
+                sunday: 0,
+                start_date: start_date_input,
+                end_date: start_date_input,
+            }
+        }
+        if (operation_days == 3){
+            var calendar = {
+                service_id: "SUNDAY_CALENDAR",
+                monday: 1,
+                tuesday: 1,
+                wednesday: 1,
+                thursday: 1,
+                friday: 1,
+                saturday: 0,
+                sunday: 1,
+                start_date: start_date_input,
+                end_date: start_date_input,
+            }
+        }
+        if (operation_days == 4){
+            var calendar = {
+                service_id: "CALENDAR_ALL",
+                monday: 1,
+                tuesday: 1,
+                wednesday: 1,
+                thursday: 1,
+                friday: 1,
+                saturday: 1,
+                sunday: 1,
+                start_date: start_date_input,
+                end_date: start_date_input,
+            }
         }
         return calendar;              
     },
@@ -160,7 +218,25 @@ module.exports = {
     //   date             | static - based on holiday represented
     //   exception_type   | static - always "2" for remove (as opposed to add)
 
-    calendarDatesCreate: function(){           
+    calendarDatesCreate: function(calendar){
+        var year = [];
+        var date_arr = [];
+        date_arr = calendar.start_date.toString(8).split("");
+        for (var i = 0; i < 3; j++){
+            year[i] = date_arr[i];
+        }
+       
+        var dates = [];
+        var temp_date = {
+            service_id: calendar.service_id,
+            date: 0,
+            exception_type: 0,
+        } 
+        temp_date.date = year + "0101";
+        dates.push(temp_date);
+        temp_date.date = year + "1225";
+        dates.push(temp_date);
+        return dates;
     },
 
     // CREATE FEED_INFO.TXT (GTFS) ================
@@ -714,8 +790,10 @@ module.exports = {
 
     // the main function to generate the test feed
     // this function may take a long time, please call it asynchronously if possible
-    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files){
+    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files, operation_days){
         var agencies = this.agencyCreate(num_agencies);
+        var calendar = this.calendarCreate(operation_days, start_date, end_date);
+        var calendar_dates = this.calendarDatesCreate(calendar);
         var stops = this.stopsCreate(num_stops);
         var routes = this.routesCreate(num_routes, num_agencies);
         var trips = this.tripsCreate(num_routes, num_trips_per_route);
@@ -730,6 +808,8 @@ module.exports = {
 
         // CSV STRINGIFY =========================
         var agenciesCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
+        var calendarCSV = csvStringifySync(calendar, {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
+        var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
         var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
         var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
         var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
@@ -797,6 +877,8 @@ module.exports = {
         fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
         fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
         fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
+        fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+        fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
         // fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV)
         // fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
         // fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
@@ -804,10 +886,10 @@ module.exports = {
         // fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================
-        var current_dir = process.cwd() // save current working dir
-        process.chdir(FILEPATH) // change dir
-        zip.zipSync("./*.txt", "./" + FILENAME) // zip the files
-        process.chdir(current_dir) // undo change dir
+        var current_dir = process.cwd(); // save current working dir
+        process.chdir(FILEPATH); // change dir
+        zip.zipSync("./*.txt", "./" + FILENAME); // zip the files
+        process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
         return (FILEPATH + FILENAME);
