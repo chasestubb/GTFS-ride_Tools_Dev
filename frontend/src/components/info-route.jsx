@@ -46,6 +46,26 @@ function get_fgcolor(bgcolor){
 	}
 }
 
+// show route colors with the colors specified on the feed (if exists)
+function RouteColor(bg, fg){
+	var bgcolor = ""
+	var fgcolor = ""
+	if (bg){ // if route has background color specified
+
+		bgcolor = bg
+		if (fg) { // if route has text color specified
+			fgcolor = fg
+			return (<span style={{backgroundColor: "#"+bgcolor, color: "#"+fgcolor}}><strong>{bgcolor} / {fgcolor}</strong></span>) // show something like "012345 / AFAFAF"
+		} else { // if route has no text color
+			fgcolor = get_fgcolor(bgcolor) // calculate the best foreground color (black/white)
+			return (<span style={{backgroundColor: "#"+bgcolor, color: "#"+fgcolor}}><strong>{bgcolor}</strong></span>)
+		}
+		
+	} else { // if route has no background color
+		return (<em>no color specified</em>)
+	}
+}
+
 class Info_Route extends React.Component{
 	constructor(props){
 		super(props);
@@ -74,6 +94,7 @@ class Info_Route extends React.Component{
 			ridership: 0,
 			err: null,
 		}
+		this.getInfo = this.getInfo.bind(this)
 	}
 
 	// get data from the server
@@ -85,33 +106,15 @@ class Info_Route extends React.Component{
 			this.setState({status: res.status, err: null})
 		}).catch(function(err){
 			console.log("Error: " + err)
-			this.setState({err: err})
+			if (err){
+				//this.setState({err: err})
+			}
 		})
 	}
 
 	// get the data on page load
 	componentDidMount(){
 		this.getInfo();
-	}
-
-	// show route colors with the colors specified on the feed (if exists)
-	RouteColor(){
-		var bgcolor = ""
-		var fgcolor = ""
-		if (this.state.bgcolor){ // if route has background color specified
-
-			bgcolor = this.state.bgcolor
-			if (this.state.fgcolor) { // if route has text color specified
-				fgcolor = this.state.fgcolor
-				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor} / {fgcolor}</strong></span>) // show something like "012345 / AFAFAF"
-			} else { // if route has no text color
-				fgcolor = get_fgcolor(bgcolor) // calculate the best foreground color (black/white)
-				return (<span bgcolor={"#" + bgcolor} color={"#" + fgcolor}><strong>{bgcolor}</strong></span>)
-			}
-			
-		} else { // if route has no background color
-			return (<em>no color specified</em>)
-		}
 	}
 
 	render(){
@@ -122,7 +125,7 @@ class Info_Route extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800"><Link to="/info" className="back-button"><i className="fas fa-chevron-left back-button"></i></Link><strong>{this.state.short_name}</strong> - {this.state.long_name}</h1>
+							<h1 className="h3 mb-0 text-gray-800"><button className="back-button" onClick={() => window.history.back()}><i className="fas fa-chevron-left back-button"></i></button><strong>{this.state.short_name}</strong>{(this.state.short_name && this.state.long_name) ? " - " : null}{this.state.long_name}</h1>
 						</div>
 					</div>
 		
@@ -138,7 +141,7 @@ class Info_Route extends React.Component{
 											<div className="h5 mb-0 font-weight-bold text-gray-800">{get_route_type(this.state.type)}</div>
 										</div>
 										<div className="col-auto">
-											<i className="fas fa-route fa-2x text-gray-300"></i>
+											<i className="fas fa-train fa-2x text-gray-300"></i>
 										</div>
 									</div>
 								</div>
@@ -192,7 +195,7 @@ class Info_Route extends React.Component{
 											<div className="text-xs font-weight-bold text-info text-uppercase mb-1">Service Span</div>
 											<div className="row no-gutters align-items-center">
 												<div className="col-auto">
-													<div className="h3 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.days}<br/>{this.state.span}</div>
+													<div className="h3 mb-0 mr-3 font-weight-bold text-gray-800">{/* INSERT SPAN DATA HERE */}</div>
 												</div>
 											</div>
 										</div>
@@ -234,12 +237,13 @@ class Info_Route extends React.Component{
 									<h6 className="m-0 font-weight-bold text-primary">Route Info</h6>
 								</div>
 								<div className="card-body">
-									Short Name: {this.state.short_name ? <strong>{this.state.short_name}</strong> : "none provided"} <br/>
-									Long Name: {this.state.long_name ? <strong>{this.state.long_name}</strong> : "none provided"} <br/>
-									Description: {this.state.desc ? <strong>{this.state.desc}</strong> : "no description provided"} <br/>
-									Website: {this.state.url ? <a href={this.state.url}><strong>{this.state.url}</strong></a> : "no website provided"} <br/>
-									Color: {this.RouteColor}<br/>
-									Variations: {this.state.variations}<br/>
+									Short Name: {this.state.short_name ? <strong>{this.state.short_name}</strong> : <em>none provided</em>} <br/>
+									Long Name: {this.state.long_name ? <strong>{this.state.long_name}</strong> : <em>none provided</em>} <br/>
+									Description: {this.state.desc ? <strong>{this.state.desc}</strong> : <em>no description provided</em>} <br/>
+									Website: {this.state.url ? <a href={this.state.url}><strong>{this.state.url}</strong></a> : <em>no website provided</em>} <br/>
+									{/*Color: <RouteColor bg={this.state.bgcolor} fg={this.state.fgcolor} /><br/>*/}
+									Color: {RouteColor(this.state.bgcolor, this.state.fgcolor)}<br/>
+									Variations: <strong>{this.state.variations}</strong><br/>
 								</div>
 							</div>
 						</div>
@@ -263,7 +267,7 @@ class Info_Route extends React.Component{
 										End time: <strong>{trip.end_time}</strong> <br/>
 										Headsign: <strong>{trip.headsign}</strong> <br/>
 										Direction: <strong>{trip.direction}</strong> <br/>
-										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + trip.ridership : null} <br/>
+										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} <strong>{trip.ridership}</strong></span> : null} <br/>
 									</div>
 								</div>
 							</div>
