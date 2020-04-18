@@ -15,6 +15,7 @@
     "extract-zip": "^1.6.7",
     "formidable": "^1.2.1",
     "nan": "^2.14.0",
+    "number-to-words": "^1.2.4",
     "random-lastname": "^1.0.1"
   }
 }
