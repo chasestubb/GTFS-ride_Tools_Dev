@@ -23,12 +23,12 @@ const SERVER_CHECK_URL = "/server_check"
 	1 = calendar_dates.txt only
 	2 = both (default)
 
-	service_days:
-	0 = every day
+	operation_days:
+	0 = weekends only
 	1 = weekdays only
 	2 = weekdays + sat
-	3 = Weekdays + sun
-	4 = weekends only
+	3 = weekdays + sun
+	4 = every day
 
 	fileStatus:
 	0 = no requests sent
@@ -57,7 +57,7 @@ class FC extends React.Component{
 				user_source: 1, // enum
 				num_riders: 1,
 				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
-				service_days: 0, // enum -- defines the service days of the week
+				operation_days: 4, // enum -- defines the service days of the week
 				files: 6, // always 6 because we are generating all GTFS-ride files
 			},
 			status: -1,
@@ -313,11 +313,11 @@ class FC extends React.Component{
 									<tr>
 										<td>Service pattern </td>
 										<td><select name="service_days" value={this.state.params.service_days} onChange={this.set}>
-											<option value={0}>7 days per week</option>
+											<option value={4}>7 days per week</option>
 											<option value={1}>Weekdays only</option>
 											<option value={2}>Weekdays + Saturdays</option>
 											<option value={3}>Weekdays + Sundays</option>
-											<option value={4}>Weekends only</option>
+											<option value={0}>Weekends only</option>
 										</select></td>
 									</tr>
 									<tr>
