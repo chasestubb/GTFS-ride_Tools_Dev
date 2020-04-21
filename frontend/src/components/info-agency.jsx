@@ -88,7 +88,7 @@ class Info_Agency extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800"><Link to="/info" className="back-button"><i className="fas fa-chevron-left back-button"></i></Link>{this.state.name}</h1>
+							<h1 className="h3 mb-0 text-gray-800"><button className="back-button" onClick={() => window.history.back()}><i className="fas fa-chevron-left back-button"></i></button>{this.state.name}</h1>
 						</div>
 					</div>
 		
@@ -241,7 +241,7 @@ class Info_Agency extends React.Component{
 										Description: <strong>{route.desc}</strong> <br/>
 										Type: {get_route_type(route.type)} <br/>
 										Trips: <strong>{route.trips}</strong> <br/>
-										{this.state.is_gtfs_ride ? RIDERSHIP_TIME + " ridership: " + route.ridership : null} <br/>
+										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} <strong>{route.ridership}</strong></span> : null} <br/>
 									</div>
 								</div>
 							</div>
