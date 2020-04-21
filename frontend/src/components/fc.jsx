@@ -104,7 +104,7 @@ class FC extends React.Component{
 		if (input.trips_per_route < 1){
 			errmsg += "Number of trips per route must be at least 1.\n";
 		}
-		if (input.start_date === null || input.end_date === null){
+		if (input.start_date == null || input.end_date == null){
 			errmsg += "Both start date and end date must be filled.\n";
 		} else {
 			var start = this.strDateToIntDate(this.state.params.start_date) // convert date representations to int
@@ -115,7 +115,7 @@ class FC extends React.Component{
 		}
 		
 		// if there are no errors
-		if (errmsg === ""){
+		if (errmsg == ""){
 			return null;
 		} else { // if there are errors
 			alert(errmsg);

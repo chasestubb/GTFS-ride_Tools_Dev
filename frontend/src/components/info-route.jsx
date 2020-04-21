@@ -119,7 +119,7 @@ class Info_Route extends React.Component{
 	}
 
 	render(){
-		if (this.state.status === 200){
+		if (this.state.status == 200){
 			return (
 				<div>
 					<div className="row">

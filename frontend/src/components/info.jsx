@@ -14,7 +14,7 @@ const RIDERSHIP_TIME = "Weekly";
 const SERVER_CHECK_URL = "/server_check";
 
 function agency_plural(count){
-	if (count === 1){
+	if (count == 1){
 		return "agency";
 	} else {
 		return "agencies";
@@ -89,7 +89,7 @@ class Info extends React.Component{
 
 	render(){
 		console.log(this.state);
-		if (this.state.status === 200){
+		if (this.state.status == 200){
 			return (
 				<div>
 
@@ -263,7 +263,7 @@ class Info extends React.Component{
 			)
 		
 		// if the server is alive but has not returned a response yet
-		} else if (this.state.status === -1 && this.props.filename) {
+		} else if (this.state.status == -1 && this.props.filename) {
 			return(
 				<div className="row">
 					<h4>Loading feed...</h4><br/><br/>
@@ -271,7 +271,7 @@ class Info extends React.Component{
 			)
 		
 		// if the server is not alive
-		} else if (this.state.status === -99) {
+		} else if (this.state.status == -99) {
 			return(
 				<div>
 					<div className="row">
