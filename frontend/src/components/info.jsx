@@ -1,34 +1,35 @@
 // info.jsx shows the general feed info
 
-import React from 'react'
-import {Link, Switch, Route, useParams} from 'react-router-dom'
-import Axios from 'axios'
+import React from 'react';
+//import {Link, Switch, Route, useParams} from 'react-router-dom';
+import {Link} from 'react-router-dom';
+import Axios from 'axios';
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const HOST = "http://localhost:8080"
-const INFO_URL = "/info"
+const HOST = "http://localhost:8080";
+const INFO_URL = "/info";
 const url = HOST + INFO_URL;
-const RIDERSHIP_TIME = "Weekly"
+const RIDERSHIP_TIME = "Weekly";
 
-const SERVER_CHECK_URL = "/server_check"
+const SERVER_CHECK_URL = "/server_check";
 
 function agency_plural(count){
-	if (count == 1){
-		return "agency"
+	if (count === 1){
+		return "agency";
 	} else {
-		return "agencies"
+		return "agencies";
 	}
 }
 
 // format the date
 function date_formatter(date_int){
-	var date = String(date_int)
-	var year = date.substr(0, 4)
-	var month = date.substr(4, 2)
-	var day = date.substr(6, 2)
+	var date = String(date_int);
+	var year = date.substr(0, 4);
+	var month = date.substr(4, 2);
+	var day = date.substr(6, 2);
 
 	// feel free to edit the date format on the next line
-	var formatted_date = year + "-" + month + "-" + day
+	var formatted_date = year + "-" + month + "-" + day;
 	// date and month will always be a 2-digit number, year will always be the complete year (e.g.: 2017)
 
 	return (formatted_date)
@@ -57,15 +58,15 @@ class Info extends React.Component{
 		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
 			console.log(res)
 		}).catch((err) => {
-			console.log("Error: " + err)
-			this.setState({status: -99})
-		})
+			console.log("Error: " + err);
+			this.setState({status: -99});
+		});
 	}
 
 	// get the feed info from the server
 	async getInfo(){
 		Axios.get(url).then((res) => {
-			console.log(res)
+			console.log(res);
 			this.setState({ // store the feed info in the local state
 				status: res.status,
 				filename: res.data.filename,
@@ -87,7 +88,7 @@ class Info extends React.Component{
 	}
 
 	render(){
-		console.log(this.state)
+		console.log(this.state);
 		if (this.state.status === 200){
 			return (
 				<div>
@@ -262,7 +263,7 @@ class Info extends React.Component{
 			)
 		
 		// if the server is alive but has not returned a response yet
-		} else if (this.state.status == -1 && this.props.filename) {
+		} else if (this.state.status === -1 && this.props.filename) {
 			return(
 				<div className="row">
 					<h4>Loading feed...</h4><br/><br/>
@@ -270,7 +271,7 @@ class Info extends React.Component{
 			)
 		
 		// if the server is not alive
-		} else if (this.state.status == -99) {
+		} else if (this.state.status === -99) {
 			return(
 				<div>
 					<div className="row">
