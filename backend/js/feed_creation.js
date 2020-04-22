@@ -34,6 +34,7 @@ var csv_stringify = csvStringify({delimiter: ','});
 var csvStringifySync = require('csv-stringify/lib/sync');
 var fs = require('fs');
 var zip = require('cross-zip');
+var {execSync} = require('child_process')
 
 var FILEPATH = "feed_creation/";
 var FILENAME = "fc.zip";
@@ -921,7 +922,9 @@ module.exports = {
         process.chdir(FILEPATH) // change dir
         console.log("current dir: " + process.cwd())
         try {
-            zip.zipSync("*.txt", FILENAME); // zip the files
+            //zip.zipSync("*.txt", FILENAME); // zip the files
+            var out = execSync('zip -r -y fc.zip *.txt')
+            console.log(out)
         } catch (e){
             console.log("ZIP")
             console.log(e)
