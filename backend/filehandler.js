@@ -233,13 +233,25 @@ app.get(INFO_URL, (req, res) => {
     console.log("FEED INFO")
     if (agencies && routes && trips && stops && stop_times){
         // initialize object
-        var feed_info_ = {
-            filename: filename,
-            is_gtfs_ride: gtfs_ride_feed,
-            agencies: [],
-            stops: [],
-            num_trips: trips.length,
-            date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+        if (feed_info[0]){
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+            }
+        } else {
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: ["-", "-"],
+            }
+        
         }
 
         // parse agencies' info
@@ -489,10 +501,17 @@ app.post(FC_POST_URL, async (req, res) => {
     fc_promise = new Promise((resolve, reject) => {
         console.log("Params received")
         resolve (feed_creation(req.body)) // generate the feed file and resolve the promise when done
+        if (reject){
+            console.log(reject)
+        }
+        res.writeHead(200)
+        res.write("Params received")
+        res.end()
+        
+    }).catch((err) => {
+        console.log(err)
     })
-    res.writeHead(200)
-    res.write("Params received")
-    res.end()
+    
 })
 
 // --------------------------------------------------------------------------------
