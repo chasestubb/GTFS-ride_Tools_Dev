@@ -8,18 +8,18 @@ Web-based tools for the management of GTFS-ride data.
 - Ashley Vieira :: vieiraas@oregonstate.edu :: @AshleyVieira
 
 ### To Demo Our Tools (For Both Non-Technical and Technical Users):
-We are currently hosting our code at http://138.197.202.242:3000/ --You can simply paste this link into your web browser (Chrome/etc.) to interact with the tools we have built. Keep in mind that this may not be the most recent state of the code--that will be here on GitHub. We will be updating this hosted code to reflect major developments.
+We are currently hosting our code at http://138.197.202.242:3000/ --You can simply paste this link into your web browser (Chrome/etc.) to interact with the tools we have built.
 
 ### Testing the Interface
-Our two main functions are "**Info**" and "**Feed Creation**." Ultimately, what all of our tools do is manipulative GTFS and GTFS-ride feeds, which are zipped folders of .txt files that are really .csv files. The majority of all development has been on the underlying infrastructure of the project, understanding the feed specifications, and deepening the functionalities of Feed Creation and Info.
+Our two main functions are "**Info**" and "**Feed Creation**." Ultimately, what all of our tools do is manipulate GTFS and GTFS-ride feeds, which are zipped folders of .txt files that are really .csv files. The majority of our development has been on the underlying infrastructures of the project (data manipulation and passing, creating the base interface and web app), understanding the feed specifications, and deepening the functionalities of Feed Creation and Info.
 
 ##### To Test "Feed Creation"
 1. Choose "Test Feed Creation" in the lefthand sidebar.
-2. Adjust fields as desired. Note that someone who typically uses this product will be non-technical, but will have familiarity with transit agencies. Generally, # agencies < # routes < # stops, but the bounds for each of these values should be well managed to support nearly anything. The ridership features are still in development, so these fields do not matter. 
-3. For "Service pattern defined in:", make sure you choose "Both files (recommended)". This is the predominantly used case, and it is currently the only one we support.
+2. Adjust fields as desired. Note that someone who typically uses this product will be non-technical, but will have familiarity with transit systems. Generally, # agencies < # routes < # stops, but the bounds for each of these values should be well-managed to support odd cases (for example: five transit agencies, each with 50 routes, each using the same stop 200 times). The ridership features are still in development, so you can disregard these fields.
+3. For "Service pattern defined in:", make sure you choose "Both files (recommended)". This is the predominant used case (and is selected by default), and it is currently the only one we support.
 
 ##### To Test "Info"
-We will be able to use the feed we just created with Feed Creation to test Info as well. To do this, head back to "Home" in the lefthand sidebar and upload the zip folder you just created (`fc.zip`). Then, you will be able to go to "Info" and see the feed's contents displayed. Within this, some elements, such as listed agencies (`Test Transit#`, for example), will be able to be clicked to see information specific to that agency. You will also be able to click a route and see relevant information for that route.
+We will be able to use the feed we just created with Feed Creation to test Info as well. To do this, head back to "Home" in the lefthand sidebar and upload the zip folder you just created (`fc.zip`). Then, you will be able to go to "Info" and see the feed's contents displayed. Within this, some elements, such as listed agencies (`Test Transit#`, for example), will be able to be clicked to see information specific to that agency. You will also be able to click a route and see relevant information for that route. Additionally, you can click on the latitude and longitude for a stop to see it in Google Maps.
 
 ---
 ### (Not recommended) Instructions for Technical User:
