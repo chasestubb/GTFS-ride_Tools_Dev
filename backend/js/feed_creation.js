@@ -298,7 +298,7 @@ module.exports = {
             feed_lang: "en",
             feed_start_date: feed_start_date1,
             feed_end_date: feed_end_date1,
-            feed_version: 1.0.0,
+            feed_version: "1.0.0",
         }
        return feed_info;
     },
