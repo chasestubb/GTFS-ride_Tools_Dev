@@ -29,7 +29,7 @@ function date_formatter(date_int){
 	var day = date.substr(6, 2);
 
 	// feel free to edit the date format on the next line
-	var formatted_date = month + "-" + day + ", " + year;
+	var formatted_date = month + "-" + day + "-" + year;
 	// date and month will always be a 2-digit number, year will always be the complete year (e.g.: 2017)
 
 	return (formatted_date)

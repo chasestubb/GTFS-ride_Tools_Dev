@@ -415,9 +415,9 @@ module.exports = {
             temp_stop.stop_id = "STOP" + i;
             randLatRaw = (Math.random() * 180) - 90; // between -90 and 90
             randLat = parseFloat(randLatRaw.toFixed(6)); // round to six decimal points
- 
+            
             randLonRaw = (Math.random() * 360) - 180; // between -180 and 180
-            randLon = parseFloat(randLatRaw.toFixed(6)); // rount to six decimal points
+            randLon = parseFloat(randLonRaw.toFixed(6)); // rount to six decimal points
 
             temp_stop.stop_lat = randLat;
             temp_stop.stop_lon = randLon;
@@ -463,8 +463,7 @@ module.exports = {
     //   stop_sequence   | algorithm - see desc above
 
     stopTimesCreate: function(num_trips, trips, num_stops, num_routes, num_trips_per_route){
-        var stop_times = [];
-        var stop_sequence_list = [];
+        var stop_times = []; // array to return
         // var stop_time_entry = {
         //     trip_id: "",
         //     arrival_time: "",
@@ -476,12 +475,11 @@ module.exports = {
         var count = 1;
 
         // get number of stops per route. also get remainder so we can add to last trip
-        num_stops_per_route = num_routes / num_stops;
-        remainder = num_routes % num_stops; 
+        var num_stops_per_route = num_stops / num_routes;
+        var remainder = num_routes % num_stops; 
 
         // FOR EACH TRIP IN FEED
         while (count <= num_trips) {
-
             // GENERATE STOP SEQUENCE for a set of trips belonging to the same route
             // e.g. [STOP5, STOP6, STOP48, STOP62...]
             // stop sequences do not ultimately increment here, but we do not 
@@ -489,10 +487,10 @@ module.exports = {
             //   with stops 5, 56, and 10, but something that consumes this data would 
             //   likely interpret it as 5, 10, 56 or this aspect wouldn't even matter since
             //   ultimately this is just a list of IDs
-            stop_sequence_list = []; // empty the list for new sequence
+            var stop_sequence_list = []; // empty the list for new sequence
             for(var k = 1; k <= num_stops_per_route && k <= 100000; k++){ // TODO - make this cap user defined                
                 // get random stop ID for each index of the stop sequence list
-                randStopID = getRandomIntInclusive(1, num_stops); // between 1 and num_stops
+                var randStopID = getRandomIntInclusive(1, num_stops); // between 1 and num_stops
                 stop_sequence_list.push("STOP" + randStopID);
             }
 
