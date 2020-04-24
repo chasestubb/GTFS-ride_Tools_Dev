@@ -293,15 +293,15 @@ module.exports = {
     //   feed_version         | static - always "1.0.0"    
 
     feedInfoCreate: function(feed_start_date1, feed_end_date1){
-        var feed_info = {
+        return [{
             feed_publisher_name: "Test Transit",
             feed_publisher_url: "https://github.com/ODOT-PTS/GTFS-ride/",
             feed_lang: "en",
             feed_start_date: feed_start_date1,
             feed_end_date: feed_end_date1,
             feed_version: "1.0.0",
-        }
-       return feed_info;
+        }];
+       //return feed_info;
     },
 
 
