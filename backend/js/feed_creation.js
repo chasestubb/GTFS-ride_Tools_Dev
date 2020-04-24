@@ -38,6 +38,7 @@ var csv_stringify = csvStringify({delimiter: ','});
 var csvStringifySync = require('csv-stringify/lib/sync');
 var fs = require('fs');
 var zip = require('cross-zip');
+var {execSync} = require('child_process')
 
 var FILEPATH = "feed_creation/";
 var FILENAME = "fc.zip";
@@ -516,8 +517,8 @@ module.exports = {
                     // GENERATE A LINE (represents a single stop time)
                     var stop_time_entry = {			  
                         trip_id: "TRIP" + count2, // trip id			  
-                        arrival_time: local_arr_time, // arrival time begins at 06:00:00 			  
-                        departure_time: local_dep_time, // departure time begins at 06:02:00 			  
+                        arrival_time: local_arr_time, // arrival time begins at 06:00:00
+                        departure_time: local_dep_time, // departure time begins at 06:02:00
                         stop_id: stop_sequence_list[c], // stop id (taken from the sequence generated)	  
                         stop_sequence: c + 1,		   	
                     };
@@ -944,8 +945,17 @@ module.exports = {
 
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
-        process.chdir(FILEPATH); // change dir
-        zip.zipSync("./*.txt", "./" + FILENAME); // zip the files
+        process.chdir(FILEPATH) // change dir
+        console.log("current dir: " + process.cwd())
+        try {
+            //zip.zipSync("*.txt", FILENAME); // zip the files
+            var out = execSync('zip -r -y fc.zip *.txt')
+            console.log(out)
+        } catch (e){
+            console.log("ZIP")
+            console.log(e)
+        }
+        
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
