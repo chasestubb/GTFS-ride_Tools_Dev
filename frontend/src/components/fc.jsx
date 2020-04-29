@@ -2,15 +2,15 @@ import React from 'react'
 import Axios from 'axios'
 
 // set this to true if the program should prohibit start date to be later than end date, set it to false to allow
-const CHECK_DATE = true
+const CHECK_DATE = true;
 
 // FOR PRODUCTION, CHANGE THIS TO THE SERVER HOST
-const HOST = "http://localhost:8080"
+const HOST = "http://localhost:8080";
 
 // DO NOT CHANGE THESE UNLESS YOU CHANGE THEM ON THE SERVER AS WELL
-const postURL = HOST + "/fc/params"
-const getURL = HOST + "/fc/getfile"
-const SERVER_CHECK_URL = "/server_check"
+const postURL = HOST + "/fc/params";
+const getURL = HOST + "/fc/getfile";
+const SERVER_CHECK_URL = "/server_check";
 
 /* ENUM VALUES
 
@@ -42,7 +42,7 @@ const SERVER_CHECK_URL = "/server_check"
 
 class FC extends React.Component{
 	constructor(props){
-		super(props)
+		super(props);
 		this.state = {
 			params: { // form data goes here
 				agencies: 1,
@@ -64,61 +64,61 @@ class FC extends React.Component{
 			zip_filename: "fc", // the resulting zip file name (without extension)
 			err: "",
 		}
-		this.setNumber = this.setNumber.bind(this)
-		//this.setDate = this.setDate.bind(this)
-		this.set = this.set.bind(this)
-		this.submit = this.submit.bind(this)
-		this.isServerAlive = this.isServerAlive.bind(this)
-		this.errCheck = this.errCheck.bind(this)
-		this.statusText = this.statusText.bind(this)
+		this.setNumber = this.setNumber.bind(this);
+		this.setDate = this.setDate.bind(this);
+		this.set = this.set.bind(this);
+		this.submit = this.submit.bind(this);
+		this.isServerAlive = this.isServerAlive.bind(this);
+		this.errCheck = this.errCheck.bind(this);
+		this.statusText = this.statusText.bind(this);
 	}
 
 	// sends a test request to the server to check if the server is up
 	async isServerAlive(){
 		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
 			console.log(res)
-			this.setState({status: res.status, fileStatus: 0})
+			this.setState({status: res.status, fileStatus: 0});
 		}).catch((err) => {
-			console.log("Error: " + err)
-			this.setState({status: -99, fileStatus: -1})
+			console.log("Error: " + err);
+			this.setState({status: -99, fileStatus: -1});
 		})
 	}
 
 	// checks for input errors, returns a string if the input is invalid, returns null if the server is valid
 	errCheck(){
-		var input = this.state.params
-		var errmsg = ""
+		var input = this.state.params;
+		var errmsg = "";
 		if (input.agencies < 1){
-			errmsg += "Number of agencies must be at least 1.\n"
+			errmsg += "Number of agencies must be at least 1.\n";
 		}
 		if (input.routes < 1){
-			errmsg += "Number of routes must be at least 1.\n"
+			errmsg += "Number of routes must be at least 1.\n";
 		}
 		if (input.stops < 1){
-			errmsg += "Number of stops must be at least 1.\n"
+			errmsg += "Number of stops must be at least 1.\n";
 		}
 		if (input.trips < 1){
-			errmsg += "Number of trips must be at least 1.\n"
+			errmsg += "Number of trips must be at least 1.\n";
 		}
 		if (input.trips_per_route < 1){
-			errmsg += "Number of trips per route must be at least 1.\n"
+			errmsg += "Number of trips per route must be at least 1.\n";
 		}
 		if (input.start_date == null || input.end_date == null){
-			errmsg += "Both start date and end date must be filled.\n"
+			errmsg += "Both start date and end date must be filled.\n";
 		} else {
 			var start = this.strDateToIntDate(this.state.params.start_date) // convert date representations to int
-			var end = this.strDateToIntDate(this.state.params.end_date)
+			var end = this.strDateToIntDate(this.state.params.end_date);
 			if ((start > end) && CHECK_DATE){
-				errmsg += "End date cannot be earlier than start date.\n"
+				errmsg += "End date cannot be earlier than start date.\n";
 			}
 		}
 		
 		// if there are no errors
 		if (errmsg == ""){
-			return null
+			return null;
 		} else { // if there are errors
-			alert(errmsg)
-			return errmsg
+			alert(errmsg);
+			return errmsg;
 		}
 	}
 
@@ -150,11 +150,11 @@ class FC extends React.Component{
 	// converts "2019-12-31" to 20191231
 	strDateToIntDate(strDate){
 		var arrDate = strDate.split("-")
-		var intDate = 0
-		intDate += Number(arrDate[0] * 10000)
-		intDate += Number(arrDate[1] * 100)
-		intDate += Number(arrDate[2])
-		return intDate
+		var intDate = 0;
+		intDate += Number(arrDate[0] * 10000);
+		intDate += Number(arrDate[1] * 100);
+		intDate += Number(arrDate[2]);
+		return intDate;
 	}
 
 	// same as set but for dates

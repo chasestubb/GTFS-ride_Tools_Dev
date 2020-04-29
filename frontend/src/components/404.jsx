@@ -1,9 +1,10 @@
-import React from 'react'
-import { render } from '@testing-library/react';
-import {useRouteMatch, Link} from 'react-router-dom'
+import React from 'react';
+//import { render } from '@testing-library/react'; // never used
+import {useRouteMatch, Link} from 'react-router-dom';
 
 function Path(){
-	let {url, path} = useRouteMatch("/:path");
+	//let {url, path} = useRouteMatch("/:path"); // path never used
+	let {url} = useRouteMatch("/:path");
 	return <span>{url}</span>;
 }
 

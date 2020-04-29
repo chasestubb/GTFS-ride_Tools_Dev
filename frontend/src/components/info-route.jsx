@@ -1,12 +1,13 @@
 // info-route.jsx shows the route-level info
 
-import React from 'react'
-import {Link, Route, useParams} from 'react-router-dom'
-import Axios from 'axios'
+import React from 'react';
+//import {Link, Route, useParams} from 'react-router-dom' // Route, useParams never used
+import {Link} from 'react-router-dom';
+import Axios from 'axios';
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const url = "http://localhost:8080/info/route/";
-const RIDERSHIP_TIME = "Weekly"
+const RIDERSHIP_TIME = "Weekly";
 
 // get the route type (route type is an enum on the standard)
 function get_route_type(type){

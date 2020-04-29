@@ -4,11 +4,16 @@
 
 // !! NOTE !!
 //   Since the primary purpose of the Feed Creation tool is to allow users
-//     to test the GTFS-ride data format, only the *required* elements of 
-//     a GTFS feed will be included. GTFS feeds abound such that test
-//     data is not necessary in lieu of available real-world data.
+//     to test and understand the GTFS-ride data format, only the *required* 
+//     elements of a GTFS feed are included. GTFS feeds abound such that more
+//     test data is of lower value due to abundant real-world data.
+// 
+//     However, efforts have been made to create test feed GTFS files that 
+//     are relatively customized for a user, shown by aspects such as the 
+//     ability to choose how the service pattern is specified.
+// 
 //   As for the GTFS-ride feed, *all* five files and *all* fields within 
-//     them will be included.
+//     them are included.
 
 // GTFS INCLUDED FILES  ============
 //   agency.txt
@@ -18,7 +23,6 @@
 //   stop_times.txt
 //   calendar.txt
 //   feed_info.txt (since referenced in GTFS-ride)
-
 
 // GTFS-RIDE INCLUDED FILES  =======
 //   board_alight.txt
@@ -295,6 +299,7 @@ module.exports = {
             feed_lang: "en",
             feed_start_date: feed_start_date1,
             feed_end_date: feed_end_date1,
+            feed_version: "1.0.0",
         }
        return [feed_info];
     },
@@ -478,9 +483,14 @@ module.exports = {
         while (count <= num_trips) {
 
             // GENERATE STOP SEQUENCE for a set of trips belonging to the same route
-            // e.g. [STOP5, STOP56, STOP98, STOP6...]
+            // e.g. [STOP5, STOP6, STOP48, STOP62...]
+            // stop sequences do not ultimately increment here, but we do not 
+            //   expect an issue. For example, there could be three lines in stop_times.txt
+            //   with stops 5, 56, and 10, but something that consumes this data would 
+            //   likely interpret it as 5, 10, 56 or this aspect wouldn't even matter since
+            //   ultimately this is just a list of IDs
             stop_sequence_list = []; // empty the list for new sequence
-            for(var k = 1; k <= num_stops_per_route && k <= 100000; k++){ // TODO - make this cap user defined
+            for(var k = 1; k <= num_stops_per_route && k <= 100000; k++){ // TODO - make this cap user defined                
                 // get random stop ID for each index of the stop sequence list
                 randStopID = getRandomIntInclusive(1, num_stops); // between 1 and num_stops
                 stop_sequence_list.push("STOP" + randStopID);
@@ -583,6 +593,20 @@ module.exports = {
         return trips;
     },
 
+    // !! NOTE !!
+    //   Since the primary purpose of the Feed Creation tool is to allow users
+    //     to test and understand the GTFS-ride data format, only the *required* 
+    //     elements of a GTFS feed are included. GTFS feeds abound such that more
+    //     test data is of lower value due to abundant real-world data.
+    // 
+    //     However, efforts have been made to create test feed GTFS files that 
+    //     are relatively customized for a user, shown by aspects such as the 
+    //     ability to choose how the service pattern is specified.
+    // 
+    //   As for the GTFS-ride feed, *all* five files and *all* fields within 
+    //     them are included.
+
+
     // CREATE RIDE_FEED_INFO.TXT (GTFS-ride) ================
     // Description: 
     //   generates very basic information about the feeds. 
@@ -592,11 +616,13 @@ module.exports = {
     // User Input: 
     //   ride_start_date (same as for feed_info.txt)
     //   ride_end_date (same as for feed_info.txt)
-    //   gtfs_feed_date TODO?
+    //   gtfs_feed_date 
     //
     // Attributes: 
     //   ride_files | All files with always be generated, as specified by ODOT + OSU
-    //   gtfs_feed_date | TODO define???
+    //   gtfs_feed_date | references feed_version in ride_info.txt or serves as a 
+    //                    replacement for it. Specifies correctness/recency of GTFS 
+    //                    elements. Since this is a test, feed, w
     //   default_currency_type | static -- USD
     //   ride_feed_version | static -- v1
 
