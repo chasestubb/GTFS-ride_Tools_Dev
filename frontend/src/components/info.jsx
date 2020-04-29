@@ -94,7 +94,7 @@ class Info extends React.Component{
 
 					{/* Content Row */}
 					<div className="row">
-						<h4>Click on an agency's name for more info.</h4><br/><br/>
+						<h4 className="h4 mb-0 text-gray-800">General Feed Information</h4><br/><br/>
 					</div>
 			
 					<div className="row">
@@ -203,6 +203,14 @@ class Info extends React.Component{
 
 
 					</div>
+
+					{/* Content Row */}
+					<div className="row">
+						<h4 className="h4 mb-0 text-gray-800">Agencies ({this.state.agency_list.length})</h4>
+					</div>
+					<div className="row">
+						<h5>Click on an agency's name for more info.</h5><br/><br/>
+					</div>
 					
 					{/* Content Row */}
 					<div className="row">
@@ -227,7 +235,7 @@ class Info extends React.Component{
 					</div>
 
 					<div className="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 className="h3 mb-0 text-gray-800">Stops</h1>
+						<h4 className="h4 mb-0 text-gray-800">Stops ({this.state.stop_list.length})</h4>
 					</div>
 					<div className="row">
 		

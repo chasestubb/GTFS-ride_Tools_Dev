@@ -296,7 +296,7 @@ module.exports = {
             feed_start_date: feed_start_date1,
             feed_end_date: feed_end_date1,
         }
-       return feed_info;
+       return [feed_info];
     },
 
 
