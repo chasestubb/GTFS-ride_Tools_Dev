@@ -128,10 +128,10 @@ module.exports = {
     //   service days for all agencies.
     //          
     // User Input: 
-    //   none. each agency will have the same service days.
+    //   service_id: set based on days of operation
     //
     // Attributes: 
-    //   service_id       | static - always "BASE_CALENDAR"          
+    //   service_id       | static - always ""          
     //   monday...sunday  | static - each is set to "1"
     //   start_date       | static - always "20000101" = Jan 1, 2000
     //   end_date         | static - always "20500101" = Jan 1, 2050
@@ -150,18 +150,6 @@ module.exports = {
         //     end_date: end_date_input,
         // }
 
-        // if (operation_days == 0){
-        //     calendar.service_id = "WEEKEND_CALENDAR";
-        //     calendar.monday = 0;
-        //     calendar.tuesday = 0;
-        //     calendar.wednesday = 0;
-        //     calendar.thursday = 0;
-        //     calendar.friday = 0;
-        //     calendar.saturday = 1;
-        //     calendar.sunday = 1;
-        //     calendar.start_date = start_date_input;
-        //     calendar.end_date = end_date_input;
-        // }
         if (operation_days == 0){
             return {
                 service_id: "WEEKEND_CALENDAR",
@@ -613,26 +601,32 @@ module.exports = {
     //     often used to discern whether the feed is gtfs or gtfs-ride
     //          
     // User Input: 
+    //   files (an int that shows which files ridership data is specified in.)
     //   ride_start_date (same as for feed_info.txt)
     //   ride_end_date (same as for feed_info.txt)
-    //   gtfs_feed_date 
     //
     // Attributes: 
-    //   ride_files | All files with always be generated, as specified by ODOT + OSU
-    //   gtfs_feed_date | references feed_version in ride_info.txt or serves as a 
-    //                    replacement for it. Specifies correctness/recency of GTFS 
-    //                    elements. Since this is a test, feed, w
-    //   default_currency_type | static -- USD
-    //   ride_feed_version | static -- v1
-
-    rideFeedInfoCreate: function(files, start_date, end_date, feed_date){
+    //   ride_files      | USER INPUT -- All files and all fields will always be generated,
+    //                     as specified by ODOT + OSU, however aggregation level will
+    //                     be supported (ie data on stop level or agency level),
+    //                     so this field *will* vary
+    //   ride_start_date | This will simply pull from the feed_info.txt start date
+    //   ride_end_date   | This will simply pull from the feed_info.txt end date
+    //   gtfs_feed_date  | STATIC -- references feed_version in ride_info.txt or serves 
+    //                     as a replacement for it. Specifies correctness/recency of GTFS 
+    //                     elements. Since this is a test, feed, will always be "1.0.0"
+    //
+    //   default_currency_type | STATIC -- USD
+    //   ride_feed_version     | STATIC -- 1.0.0
+            
+    rideFeedInfoCreate: function(files, feed_start_date, feed_end_date){
         var ride_feed_info = {
-            ride_files : files,
-            ride_start_date : start_date,
-            ride_end_date : end_date,
-            gtfs_feed_date : feed_date,
+            ride_files : files, // INT for specific combination of files
+            ride_start_date : feed_start_date,
+            ride_end_date : feed_end_date,
+            gtfs_feed_date : "1.0.0",
             default_currency_type : "USD",
-            ride_feed_version : 1.0,
+            ride_feed_version : "1.0.0",
         } 
         if ( files == null ){
             //defaults to all files if not speciified
@@ -773,7 +767,19 @@ module.exports = {
         return rider_trips;
     },
 
-    ridershipCreate: function(stops, num_stops, num_routes, routes, board_alight, num_riders, trips, num_trips){
+
+    // CREATE RIDERSHIP.TXT (GTFS-ride) ================
+    // Description: 
+    //   
+    //          
+    // User Input: 
+    //   num_boardings
+    //   num_alightings
+    //
+    // Attributes: 
+    //   temp_ridership
+
+    ridershipCreate: function(operation_days, stops, num_stops, num_routes, routes, board_alight, num_riders, trips, num_trips){
         var ridership = [];
         var temp_ridership = {
             total_boardings : 0,
@@ -856,10 +862,11 @@ module.exports = {
         var trips = this.tripsCreate(num_routes, num_trips_per_route);
         var stopTimes = this.stopTimesCreate(num_trips, trips, num_stops, num_routes, num_trips_per_route);
         var feedInfo = this.feedInfoCreate(start_date, end_date);
-        // var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date, feed_date);
+        var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
+        //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
+
         // var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source);
         // var riderTrip = this.riderTripCreate(num_riders, trips, num_trips, num_stops);
-        // var ridership = this.ridershipCreate(stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
         // var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
 
@@ -872,7 +879,7 @@ module.exports = {
         var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
         var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
         var feedInfoCSV = csvStringifySync(feedInfo, {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
-        // var rideFeedInfoCSV = csvStringifySync(rideFeedInfo, {head: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
+        var rideFeedInfoCSV = csvStringifySync(rideFeedInfo, {head: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
         // var boardAlightCSV = csvStringifySync(boardAlight, {head: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
         // var riderTripCSV = csvStringifySync(riderTrip, {head: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
         // var ridershipCSV = csvStringifySync(ridership, {head: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
@@ -936,7 +943,7 @@ module.exports = {
         fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
         fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
         fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
-        // fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV)
+        fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
         // fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
         // fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
         // fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV)
