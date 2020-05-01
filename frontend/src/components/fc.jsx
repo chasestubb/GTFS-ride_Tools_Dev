@@ -1,6 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
-import fileDownload from 'js-file-download';
+//import fileDownload from 'js-file-download';
 
 // set this to true if the program should prohibit start date to be later than end date, set it to false to allow
 const CHECK_DATE = true;
@@ -66,7 +66,7 @@ class FC extends React.Component{
 			err: "",
 		}
 		this.setNumber = this.setNumber.bind(this);
-		this.setDate = this.setDate.bind(this);
+		//this.setDate = this.setDate.bind(this);
 		this.set = this.set.bind(this);
 		this.submit = this.submit.bind(this);
 		this.isServerAlive = this.isServerAlive.bind(this);
@@ -190,11 +190,24 @@ class FC extends React.Component{
 		Axios.get(getURL, {
 			responseType: "arraybuffer" // response is a binary file, do not parse as string
 		}).then((res) => {
+			console.log("Response from sendGet:")
 			console.log(res)
 			this.setState({fileStatus: 3})
 			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
 			if (blob){
-				fileDownload(blob, this.state.zip_filename + ".zip") // send for download
+				//fileDownload(blob, this.state.zip_filename + ".zip") // send for download
+				// force the browser to download (i.e. not display or store) the file
+				let a = document.createElement("a");
+				let downloadUrl = window.URL.createObjectURL(blob)
+				let filename = this.state.zip_filename + ".zip"
+				if (typeof a.download === "undefined") {
+					window.location.href = downloadUrl
+				} else {
+					a.href = downloadUrl;
+					a.download = filename;
+					document.body.appendChild(a);
+					a.click();
+				}
 			}
 			this.state.err = ""
 		}).catch((err) => {
@@ -312,7 +325,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Service pattern </td>
-										<td><select name="service_days" value={this.state.params.service_days} onChange={this.set}>
+										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.set}>
 											<option value={4}>7 days per week</option>
 											<option value={1}>Weekdays only</option>
 											<option value={2}>Weekdays + Saturdays</option>
