@@ -224,8 +224,12 @@ class Info_Agency extends React.Component{
 							</div>
 						</div>
 					</div>
-					<div className="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 className="h3 mb-0 text-gray-800">Routes ({(this.state.routes).length})</h1>
+					{/* Content Row */}
+					<div className="row">
+						<h4 className="h4 mb-0 text-gray-800">Routes ({(this.state.routes).length})</h4>
+					</div>
+					<div className="row">
+						<h5>Click on a route name for more info.</h5><br/><br/>
 					</div>
 					<div className="row">
 		

@@ -65,7 +65,6 @@ class FC extends React.Component{
 			err: "",
 		}
 		this.setNumber = this.setNumber.bind(this);
-		this.setDate = this.setDate.bind(this);
 		this.set = this.set.bind(this);
 		this.submit = this.submit.bind(this);
 		this.isServerAlive = this.isServerAlive.bind(this);
