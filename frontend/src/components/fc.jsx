@@ -1,101 +1,169 @@
-import React from 'react'
-import Axios from 'axios'
-import fileDownload from 'js-file-download'
+import React from 'react';
+import Axios from 'axios';
+//import fileDownload from 'js-file-download';
 
 // set this to true if the program should prohibit start date to be later than end date, set it to false to allow
-const CHECK_DATE = true
+const CHECK_DATE = true;
 
 // FOR PRODUCTION, CHANGE THIS TO THE SERVER HOST
-const HOST = "http://localhost:8080"
+const HOST = "http://localhost:8080";
 
 // DO NOT CHANGE THESE UNLESS YOU CHANGE THEM ON THE SERVER AS WELL
-const postURL = HOST + "/fc/params"
-const getURL = HOST + "/fc/getfile"
-const SERVER_CHECK_URL = "/server_check"
+const postURL = HOST + "/fc/params";
+const getURL = HOST + "/fc/getfile";
+const SERVER_CHECK_URL = "/server_check";
+
+/* ENUM VALUES
+
+	user_source:
+	see GTFS-ride documentation
+
+	calendar_type:
+	0 = calendar.txt only
+	1 = calendar_dates.txt only
+	2 = both (default)
+
+	operation_days:
+	0 = weekends only
+	1 = weekdays only
+	2 = weekdays + sat
+	3 = weekdays + sun
+	4 = every day
+
+	fileStatus:
+	0 = no requests sent
+	1 = request sent to server
+	2 = server received the request and is now processing it
+	3 = file ready
+	-1 = server unreachable
+	-2 = other errors
+
+	files:
+	0 = board_alight
+	1 = rider_trip
+	2 = ridership
+	3 = board_alight and rider_trip
+	4 = board_alight and ridership
+	5 = rider_trip and ridership
+	6 = board_alight, rider_trip, and ridership
+	this tool can only support 2, 4, or 6
+
+	aggr_level:
+	0 = stop
+	1 = trip
+	2 = route
+	3 = agency
+
+*/
 
 
 class FC extends React.Component{
 	constructor(props){
-		super(props)
+		super(props);
 		this.state = {
 			params: { // form data goes here
 				agencies: 1,
 				routes: 1,
-				stops: 1,
+				stops: 2,
 				trips: 1,
 				trips_per_route: 1,
 				start_date: null,
 				end_date: null,
-				feed_date: null, // just made it the same as start_date
-				user_source: 0, // enum
-				num_riders: 1,
-				files: 6, // because we are generating all files
-				operation_days : 0,
+				feed_date: null, // just make it the same as start_date
+				user_source: 1, // enum
+				min_riders: 1,
+				max_riders: 1,
+				aggr_level: 0, // enum
+				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
+				operation_days: 4, // enum -- defines the service days of the week
+				files: 6, // enum -- defines what files are being generated (we only support 2, 4, or 6)
 			},
 			status: -1,
-			fileStatus: 0, // 0 = no requests sent, 1 = request sent to server, 2 = server received the request and is now processing it, 3 = file ready, -1 = server unreachable
+			fileStatus: 0, // see the "enum values" section above
 			zip_filename: "fc", // the resulting zip file name (without extension)
+			err: "",
 		}
-		this.setNumber = this.setNumber.bind(this)
-		this.setDate = this.setDate.bind(this)
-		this.set = this.set.bind(this)
-		this.submit = this.submit.bind(this)
-		this.isServerAlive = this.isServerAlive.bind(this)
-		this.errCheck = this.errCheck.bind(this)
-		this.statusText = this.statusText.bind(this)
+		this.setNumber = this.setNumber.bind(this);
+		//this.setDate = this.setDate.bind(this);
+		this.set = this.set.bind(this);
+		this.submit = this.submit.bind(this);
+		this.isServerAlive = this.isServerAlive.bind(this);
+		this.errCheck = this.errCheck.bind(this);
+		this.statusText = this.statusText.bind(this);
 	}
 
 	// sends a test request to the server to check if the server is up
 	async isServerAlive(){
 		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
 			console.log(res)
-			this.setState({status: res.status, fileStatus: 0})
+			this.setState({status: res.status, fileStatus: 0});
 		}).catch((err) => {
-			console.log("Error: " + err)
-			this.setState({status: -99, fileStatus: -1})
+			console.log("Error: " + err);
+			this.setState({status: -99, fileStatus: -1});
 		})
 	}
 
 	// checks for input errors, returns a string if the input is invalid, returns null if the server is valid
 	errCheck(){
-		var input = this.state.params
-		var errmsg = ""
+		var input = this.state.params;
+		var errmsg = "";
 		if (input.agencies < 1){
-			errmsg += "Number of agencies must be at least 1.\n"
+			errmsg += "Number of agencies must be at least 1.\n";
 		}
 		if (input.routes < 1){
-			errmsg += "Number of routes must be at least 1.\n"
+			errmsg += "Number of routes must be at least 1.\n";
 		}
 		if (input.stops < 1){
-			errmsg += "Number of stops must be at least 1.\n"
+			errmsg += "Number of stops must be at least 1.\n";
 		}
 		if (input.trips < 1){
-			errmsg += "Number of trips must be at least 1.\n"
+			errmsg += "Number of trips must be at least 1.\n";
 		}
 		if (input.trips_per_route < 1){
-			errmsg += "Number of trips per route must be at least 1.\n"
+			errmsg += "Number of trips per route must be at least 1.\n";
 		}
 		if (input.start_date == null || input.end_date == null){
-			errmsg += "Both start date and end date must be filled.\n"
+			errmsg += "Both start date and end date must be filled.\n";
 		} else {
 			var start = this.strDateToIntDate(this.state.params.start_date) // convert date representations to int
-			var end = this.strDateToIntDate(this.state.params.end_date)
+			var end = this.strDateToIntDate(this.state.params.end_date);
 			if ((start > end) && CHECK_DATE){
-				errmsg += "End date cannot be earlier than start date.\n"
+				errmsg += "End date cannot be earlier than start date.\n";
+			}
+		}
+		if (input.min_riders < 1 || input.max_riders < 1){
+			errmsg += "Number of riders must be at least 1.\n";
+		} else {
+			if (input.min_riders > input.max_riders){
+				errmsg += "Minimum riders cannot be greater than maximum riders.\n";
 			}
 		}
 		
 		// if there are no errors
 		if (errmsg == ""){
-			return null
+			return null;
 		} else { // if there are errors
-			alert(errmsg)
-			return errmsg
+			alert(errmsg);
+			return errmsg;
 		}
 	}
 
-	// changes the state based on the input field's name
+	// sets a parameter based on the name attribute on the HTML element
+	// if the HTML code looks like <input name="xyz" onChange={this.set}/>
+	// then this function modifies this.state.params.xyz
+	set(event){
+		this.setState({fileStatus: 0})
+		this.setState({
+			params: {
+				...this.state.params,
+				[event.target.name]: event.target.value
+			}
+		})
+	}
+
+	// same as set but converts the input to number and rounds it
 	setNumber(event){
+		this.setState({fileStatus: 0})
 		var num = Number(event.target.value)
 		this.setState({
 			params: {
@@ -108,30 +176,23 @@ class FC extends React.Component{
 	// converts "2019-12-31" to 20191231
 	strDateToIntDate(strDate){
 		var arrDate = strDate.split("-")
-		var intDate = 0
-		intDate += Number(arrDate[0] * 10000)
-		intDate += Number(arrDate[1] * 100)
-		intDate += Number(arrDate[2])
-		return intDate
+		var intDate = 0;
+		intDate += Number(arrDate[0] * 10000);
+		intDate += Number(arrDate[1] * 100);
+		intDate += Number(arrDate[2]);
+		return intDate;
 	}
 
-	setDate(event){
+	// same as set but for dates
+	/*setDate(event){
+		this.setState({fileStatus: 0})
 		this.setState({
 			params: {
 				...this.state.params,
 				[event.target.name]: event.target.value
 			}
 		})
-	}
-
-	set(event){
-		this.setState({
-			params: {
-				...this.state.params,
-				[event.target.name]: event.target.value
-			}
-		})
-	}
+	}*/
 
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
@@ -140,6 +201,7 @@ class FC extends React.Component{
 		}).catch ((err) => {
 			if (err) {
 				console.log(err);
+				this.setState({err: err, fileStatus: -2})
 				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
 				}
@@ -151,16 +213,31 @@ class FC extends React.Component{
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
 	async sendGet(){
 		Axios.get(getURL, {
-			responseType: "arraybuffer"
+			responseType: "arraybuffer" // response is a binary file, do not parse as string
 		}).then((res) => {
+			console.log("Response from sendGet:")
 			console.log(res)
 			this.setState({fileStatus: 3})
 			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
 			if (blob){
-				fileDownload(blob, this.state.zip_filename + ".zip")
+				//fileDownload(blob, this.state.zip_filename + ".zip") // send for download
+				// force the browser to download (i.e. not display or store) the file
+				let a = document.createElement("a");
+				let downloadUrl = window.URL.createObjectURL(blob)
+				let filename = this.state.zip_filename + ".zip"
+				if (typeof a.download === "undefined") {
+					window.location.href = downloadUrl
+				} else {
+					a.href = downloadUrl;
+					a.download = filename;
+					document.body.appendChild(a);
+					a.click();
+				}
 			}
+			this.state.err = ""
 		}).catch((err) => {
 			console.log("ERROR " + err)
+			this.setState({err: err, fileStatus: -2})
 		})
 	}
 
@@ -211,6 +288,8 @@ class FC extends React.Component{
 				return("Your feed is ready. Check your browser's download section.")
 			case -1:
 				return("Server unreachable.")
+			case -2:
+				return this.state.err
 			default:
 				return("Please fill out the form and click \"Generate Feed\".")
 		}
@@ -241,52 +320,86 @@ class FC extends React.Component{
 							</div>
 							<div className="card-body">
 								<table>
+									<th><strong className="text-dark">Feed size</strong></th>
 									<tr>
 										<td>Number of agencies</td>
-										<td><input name="agencies" className="fc-input-number" type="number" min={1} value={this.state.params.agencies} onChange={this.setNumber}></input></td>
+										<td><input name="agencies" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.agencies} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of routes</td>
-										<td><input name="routes" className="fc-input-number" type="number" min={1} value={this.state.params.routes} onChange={this.setNumber}></input></td>
+										<td><input name="routes" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.routes} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of stops</td>
-										<td><input name="stops" className="fc-input-number" type="number" min={1} value={this.state.params.stops} onChange={this.setNumber}></input></td>
+										<td><input name="stops" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.stops} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
 										<td>Number of trips per route</td>
-										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} value={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
+										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
+									</tr>
+									<tr className="empty-tr"></tr>
+									<th><strong className="text-dark">Feed dates</strong></th>
+									<tr>
+										<td>Service pattern </td>
+										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.set}>
+											<option value={4}>7 days per week</option>
+											<option value={1}>Weekdays only</option>
+											<option value={2}>Weekdays + Saturdays</option>
+											<option value={3}>Weekdays + Sundays</option>
+											<option value={0}>Weekends only</option>
+										</select></td>
+									</tr>
+									<tr>
+										<td>Service pattern defined in </td>
+										<td><select name="calendar_type" value={this.state.params.calendar_type} onChange={this.set}>
+											<option value={0}>calendar.txt only</option>
+											<option value={1}>calendar_dates.txt only</option>
+											<option value={2}>Both files (recommended)</option>
+										</select></td>
 									</tr>
 									<tr>
 										<td>Feed start date</td>
-										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.setDate}></input></td>
+										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.set}></input></td>
 									</tr>
 									<tr>
 										<td>Feed end date</td>
-										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.setDate}></input></td>
+										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.set}></input></td>
+									</tr>
+									<tr className="empty-tr"></tr>
+									<th><strong className="text-dark">Ridership</strong></th>
+									<tr>
+										<td>Most specific aggregation level </td>
+										<td><select name="aggr_level" value={this.state.params.aggr_level} onChange={this.set}>
+											<option value={0}>Stop-level data</option>
+											<option value={1}>Trip-level data</option>
+											<option value={2}>Route-level data</option>
+											<option value={3}>Agency-level data</option>
+										</select></td>
 									</tr>
 									<tr>
-										<td>Number of riders</td>
-										<td><input name="num_riders" className="fc-input-number" type="number" min={1} value={this.state.params.num_riders} onChange={this.setNumber}></input></td>
+										<td>Minimum number of riders</td>
+										<td><input name="min_riders" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.min_riders} onChange={this.setNumber}></input></td>
 									</tr>
 									<tr>
-										<td>Ridership data collection method</td>
+										<td>Maximum number of riders</td>
+										<td><input name="max_riders" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.max_riders} onChange={this.setNumber}></input></td>
+									</tr>
+									<tr>
+										<td>Ridership data collection method </td>
 										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
-											<option value={0}>Manual Counting</option>
 											<option value={1}>Automated Passenger Counter</option>
 											<option value={2}>Automated Fare Collector</option>
+											<option value={0}>Manual Counting</option>
 											<option value={3}>Model Estimation</option>
 											<option value={4}>Mixed Source</option>
 										</select></td>
 									</tr>
 									<tr>
-										<td>Usual days of operation</td>
-										<td><select name="operation_days" value={this.state.params.operation_days} onChange={this.set}>
-											<option value={0}>Weekends</option>
-											<option value={1}>Weekdays</option>
-											<option value={2}>Weekdays and Saturday</option>
-											<option value={3}>Weekdays and Sunday</option>
-											<option value={4}>Everyday</option>
+										<td>Ridership files </td>
+										<td><select name="files" value={this.state.params.files} onChange={this.set}>
+											<option value={2}>Only ridership.txt</option>
+											<option value={4}>ridership.txt and board_alight.txt</option>
+											<option value={6}>ridership.txt, board_alight.txt, and rider_trip.txt</option>
 										</select></td>
 									</tr>
 								</table>

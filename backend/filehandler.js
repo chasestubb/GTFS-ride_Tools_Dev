@@ -63,7 +63,7 @@ var fc_promise
 async function feed_creation(params){
     console.log("Generating feed with params:")
     console.log(params)
-    var fc_filename = Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.num_riders, 6, params.operation_days)
+    var fc_filename = Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.min_riders, params.max_riders, params.files, params.operation_days)
     console.log("Feed successfully created")
     return fc_filename
 }
@@ -391,7 +391,13 @@ app.get(INFO_ROUTE_URL, (req, res) => {
             id: route.route_id,
             short_name: route.route_short_name,
             long_name: route.route_long_name,
-            url: route.route_url,
+            desc: route.route_desc,
+			type: route.route_type,
+			url: route.route_url,
+			bgcolor: route.route_color,
+			fgcolor: route.route_text_color,
+			min_headway: 0,
+			variations: 1,
             span: {
                 m: "",
                 t: "",
@@ -402,7 +408,6 @@ app.get(INFO_ROUTE_URL, (req, res) => {
                 u: ""
             },
             trips: [],
-            //stops: [],
             is_gtfs_ride: gtfs_ride_feed,
             ridership: 0,
         }
@@ -410,7 +415,7 @@ app.get(INFO_ROUTE_URL, (req, res) => {
         // get the route's trips
         for (var x = 0; x < trips.length; x++){
             var trip = trips[x];
-            if (trips.route_id == route.route_id){
+            if (trip.route_id == route.route_id){
                 var trip_info = {
                     index: x,
                     id: trip.trip_id,
@@ -432,15 +437,15 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 
 
         // send feed type
-        agency_info.is_gtfs_ride = gtfs_ride_feed
+        route_info.is_gtfs_ride = gtfs_ride_feed
 
         // GTFS-ride specific fields
         if (gtfs_ride_feed){
-            agency_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+            route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
         }
 
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
-        res.write(JSON.stringify(agency_info));
+        res.write(JSON.stringify(route_info));
         res.end();
     } else {
         res.writeHead(400, {"Access-Control-Allow-Origin": "http://localhost:3000"});

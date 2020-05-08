@@ -1,8 +1,8 @@
-var feed_creation = require('../js/info.js');
-var assert = require('assert');
+var info = require('../js/info.js');
+var assert = require('chai').assert;
 
 //test matching method
-describe("Matching id test", function(){
+describe("INFO :: Matching id test", function(){
     it("The number of matched ids should be 3", function(){
         var agency = {
             agency_id: "A1"
@@ -39,7 +39,8 @@ describe("Matching id test", function(){
 });
 
 //test counting method
-describe("Counting method", function(){
+
+describe("INFO :: Counting method", function(){
     it("The number counted should matched expected count", function(){
         var trip = {
             trip_id: "T1"
@@ -65,4 +66,3 @@ describe("Counting method", function(){
         assert.equal(10, total);
     });
 });
-
