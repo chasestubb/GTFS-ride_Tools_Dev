@@ -38,6 +38,22 @@ const SERVER_CHECK_URL = "/server_check";
 	-1 = server unreachable
 	-2 = other errors
 
+	files:
+	0 = board_alight
+	1 = rider_trip
+	2 = ridership
+	3 = board_alight and rider_trip
+	4 = board_alight and ridership
+	5 = rider_trip and ridership
+	6 = board_alight, rider_trip, and ridership
+	this tool can only support 2, 4, or 6
+
+	aggr_level:
+	0 = stop
+	1 = trip
+	2 = route
+	3 = agency
+
 */
 
 
@@ -55,10 +71,12 @@ class FC extends React.Component{
 				end_date: null,
 				feed_date: null, // just make it the same as start_date
 				user_source: 1, // enum
-				num_riders: 1,
+				min_riders: 1,
+				max_riders: 1,
+				aggr_level: 0, // enum
 				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
 				operation_days: 4, // enum -- defines the service days of the week
-				files: 6, // always 6 because we are generating all GTFS-ride files
+				files: 6, // enum -- defines what files are being generated (we only support 2, 4, or 6)
 			},
 			status: -1,
 			fileStatus: 0, // see the "enum values" section above
@@ -111,6 +129,13 @@ class FC extends React.Component{
 			var end = this.strDateToIntDate(this.state.params.end_date);
 			if ((start > end) && CHECK_DATE){
 				errmsg += "End date cannot be earlier than start date.\n";
+			}
+		}
+		if (input.min_riders < 1 || input.max_riders < 1){
+			errmsg += "Number of riders must be at least 1.\n";
+		} else {
+			if (input.min_riders > input.max_riders){
+				errmsg += "Minimum riders cannot be greater than maximum riders.\n";
 			}
 		}
 		
@@ -295,6 +320,7 @@ class FC extends React.Component{
 							</div>
 							<div className="card-body">
 								<table>
+									<th><strong className="text-dark">Feed size</strong></th>
 									<tr>
 										<td>Number of agencies</td>
 										<td><input name="agencies" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.agencies} onChange={this.setNumber}></input></td>
@@ -311,18 +337,8 @@ class FC extends React.Component{
 										<td>Number of trips per route</td>
 										<td><input name="trips_per_route" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.trips_per_route} onChange={this.setNumber}></input></td>
 									</tr>
-									<tr>
-										<td>Feed start date</td>
-										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.set}></input></td>
-									</tr>
-									<tr>
-										<td>Feed end date</td>
-										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.set}></input></td>
-									</tr>
-									<tr>
-										<td>Number of riders</td>
-										<td><input name="num_riders" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.num_riders} onChange={this.setNumber}></input></td>
-									</tr>
+									<tr className="empty-tr"></tr>
+									<th><strong className="text-dark">Feed dates</strong></th>
 									<tr>
 										<td>Service pattern </td>
 										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.set}>
@@ -342,6 +358,33 @@ class FC extends React.Component{
 										</select></td>
 									</tr>
 									<tr>
+										<td>Feed start date</td>
+										<td><input name="start_date" className="" type="date" value={this.state.params.start_date} onChange={this.set}></input></td>
+									</tr>
+									<tr>
+										<td>Feed end date</td>
+										<td><input name="end_date" className="" type="date" value={this.state.params.end_date} onChange={this.set}></input></td>
+									</tr>
+									<tr className="empty-tr"></tr>
+									<th><strong className="text-dark">Ridership</strong></th>
+									<tr>
+										<td>Most specific aggregation level </td>
+										<td><select name="aggr_level" value={this.state.params.aggr_level} onChange={this.set}>
+											<option value={0}>Stop-level data</option>
+											<option value={1}>Trip-level data</option>
+											<option value={2}>Route-level data</option>
+											<option value={3}>Agency-level data</option>
+										</select></td>
+									</tr>
+									<tr>
+										<td>Minimum number of riders</td>
+										<td><input name="min_riders" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.min_riders} onChange={this.setNumber}></input></td>
+									</tr>
+									<tr>
+										<td>Maximum number of riders</td>
+										<td><input name="max_riders" className="fc-input-number" type="number" min={1} defaultValue={this.state.params.max_riders} onChange={this.setNumber}></input></td>
+									</tr>
+									<tr>
 										<td>Ridership data collection method </td>
 										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
 											<option value={1}>Automated Passenger Counter</option>
@@ -349,6 +392,14 @@ class FC extends React.Component{
 											<option value={0}>Manual Counting</option>
 											<option value={3}>Model Estimation</option>
 											<option value={4}>Mixed Source</option>
+										</select></td>
+									</tr>
+									<tr>
+										<td>Ridership files </td>
+										<td><select name="files" value={this.state.params.files} onChange={this.set}>
+											<option value={2}>Only ridership.txt</option>
+											<option value={4}>ridership.txt and board_alight.txt</option>
+											<option value={6}>ridership.txt, board_alight.txt, and rider_trip.txt</option>
 										</select></td>
 									</tr>
 								</table>
