@@ -34,6 +34,8 @@ var csv_stringify = csvStringify({delimiter: ','});
 var csvStringifySync = require('csv-stringify/lib/sync');
 var fs = require('fs');
 var zip = require('cross-zip');
+var {execSync} = require('child_process');
+var Holidays = require('date-holidays')
 
 var FILEPATH = "feed_creation/";
 var FILENAME = "fc.zip";
@@ -44,13 +46,20 @@ var FILENAME = "fc.zip";
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
-};
+}
 
 // PAD NUMBER SIZE TO TWO DIGITS
 function pad(num) {
     var s = num + "";
     while (s.length < 2) s = "0" + s;
     return s;
+}
+
+var getDaysArray = function(start, end) {
+    for(var arr=[],dt=new Date(start); dt<=end; dt.setDate(dt.getDate()+1)){
+        arr.push(new Date(dt));
+    }
+    return arr;
 }
 
 // TIME INCREMENTER ========================
@@ -132,7 +141,7 @@ module.exports = {
     //   start_date       | static - always "20000101" = Jan 1, 2000
     //   end_date         | static - always "20500101" = Jan 1, 2050
 
-    calendarCreate: function(operation_days, start_date_input, end_date_input){
+    calendarCreate: function(operation_days, start_date_input, end_date_input, calendar_type){
         // var calendar = {
         //     service_id: "WEEKEND_CALENDAR",
         //     monday: 0,
@@ -158,75 +167,81 @@ module.exports = {
         //     calendar.start_date = start_date_input;
         //     calendar.end_date = end_date_input;
         // }
-        if (operation_days == 0){
-            return {
-                service_id: "WEEKEND_CALENDAR",
-                monday: 0,
-                tuesday: 0,
-                wednesday: 0,
-                thursday: 0,
-                friday: 0,
-                saturday: 1,
-                sunday: 1,
-                start_date: start_date_input,
-                end_date: end_date_input,
+        if (calendar_type == 1){
+            //if the user selected not to use calendar.txt
+            return;
+        }
+        else{
+            if (operation_days == 0){
+                return {
+                    service_id: "WEEKEND_CALENDAR",
+                    monday: 0,
+                    tuesday: 0,
+                    wednesday: 0,
+                    thursday: 0,
+                    friday: 0,
+                    saturday: 1,
+                    sunday: 1,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                }
             }
-        }
-        if (operation_days == 1){
-            return {
-                service_id: "WEEKDAY_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 0,
-                sunday: 0,
-                start_date: start_date_input,
-                end_date: end_date_input,
+            if (operation_days == 1){
+                return {
+                    service_id: "WEEKDAY_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 0,
+                    sunday: 0,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                }
             }
-        }
-        if (operation_days == 2){
-            return {
-                service_id: "SATURDAY_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 1,
-                sunday: 0,
-                start_date: start_date_input,
-                end_date: end_date_input,
+            if (operation_days == 2){
+                return {
+                    service_id: "SATURDAY_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 1,
+                    sunday: 0,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                }
             }
-        }
-        if (operation_days == 3){
-            return {
-                service_id: "SUNDAY_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 0,
-                sunday: 1,
-                start_date: start_date_input,
-                end_date: end_date_input,
-            };
-        }
-        if (operation_days == 4){
-            return {
-                service_id: "ALL_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 1,
-                sunday: 1,
-                start_date: start_date_input,
-                end_date: end_date_input,
-            };
+            if (operation_days == 3){
+                return {
+                    service_id: "SUNDAY_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 0,
+                    sunday: 1,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                };
+            }
+            if (operation_days == 4){
+                return {
+                    service_id: "ALL_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 1,
+                    sunday: 1,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                };
+            }
         }
         // return calendar;              
     },
@@ -243,31 +258,128 @@ module.exports = {
     //   date             | static - based on holiday represented
     //   exception_type   | static - always "2" for remove (as opposed to add)
 
-    calendarDatesCreate: function(calendar){
+    calendarDatesCreate: function(calendar, operation_days, start_date_input, end_date_input, calendar_type){
         startYearNum = Math.floor(calendar.start_date / 10000); // number
         endYearNum = Math.floor(calendar.end_date / 10000); // number
-       
-        var calendar_dates = [];
-        for(var i = startYearNum; i <= endYearNum; i++){
-
-            // NEW YEARS
-            var newyear_date = {
-                service_id: calendar.service_id,
-                date: i + "0101",
-                exception_type: 0,
-            };
-            calendar_dates.push(newyear_date);
-
-            // CHRISTMAS
-            var christmas_date = {
-                service_id: calendar.service_id,
-                date: i + "1225",
-                exception_type: 0,
-            };
-            calendar_dates.push(christmas_date);
+        if (calendar_type == 0){
+            //do not use calendar_dates
+            return;
         }
+        else if (calendar_type == 2){
+            //Use both calendar_dates.txt and calendar.txt
+            var calendar_dates = [];
+            for(var i = startYearNum; i <= endYearNum; i++){
+                // NEW YEARS
+                var newyear_date = {
+                    service_id: calendar.service_id,
+                    date: i + "0101",
+                    exception_type: 2,
+                };
+                calendar_dates.push(newyear_date);
 
-        return calendar_dates;
+                // CHRISTMAS
+                var christmas_date = {
+                    service_id: calendar.service_id,
+                    date: i + "1225",
+                    exception_type: 2,
+                };
+                calendar_dates.push(christmas_date);
+            }
+
+            return calendar_dates;
+        }
+        else{
+            //Handle usage of only calendar_dates.txt
+            //First we get every day between the feed start and end date
+            var start_date_str = String(start_date_input);
+            var start_year = start_date_str.substr(0,4);
+            var start_month = start_date_str.substr(4,2);
+            //month starts at 0 -- Jan is Month 0
+            var month1 = start_month - 1;
+            var start_day = start_date_str.substr(6,2);
+            var start_date = new Date(start_year, month1, start_day);
+
+            var end_date_str = String(end_date_input);
+            var end_year = end_date_str.substr(0,4);
+            var end_month = end_date_str.substr(4,2);
+            var month2 = end_month - 1;
+            var end_day = end_date_str.substr(6,2);
+            var end_date = new Date(end_year, month2, end_day);
+           //helper function to form array
+            var dates = [];
+            var calendar_dates = [];
+            dates = getDaysArray(start_date, end_date);
+            var temp_date = {
+                service_id: "", 
+                date: "",
+                exception_type: 0
+            }
+            if (operation_days == 1){
+                //get all weekdays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay == 6 || dates[i].getDay == 0){
+                        dates.splice(i, 1);
+                    }
+                    if (dates[i].isHoliday){
+                        dates.splice(i,1);
+                    }
+                }
+           
+            }
+            if (operation_days == 0){
+                //only weekends
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay > 0 && dates[i] < 6){
+                        dates.splice(i,1);
+                    }
+                    if (dates[i].isHoliday){
+                        dates.splice(i,1);
+                    }
+                }
+            }
+            if (operation_days == 2){
+                //No saturdays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay == 6){
+                        dates.splice(i,1);
+                    }
+                    if (dates[i].isHoliday){
+                        dates.splice(i,1);
+                    }
+                }
+            }
+            if (operation_days == 3){
+                //No sundays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay == 0){
+                        dates.splice(i,1);
+                    }
+                    if (dates[i].isHoliday){
+                        dates.splice(i,1);
+                    }
+                }
+            }
+            if (operation_days == 4){
+                //Keep all days except holidays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].isHoliday)
+                        dates.splice(i,1);
+                }
+            }  
+            //Fill calendar_dates with the updated array
+            for (var i = 0; i < dates.length; i++){
+                temp_date = {
+                    service_id: "", 
+                    date: "",
+                    exception_type: 1,
+                }
+                temp_date.service_id = calendar.service_id;
+                temp_date.date = dates[i];
+                temp_date.exception_type = 1;
+                calendar_dates.push(temp_date);
+            }
+            return calendar_dates;
+        }
     },
 
     // CREATE FEED_INFO.TXT (GTFS) ================
@@ -288,14 +400,15 @@ module.exports = {
     //   feed_version         | static - always "1.0.0"    
 
     feedInfoCreate: function(feed_start_date1, feed_end_date1){
-        var feed_info = {
+        return {
             feed_publisher_name: "Test Transit",
             feed_publisher_url: "https://github.com/ODOT-PTS/GTFS-ride/",
             feed_lang: "en",
             feed_start_date: feed_start_date1,
             feed_end_date: feed_end_date1,
-        }
-       return feed_info;
+            feed_version: "1.0.0",
+        };
+       //return feed_info;
     },
 
 
@@ -506,8 +619,8 @@ module.exports = {
                     // GENERATE A LINE (represents a single stop time)
                     var stop_time_entry = {			  
                         trip_id: "TRIP" + count2, // trip id			  
-                        arrival_time: local_arr_time, // arrival time begins at 06:00:00 			  
-                        departure_time: local_dep_time, // departure time begins at 06:02:00 			  
+                        arrival_time: local_arr_time, // arrival time begins at 06:00:00
+                        departure_time: local_dep_time, // departure time begins at 06:02:00
                         stop_id: stop_sequence_list[c], // stop id (taken from the sequence generated)	  
                         stop_sequence: c + 1,		   	
                     };
@@ -821,10 +934,10 @@ module.exports = {
 
     // the main function to generate the test feed
     // this function may take a long time, please call it asynchronously if possible
-    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files, operation_days){
+    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files, operation_days, calendar_type){
         var agencies = this.agencyCreate(num_agencies);
-        var calendar = this.calendarCreate(operation_days, start_date, end_date);
-        var calendar_dates = this.calendarDatesCreate(calendar);
+        var calendar = this.calendarCreate(operation_days, start_date, end_date, calendar_type);
+        var calendar_dates = this.calendarDatesCreate(calendar, operation_days, start_date, end_date, calendar_type);
         var stops = this.stopsCreate(num_stops);
         var routes = this.routesCreate(num_routes, num_agencies);
         var trips = this.tripsCreate(num_routes, num_trips_per_route);
@@ -918,8 +1031,17 @@ module.exports = {
 
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
-        process.chdir(FILEPATH); // change dir
-        zip.zipSync("./*.txt", "./" + FILENAME); // zip the files
+        process.chdir(FILEPATH) // change dir
+        console.log("current dir: " + process.cwd())
+        try {
+            //zip.zipSync("*.txt", FILENAME); // zip the files
+            var out = execSync('zip -r -y fc.zip *.txt')
+            console.log(out)
+        } catch (e){
+            console.log("ZIP")
+            console.log(e)
+        }
+        
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
