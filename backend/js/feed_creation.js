@@ -80,6 +80,17 @@ function incrementTime (input_time, amount) {
     return (pad(output_hours) + ":" + pad(output_minutes) + ":" + pad(seconds));
 }
 
+// get a trip's agency
+// returns null if it could not find an agency
+function getAgencyOfTrip(trip_id, trips, routes){
+    for (var r = 0; r < routes.length; r++){
+        if (routes[r].route_id == trips[trip_id].route_id){
+            return routes[r].agency_id
+        }
+    }
+    return null
+}
+
 module.exports = {
     // AGENCY.TXT CREATE (GTFS) ================
     // Description: 
@@ -722,8 +733,7 @@ module.exports = {
         return board_alight;
     },
 
-    //riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, num_routes, stop_times){
-    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, num_routes, stop_times){
+    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level){
         var num_riders = getRandomIntInclusive(min_riders, max_riders)
         var rider_trips = [];
         var min = 0;
@@ -732,16 +742,33 @@ module.exports = {
         //console.log("Stop times " + stop_times.length)
 
         for (var i = 0; i < num_riders; i++){
-            var rand_trip = getRandomIntInclusive(1, num_trips);
+            var rand_trip = getRandomIntInclusive(0, num_trips-1);
+            var trip_start_index = rand_trip * num_stops_per_route;
 
-            var rand_st_row = getRandomIntInclusive(0, stop_times.length-1)
+            var stop1, stop2
+            
+            var stop1_index = getRandomIntInclusive(trip_start_index, trip_start_index + num_stops_per_route - 1)
+            var stop2_index
+            do {
+                stop2_index = getRandomIntInclusive(trip_start_index, trip_start_index + num_stops_per_route - 1)
+            } while (stop1_index == stop2_index)
+
+            if (stop1_index > stop2_index){ // swap the order if stop1_index is greater than stop2_index so the trip always go forward
+                stop1 = stop_times[stop2_index]
+                stop2 = stop_times[stop1_index]
+            } else {
+                stop1 = stop_times[stop1_index]
+                stop2 = stop_times[stop2_index]
+            }
+
+            /*var rand_st_row = getRandomIntInclusive(0, stop_times.length-1)
             var stop1 = stop_times[rand_st_row]
             var remaining_stops = num_stops_per_route - stop1.stop_sequence
-            var stop2 = stop_times[getRandomIntInclusive(rand_st_row, rand_st_row + remaining_stops)]
+            var stop2 = stop_times[getRandomIntInclusive(rand_st_row, rand_st_row + remaining_stops)]*/
             var temp_rider = {
                 rider_id : "RIDER" + i,
-                agency_id : "RIDE",
-                trip_id : "TRIP" + rand_trip,
+                agency_id : getAgencyOfTrip(rand_trip, trips, routes),
+                trip_id : "TRIP" + (rand_trip+1),
                 boarding_stop_id : stop1.stop_id,
                 boarding_stop_sequence : stop1.stop_sequence,
                 alighting_stop_id : stop2.stop_id,
@@ -750,7 +777,7 @@ module.exports = {
                 boarding_time : stop1.arrival_time,
                 alighting_time : stop2.arrival_time,
                 rider_type : 0,
-                rider_type_description : "ex.: 'senior' or 'student' goes here",
+                rider_type_description : "no type",
                 fare_paid : 10,
                 transaction_type : 0,
                 fare_media : 0,
@@ -865,7 +892,11 @@ module.exports = {
 
     // the main function to generate the test feed
     // this function may take a long time, please call it asynchronously if possible
-    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, min_riders, max_riders, files, operation_days){
+    Feed_Creation: function(
+        num_agencies, num_routes, num_stops, num_trips, num_trips_per_route,
+        start_date, end_date, feed_date, operation_days,
+        user_source, min_riders, max_riders, aggr_level,
+        files){
     //Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, num_riders, files, operation_days){
         var agencies = this.agencyCreate(num_agencies);
         var calendar = this.calendarCreate(operation_days, start_date, end_date);
@@ -880,7 +911,7 @@ module.exports = {
 
         console.log("Stop times " + stopTimes.length)
         // var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source);
-        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, num_routes, stopTimes);
+        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level);
         // var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
 
