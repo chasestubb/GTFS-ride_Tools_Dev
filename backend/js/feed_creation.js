@@ -262,13 +262,15 @@ module.exports = {
     //   exception_type   | static - always "2" for remove (as opposed to add)
 
     calendarDatesCreate: function(calendar, operation_days, start_date_input, end_date_input, calendar_type){
-        startYearNum = Math.floor(calendar.start_date / 10000); // number
-        endYearNum = Math.floor(calendar.end_date / 10000); // number
+    
         if (calendar_type == 0){
             //do not use calendar_dates
             return;
         }
         else if (calendar_type == 2){
+            startYearNum = Math.floor(calendar.start_date / 10000); // number
+            endYearNum = Math.floor(calendar.end_date / 10000); // number
+
             //Use both calendar_dates.txt and calendar.txt
             var calendar_dates = [];
             for(var i = startYearNum; i <= endYearNum; i++){
@@ -989,7 +991,7 @@ module.exports = {
     // the main function to generate the test feed
     // this function may take a long time, please call it asynchronously if possible
     //Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date,feed_date,user_source, num_riders, files, operation_days, calendar_type){
-    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, min_riders, max_riders, files, operation_days){
+    Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, min_riders, max_riders, files, operation_days, calendar_type){
     //Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, num_riders, files, operation_days){
         var agencies = this.agencyCreate(num_agencies);
         var calendar = this.calendarCreate(operation_days, start_date, end_date, calendar_type);
