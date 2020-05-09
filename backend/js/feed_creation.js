@@ -91,6 +91,57 @@ function getAgencyOfTrip(trip_id, trips, routes){
     return null
 }
 
+// increment date by 1 day
+function tomorrow(d){
+    var year = Math.floor(d / 10000)
+    var month = Math.floor((d % 10000) / 100);
+    var day = d % 100;
+    switch(month){
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+            if (day == 31){
+                return ((year * 10000) + ((month+1) * 100) + 1)
+            } else {
+                return ++d
+            }
+        case 4:
+        case 6:
+        case 9:
+        case 11:
+            if (day == 30){
+                return ((year * 10000) + ((month+1) * 100) + 1)
+            } else {
+                return ++d
+            }
+        case 2:
+            if ((year % 4) == 0 && (year % 400) != 0){ // if leap year
+                if (day == 29){
+                    return ((year * 10000) + 301)
+                } else {
+                    return ++d
+                }
+            } else { // if not leap year
+                if (day == 28){
+                    return ((year * 10000) + 301)
+                } else {
+                    return ++d
+                }
+            }
+        case 12:
+            if (day == 31){
+                return (((year+1) * 10000) + 101)
+            } else {
+                return ++d
+            }
+        default:
+            return ++d;
+    }
+}
+
 module.exports = {
     // AGENCY.TXT CREATE (GTFS) ================
     // Description: 
@@ -681,9 +732,9 @@ module.exports = {
     //   source |
 
     // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
-    boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times, user_source){
+    boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times, user_source, rider_trip, start_date, end_date){
         var board_alight = [];
-        var temp_alight = {
+        /*var temp_alight = {
             trip_id : "",
             stop_id : "",
             stop_sequence : 0,
@@ -730,6 +781,40 @@ module.exports = {
             //TODO add functionality for optional fields
             board_alight.push(temp_alight);
         }
+        */
+        for (var d = start_date; d <= end_date;){ // for every day on the feed
+            for (var st = 0; st < stop_times.length; st++){ // fill the board_alight array with info from stop_times
+                board_alight.push ({
+                    trip_id : stop_times[st].trip_id,
+                    stop_id : stop_times[st].stop_id,
+                    stop_sequence : stop_times[st].stop_sequence,
+                    record_use : 0,
+                    schedule_relationship : 0,
+                    boardings : 0,
+                    alightings : 0,
+                    current_load : 0,
+                    load_count : 0,
+                    load_type : 0,
+                    rack_down : 0,
+                    bike_boardings : 0,
+                    bike_alightings : 0,
+                    ramp_used : 0,
+                    ramp_boardings : 0,
+                    ramp_alightings : 0,
+                    service_date : d,
+                    service_arrival_time : stop_times[st].arrival_time,
+                    service_departure_time : stop_times[st].departure_time,
+                    source : user_source,  
+                })
+            }
+            d = tomorrow(d)
+        }
+
+        for (var r = 0; r < rider_trip.length; r++){
+            // TODO: fill the array with info from rider_trip
+        }
+        
+       
         return board_alight;
     },
 
@@ -907,12 +992,11 @@ module.exports = {
         var stopTimes = this.stopTimesCreate(num_trips, trips, num_stops, num_routes, num_trips_per_route);
         var feedInfo = this.feedInfoCreate(start_date, end_date);
         var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
-        //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
 
-        console.log("Stop times " + stopTimes.length)
-        // var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source);
         var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level);
-        // var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
+        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source, riderTrip);
+        //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
+        //var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
 
         // CSV STRINGIFY =========================
@@ -962,3 +1046,4 @@ module.exports = {
 // test function
 //module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231, 20200304, 0, 1000, 6)
 //console.log(module.exports.tripsCreate(10, 5));
+

@@ -63,7 +63,11 @@ var fc_promise
 async function feed_creation(params){
     console.log("Generating feed with params:")
     console.log(params)
-    var fc_filename = Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.min_riders, params.max_riders, params.files, params.operation_days)
+    var fc_filename = Feed_Creation.Feed_Creation(
+        params.agencies, params.routes, params.stops, params.trips, params.trips_per_route,
+        params.start_date, params.end_date, params.feed_date, params.operation_days,
+        params.user_source, params.min_riders, params.max_riders, params.aggr_level,
+        params.files)
     console.log("Feed successfully created")
     return fc_filename
 }
