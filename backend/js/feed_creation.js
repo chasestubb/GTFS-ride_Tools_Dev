@@ -59,12 +59,6 @@ function pad(num) {
     return s;
 }
 
-var getDaysArray = function(start, end) {
-    for(var arr=[],dt=new Date(start); dt<=end; dt.setDate(dt.getDate()+1)){
-        arr.push(new Date(dt));
-    }
-    return arr;
-}
 
 // TIME INCREMENTER ========================
 function incrementTime (input_time, amount) {
@@ -310,80 +304,158 @@ module.exports = {
             var month2 = end_month - 1;
             var end_day = end_date_str.substr(6,2);
             var end_date = new Date(end_year, month2, end_day);
-           //helper function to form array
-            var dates = [];
             var calendar_dates = [];
-            dates = getDaysArray(start_date, end_date);
+            for(var dates=[],dt=new Date(start_date); dt<=end_date; dt.setDate(dt.getDate()+1)){
+            dates.push(new Date(dt));
+        }
             var temp_date = {
                 service_id: "", 
                 date: "",
                 exception_type: 0
             }
             if (operation_days == 1){
+                console.log("weekdays");
                 //get all weekdays
                 for (var i = 0; i < dates.length; i++){
-                    if (dates[i].getDay == 6 || dates[i].getDay == 0){
-                        dates.splice(i, 1);
+                    if (dates[i].getDay() ==  6|| dates[i].getDay() == 0){
+                            dates.splice(i, 1);
+                            i = i - 1;
                     }
                     if (dates[i].isHoliday){
                         dates.splice(i,1);
                     }
                 }
-           
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    temp_date.service_id = "WEEKDAY_CALENDAR";
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    temp_date.date = year +""+ month + day;
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
             }
             if (operation_days == 0){
+                console.log("weekends");
                 //only weekends
                 for (var i = 0; i < dates.length; i++){
-                    if (dates[i].getDay > 0 && dates[i] < 6){
+                    if (dates[i].getDay() > 0 && dates[i].getDay() < 6){
                         dates.splice(i,1);
+                        i = i - 1;
                     }
                     if (dates[i].isHoliday){
                         dates.splice(i,1);
                     }
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    temp_date.date = year +""+ month + day;
+                    temp_date.service_id = "WEEKEND_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
                 }
             }
             if (operation_days == 2){
+                console.log("saturdays");
                 //No saturdays
                 for (var i = 0; i < dates.length; i++){
-                    if (dates[i].getDay == 6){
+                    if (dates[i].getDay() == 6){
                         dates.splice(i,1);
+                        i = i - 1;
                     }
                     if (dates[i].isHoliday){
                         dates.splice(i,1);
                     }
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    temp_date.date = year +""+ month + day;
+                    temp_date.service_id = "SATURDAY_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
                 }
             }
             if (operation_days == 3){
+                console.log("sundays");
                 //No sundays
                 for (var i = 0; i < dates.length; i++){
-                    if (dates[i].getDay == 0){
+
+                    if (dates[i].getDay() == 0){
                         dates.splice(i,1);
+                        i = i - 1;
                     }
                     if (dates[i].isHoliday){
                         dates.splice(i,1);
                     }
                 }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    temp_date.date = year +""+ month + day;
+                    temp_date.service_id = "SUNDAY_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
             }
             if (operation_days == 4){
+                console.log("all");
                 //Keep all days except holidays
                 for (var i = 0; i < dates.length; i++){
                     if (dates[i].isHoliday)
                         dates.splice(i,1);
                 }
-            }  
-            //Fill calendar_dates with the updated array
-            for (var i = 0; i < dates.length; i++){
-                temp_date = {
-                    service_id: "", 
-                    date: "",
-                    exception_type: 1,
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    temp_date.date = year +""+ month + day;
+                    temp_date.service_id = "ALL_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
                 }
-                temp_date.service_id = calendar.service_id;
-                temp_date.date = dates[i];
-                temp_date.exception_type = 1;
-                calendar_dates.push(temp_date);
             }
-            return calendar_dates;
+   /*         for (var j = 0; j < calendar_dates.length; j++){
+                console.log("printing dates");
+                console.log(calendar_dates[j]);
+            }*/
+            console.log("Number of days in this calendar: " + calendar_dates.length)
+            
+           return calendar_dates;
         }
     },
 
@@ -1058,11 +1130,15 @@ module.exports = {
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
-        return (FILEPATH + FILENAME);
-    }
-};
+        return (FILEPATH + FILENAME); 
+    } 
+}; 
 
 
 // test function
-//module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231, 20200304, 0, 1000, 6)
+//Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, min_riders, max_riders, files, operation_days, calendar_type)
+//calendar_dates = this.calendarDatesCreate(calendar, operation_days, start_date, end_date, calendar_type);
+
+//module.exports.Feed_Creation(1, 5, 100, 10, 3, 20200501, 20200531, 20200531, 6, 6, 6, 6, 0, 1);
+//module.exports.calendarDatesCreate()
 //console.log(module.exports.tripsCreate(10, 5));
