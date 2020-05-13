@@ -43,8 +43,8 @@ var FILEPATH = "feed_creation/";
 var FILENAME = "fc.zip";
 //var FILEPATH = "./"
 
- // GET RANDOM INT INCLUSIVE ================
- function getRandomIntInclusive (min, max) {
+// GET RANDOM INT INCLUSIVE ================
+function getRandomIntInclusive (min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
@@ -141,6 +141,8 @@ function tomorrow(d){
             return ++d;
     }
 }
+
+
 
 module.exports = {
     // AGENCY.TXT CREATE (GTFS) ================
@@ -585,7 +587,7 @@ module.exports = {
                 count = count + 1; // account for a new trip
             }
         }
-        console.log("Stop times " + stop_times.length)
+        //console.log("Stop times " + stop_times.length)
         return stop_times;
     },
 
@@ -732,7 +734,7 @@ module.exports = {
     //   source |
 
     // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
-    boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times, user_source, rider_trip, start_date, end_date){
+    boardAlightCreate: function(trips, stops, num_trips, num_stops, num_routes, stop_times, user_source, rider_trip, start_date, end_date){
         var board_alight = [];
         /*var temp_alight = {
             trip_id : "",
@@ -782,7 +784,8 @@ module.exports = {
             board_alight.push(temp_alight);
         }
         */
-        for (var d = start_date; d <= end_date;){ // for every day on the feed
+        var d = start_date
+        while (d <= end_date){ // for every day on the feed
             for (var st = 0; st < stop_times.length; st++){ // fill the board_alight array with info from stop_times
                 board_alight.push ({
                     trip_id : stop_times[st].trip_id,
@@ -810,19 +813,48 @@ module.exports = {
             d = tomorrow(d)
         }
 
-        for (var r = 0; r < rider_trip.length; r++){
-            // TODO: fill the array with info from rider_trip
+        // sort the rider_trip array by service_date
+        rider_trip.sort(function(a, b){
+            return a.service_date - b.service_date
+        })
+
+        var num_stops_per_route = num_stops / num_routes;
+
+        var last_date = start_date // the date of the previous row in rider_trip
+        var date_start_index = 0 // the starting index of the board_alight dataset for the day
+        for (var r = 0; r < rider_trip.length; r++){ // for every field in rider_trip
+            // check if the date is the same as the last one
+            console.log("Date: " + rider_trip[r].service_date + " (before was " + last_date + ")")
+            if (rider_trip[r].service_date != last_date){
+                console.log("DIFFERENT")
+                date_start_index += stop_times.length // increment the starting index to point to the next day's ridership data
+                // this works since we sort the rider_trip array by date beforehand
+                last_date = rider_trip[r].service_date
+            }
+
+            var trip_num = Number(rider_trip[r].trip_id.substr(4)) // get the trip ID from index 4 (where the number starts) onwards and convert it to number
+            console.log("TRIP" + trip_num)
+            var trip_start_index = date_start_index + ((trip_num - 1) * num_stops_per_route) // the index where the trip starts on board_alight array
+            var boarding_index = trip_start_index + rider_trip[r].boarding_stop_sequence - 1
+            var alighting_index = trip_start_index + rider_trip[r].alighting_stop_sequence - 1
+
+            console.log(boarding_index + " -> " + alighting_index)
+
+            board_alight[boarding_index].boardings++
+            board_alight[alighting_index].alightings++
+
         }
         
        
         return board_alight;
     },
 
-    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level){
+    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level, start_date, end_date){
         var num_riders = getRandomIntInclusive(min_riders, max_riders)
         var rider_trips = [];
         var min = 0;
         var num_stops_per_route = num_stops / num_routes;
+        var date = start_date
 
         //console.log("Stop times " + stop_times.length)
 
@@ -846,10 +878,6 @@ module.exports = {
                 stop2 = stop_times[stop2_index]
             }
 
-            /*var rand_st_row = getRandomIntInclusive(0, stop_times.length-1)
-            var stop1 = stop_times[rand_st_row]
-            var remaining_stops = num_stops_per_route - stop1.stop_sequence
-            var stop2 = stop_times[getRandomIntInclusive(rand_st_row, rand_st_row + remaining_stops)]*/
             var temp_rider = {
                 rider_id : "RIDER" + i,
                 agency_id : getAgencyOfTrip(rand_trip, trips, routes),
@@ -858,7 +886,7 @@ module.exports = {
                 boarding_stop_sequence : stop1.stop_sequence,
                 alighting_stop_id : stop2.stop_id,
                 alighting_stop_sequence : stop2.stop_sequence,
-                service_date : 20000101, // TODO Ashley calendar
+                service_date : date,
                 boarding_time : stop1.arrival_time,
                 alighting_time : stop2.arrival_time,
                 rider_type : 0,
@@ -869,23 +897,12 @@ module.exports = {
                 accompanying_device : 0,
                 transfer_status : 0,
             };
-            /*temp_rider.rider_id = "RIDER" + i;
-            var rand_stop = getRandomIntInclusive(1, num_stops); 
-            var rand_stop2 = getRandomIntInclusive(1, num_stops);
-            temp_rider.boarding_stop_id = rand_stop;
-            temp_rider.alighting_stop_id = rand_stop2;*/
-            
-            /*var a = new Date();
-            a.setHours(6);
-            a.setMinutes(min);
-            temp_rider.trip_id = trips[rand_trip].trip_id;
-            temp_rider.boarding_time = a;
-            a.setMinutes(min + 2);
-            temp_rider.alighting_time = a;
-            min = min + 5;
-            temp_rider.boarding_stop_sequence = temp_rider.boarding_stop_sequence + 1;
-            temp_rider.alighting_stop_sequence = temp_rider.alighting_stop_sequence + 1;*/
             rider_trips.push(temp_rider);
+
+            date = tomorrow(date)
+            if (date > end_date){
+                date = start_date
+            }
         }
 
         return rider_trips;
@@ -993,8 +1010,8 @@ module.exports = {
         var feedInfo = this.feedInfoCreate(start_date, end_date);
         var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
 
-        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level);
-        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, stopTimes, user_source, riderTrip);
+        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_date, end_date);
+        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_date, end_date);
         //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
         //var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
@@ -1009,7 +1026,7 @@ module.exports = {
         var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
         var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
         var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
-        // var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
+        var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
         var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
         // var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
         // var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
@@ -1026,7 +1043,7 @@ module.exports = {
         fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
         fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
         fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
-        // fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
+        fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
         fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
         // fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV)
         // fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
