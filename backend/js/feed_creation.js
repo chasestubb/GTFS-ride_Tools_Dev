@@ -736,57 +736,10 @@ module.exports = {
     // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
     boardAlightCreate: function(trips, stops, num_trips, num_stops, num_routes, stop_times, user_source, rider_trip, start_date, end_date){
         var board_alight = [];
-        /*var temp_alight = {
-            trip_id : "",
-            stop_id : "",
-            stop_sequence : 0,
-            record_use : 0,
-            schedule_relationship : 0,
-            boardings : 0,
-            alightings : 0,
-            current_load : 0,
-            load_count : 0,
-            load_type : 0,
-            rack_down : 0,
-            bike_boardings : 0,
-            bike_alightings : 0,
-            ramp_used : 0,
-            ramp_boardings : 0,
-            ramp_alightings : 0,
-            service_date : 20000101,
-            service_arrival_time : 0,
-            service_departure_time : 0,
-            source : user_source,  
-        };
 
-        var min = 0;
-        for (var i = 0; i < num_trips; i++){
-            var rand_trip = getRandomIntInclusive(1, num_trips);
-            var a = new Date();
-            a.setHours(6);
-            a.setMinutes(min);
-            temp_alight.trip_id = trips[rand_trip].trip_id;
-            temp_alight.arrival_time = a;
-            a.setMinutes(min + 2);
-            temp_alight.departure_time = a;
-            min = min + 5;
-            for ( var j = 0; j < stop_times.length; j++){
-                if (stop_times[j].trip_id === trips[i].trip_id)
-                    temp_alight.stop_sequence = stop_times[j].stop_sequence;
-            }
-            for (var k = 0; k < num_stops; k++){
-                if (stops[k].trip_id == trips[i].trip_id){
-                    temp_alight.stop_id = stop[k].stop_id;
-                }
-            }
-            
-            //TODO add functionality for optional fields
-            board_alight.push(temp_alight);
-        }
-        */
         var d = start_date
         while (d <= end_date){ // for every day on the feed
-            for (var st = 0; st < stop_times.length; st++){ // fill the board_alight array with info from stop_times
+            for (var st = 0; st < stop_times.length; st++){ // fill the board_alight array with info from stop_times, no ridership info yet
                 board_alight.push ({
                     trip_id : stop_times[st].trip_id,
                     stop_id : stop_times[st].stop_id,
@@ -797,7 +750,7 @@ module.exports = {
                     alightings : 0,
                     current_load : 0,
                     load_count : 0,
-                    load_type : 0,
+                    load_type : 1, // departing load
                     rack_down : 0,
                     bike_boardings : 0,
                     bike_alightings : 0,
@@ -810,63 +763,75 @@ module.exports = {
                     source : user_source,  
                 })
             }
-            d = tomorrow(d)
+            d = tomorrow(d) // increment the date
         }
 
         // sort the rider_trip array by service_date
+        /* this WILL change the final array and the exported file
+           to undo this, sort the rider_trip array by rider_id,
+           but tools should not fail due to the ordering of the rows
+        */
         rider_trip.sort(function(a, b){
             return a.service_date - b.service_date
         })
 
+        // fill the board_alight array with ridership data
         var num_stops_per_route = num_stops / num_routes;
-
         var last_date = start_date // the date of the previous row in rider_trip
         var date_start_index = 0 // the starting index of the board_alight dataset for the day
         for (var r = 0; r < rider_trip.length; r++){ // for every field in rider_trip
             // check if the date is the same as the last one
-            console.log("Date: " + rider_trip[r].service_date + " (before was " + last_date + ")")
             if (rider_trip[r].service_date != last_date){
-                console.log("DIFFERENT")
                 date_start_index += stop_times.length // increment the starting index to point to the next day's ridership data
                 // this works since we sort the rider_trip array by date beforehand
                 last_date = rider_trip[r].service_date
             }
 
             var trip_num = Number(rider_trip[r].trip_id.substr(4)) // get the trip ID from index 4 (where the number starts) onwards and convert it to number
-            console.log("TRIP" + trip_num)
             var trip_start_index = date_start_index + ((trip_num - 1) * num_stops_per_route) // the index where the trip starts on board_alight array
-            var boarding_index = trip_start_index + rider_trip[r].boarding_stop_sequence - 1
-            var alighting_index = trip_start_index + rider_trip[r].alighting_stop_sequence - 1
+            var boarding_index = trip_start_index + rider_trip[r].boarding_stop_sequence - 1 // the index where boarding occurs
+            var alighting_index = trip_start_index + rider_trip[r].alighting_stop_sequence - 1 // the index where alighting occurs
 
-            console.log(boarding_index + " -> " + alighting_index)
-
+            // increment the boardings and alightings
             board_alight[boarding_index].boardings++
             board_alight[alighting_index].alightings++
+        }
 
+        // do another run-through of the board_alight array to set the load_count field
+        var max_load = 60 // the maximum load, used for current_load
+        // special case for index 0 where there is no row/element before it
+        board_alight[0].load_count = board_alight[0].boardings - board_alight[0].alightings // first load = boardings - alightings (no checks to the previous row)
+        board_alight[0].current_load = board_alight[0].load_count / max_load
+        for (var b = 1; b < board_alight.length; b++){
+            if (board_alight[b].trip_id == board_alight[b-1].trip_id){ // if this row is still part of the same trip as the last one
+                board_alight[b].load_count = board_alight[b-1].load_count + board_alight[b].boardings - board_alight[b].alightings // add the previous load count to the current calculation
+            } else { // if this is a part of a new trip
+                board_alight[b].load_count = board_alight[b].boardings - board_alight[b].alightings // just count the number of boardings minus the number of alightings
+            }
+            board_alight[b].current_load = board_alight[b].load_count * 100 / max_load // current_load is a percentage of the load (how full the vehicle is)
         }
         
-       
         return board_alight;
     },
 
     riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level, start_date, end_date){
         var num_riders = getRandomIntInclusive(min_riders, max_riders)
         var rider_trips = [];
-        var min = 0;
         var num_stops_per_route = num_stops / num_routes;
         var date = start_date
 
-        //console.log("Stop times " + stop_times.length)
-
         for (var i = 0; i < num_riders; i++){
+
+            // get a random trip
             var rand_trip = getRandomIntInclusive(0, num_trips-1);
             var trip_start_index = rand_trip * num_stops_per_route;
 
+            // get 2 random stops within a trip
             var stop1, stop2
             
             var stop1_index = getRandomIntInclusive(trip_start_index, trip_start_index + num_stops_per_route - 1)
             var stop2_index
-            do {
+            do { // stop2 cannot be the same as stop1
                 stop2_index = getRandomIntInclusive(trip_start_index, trip_start_index + num_stops_per_route - 1)
             } while (stop1_index == stop2_index)
 
@@ -878,6 +843,7 @@ module.exports = {
                 stop2 = stop_times[stop2_index]
             }
 
+            // add the row to rider_trip
             var temp_rider = {
                 rider_id : "RIDER" + i,
                 agency_id : getAgencyOfTrip(rand_trip, trips, routes),
@@ -899,6 +865,7 @@ module.exports = {
             };
             rider_trips.push(temp_rider);
 
+            // increment the date, and go back to the start date if the current date exceeds the end date
             date = tomorrow(date)
             if (date > end_date){
                 date = start_date
@@ -1026,7 +993,7 @@ module.exports = {
         var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
         var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
         var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
-        var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
+        var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_count","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
         var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
         // var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
         // var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
