@@ -11039,3 +11039,7 @@ img {
 .back-button:hover{
   color: #224abe;
 }
+
+.empty-tr{
+  height: 0.75em;
+}

@@ -63,7 +63,11 @@ var fc_promise
 async function feed_creation(params){
     console.log("Generating feed with params:")
     console.log(params)
-    var fc_filename = Feed_Creation.Feed_Creation(params.agencies, params.routes, params.stops, params.trips, params.trips_per_route, params.start_date, params.end_date, params.feed_date, params.user_source, params.num_riders, 6, params.operation_days)
+    var fc_filename = Feed_Creation.Feed_Creation(
+        params.agencies, params.routes, params.stops, params.trips, params.trips_per_route,
+        params.start_date, params.end_date, params.feed_date, params.operation_days,
+        params.user_source, params.min_riders, params.max_riders, params.aggr_level,
+        params.files)
     console.log("Feed successfully created")
     return fc_filename
 }
@@ -233,25 +237,13 @@ app.get(INFO_URL, (req, res) => {
     console.log("FEED INFO")
     if (agencies && routes && trips && stops && stop_times){
         // initialize object
-        if (feed_info[0]){
-            var feed_info_ = {
-                filename: filename,
-                is_gtfs_ride: gtfs_ride_feed,
-                agencies: [],
-                stops: [],
-                num_trips: trips.length,
-                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
-            }
-        } else {
-            var feed_info_ = {
-                filename: filename,
-                is_gtfs_ride: gtfs_ride_feed,
-                agencies: [],
-                stops: [],
-                num_trips: trips.length,
-                date: ["-", "-"],
-            }
-        
+        var feed_info_ = {
+            filename: filename,
+            is_gtfs_ride: gtfs_ride_feed,
+            agencies: [],
+            stops: [],
+            num_trips: trips.length,
+            date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
         }
 
         // parse agencies' info
@@ -501,17 +493,10 @@ app.post(FC_POST_URL, async (req, res) => {
     fc_promise = new Promise((resolve, reject) => {
         console.log("Params received")
         resolve (feed_creation(req.body)) // generate the feed file and resolve the promise when done
-        if (reject){
-            console.log(reject)
-        }
-        res.writeHead(200)
-        res.write("Params received")
-        res.end()
-        
-    }).catch((err) => {
-        console.log(err)
     })
-    
+    res.writeHead(200)
+    res.write("Params received")
+    res.end()
 })
 
 // --------------------------------------------------------------------------------

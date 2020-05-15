@@ -258,7 +258,7 @@ class Info extends React.Component{
 										Location: {stop.pos ? <a href={"http://www.google.com/maps/place/" + stop.pos[0] + "," + stop.pos[1]} target="_blank" rel="noopener noreferrer"><strong>{stop.pos[0]}, {stop.pos[1]}</strong></a> : <em>no data</em>} <br/>
 										{/*                      ^ opens the coordinates on Google Maps                                       ^ opens it on a new tab */}
 										Description: {stop.desc ? <strong>{stop.desc}</strong> : <em>no data</em>} <br/>
-										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} {stop.ridership ? <strong>{stop.ridership}</strong> : <em>no data</em>} <br/></span> : null}
+										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} {stop.ridership !== undefined ? <strong>{stop.ridership}</strong> : <em>no data</em>} <br/></span> : null}
 									</div>
 								</div>
 							</div>
