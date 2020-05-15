@@ -31,6 +31,42 @@
 //   ridership.txt
 //   ride_feed_info.txt (required)
 
+/* ENUM VALUES
+
+	user_source:
+	see GTFS-ride documentation on board_alight.txt -> source
+
+	calendar_type:
+	0 = calendar.txt only
+	1 = calendar_dates.txt only
+	2 = both (default)
+
+	operation_days:
+	0 = weekends only
+	1 = weekdays only
+	2 = weekdays + sat
+	3 = weekdays + sun
+	4 = every day
+
+	files:
+	0 = board_alight
+	1 = rider_trip
+	2 = ridership
+	3 = board_alight and rider_trip
+	4 = board_alight and ridership
+	5 = rider_trip and ridership
+	6 = board_alight, rider_trip, and ridership
+	this tool can only support 2, 4, or 6
+
+	aggr_level:
+	0 = stop
+	1 = trip
+	2 = route
+	3 = agency
+	4 = feed
+
+*/
+
 var randomLastName = require('random-lastname');
 var randordinal_converter = require('number-to-words'); // ex ordinal_converter.toOrdinal(21); => “21st”
 var csvStringify = require('csv-stringify');
@@ -38,6 +74,7 @@ var csv_stringify = csvStringify({delimiter: ','});
 var csvStringifySync = require('csv-stringify/lib/sync');
 var fs = require('fs');
 var zip = require('cross-zip');
+var {execSync} = require('child_process')
 
 var FILEPATH = "feed_creation/";
 var FILENAME = "fc.zip";
@@ -965,7 +1002,7 @@ module.exports = {
         num_agencies, num_routes, num_stops, num_trips, num_trips_per_route,
         start_date, end_date, feed_date, operation_days,
         user_source, min_riders, max_riders, aggr_level,
-        files){
+        calendar_type, files){
         var agencies = this.agencyCreate(num_agencies);
         var calendar = this.calendarCreate(operation_days, start_date, end_date);
         var calendar_dates = this.calendarDatesCreate(calendar);
@@ -1001,20 +1038,29 @@ module.exports = {
         //console.log(process.cwd())
 
         // DELETE PREVIOUS FILES
-        fs.unlinkSync("./feed_creation/fc.zip")
-        fs.unlinkSync("./feed_creation/agency.txt")
-        fs.unlinkSync("./feed_creation/stops.txt")
-        fs.unlinkSync("./feed_creation/routes.txt")
-        fs.unlinkSync("./feed_creation/trips.txt")
-        fs.unlinkSync("./feed_creation/stop_times.txt")
-        fs.unlinkSync("./feed_creation/feed_info.txt")
-        fs.unlinkSync("./feed_creation/calendar.txt")
-        fs.unlinkSync("./feed_creation/calendar_dates.txt")
-        fs.unlinkSync("./feed_creation/ride_feed_info.txt")
-        fs.unlinkSync("./feed_creation/board_alight.txt")
-        fs.unlinkSync("./feed_creation/rider_trip.txt")
-        fs.unlinkSync("./feed_creation/ridership.txt")
-        fs.unlinkSync("./feed_creation/trip_capacity.txt")
+        /*
+        if (fs.existsSync("./feed_creation/calendar.txt") && calendar_type === 1){
+            fs.unlinkSync("./feed_creation/calendar.txt")
+        }
+        if (fs.existsSync("./feed_creation/calendar_dates.txt") && calendar_type === 0){
+            fs.unlinkSync("./feed_creation/calendar_dates.txt")
+        }
+        if (fs.existsSync("./feed_creation/rider_trip.txt") && (files === 1 || files === 2 || files === 5)){
+            fs.unlinkSync("./feed_creation/rider_trip.txt")
+        }
+        if (fs.existsSync("./feed_creation/board_alight.txt") && (files === 0 || files === 2 || files === 4)){
+            fs.unlinkSync("./feed_creation/board_alight.txt")
+        }
+        if (fs.existsSync("./feed_creation/ridership.txt") && (files === 0 || files === 1 || files === 3)){
+            fs.unlinkSync("./feed_creation/ridership.txt")
+        }*/
+        try {
+            var out = execSync('rm ./feed_creation/*') // delete previous files
+            console.log(out)
+        } catch (e){
+            console.log("RM")
+            console.log(e)
+        }
 
 
         // WRITE THE FILES =========================
@@ -1035,7 +1081,14 @@ module.exports = {
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
         process.chdir(FILEPATH); // change dir
-        zip.zipSync("./*.txt", "./" + FILENAME); // zip the files
+        try {
+            var out = execSync('zip -r -y fc.zip *.txt') // zip the files
+            console.log(out)
+        } catch (e){
+            console.log("ZIP")
+            console.log(e)
+        }
+
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME

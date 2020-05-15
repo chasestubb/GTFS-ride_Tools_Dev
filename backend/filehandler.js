@@ -67,7 +67,7 @@ async function feed_creation(params){
         params.agencies, params.routes, params.stops, params.trips, params.trips_per_route,
         params.start_date, params.end_date, params.feed_date, params.operation_days,
         params.user_source, params.min_riders, params.max_riders, params.aggr_level,
-        params.files)
+        params.calendar_type, params.files)
     console.log("Feed successfully created")
     return fc_filename
 }
