@@ -9,11 +9,30 @@ const FILE_UPLOAD_URL = "/fileupload"
 const url = HOST + FILE_UPLOAD_URL;
 
 //const SERVER_CHECK_URL = "/server_check"
+function status_text(st, err){
+	switch(Number(st)){ // no break statements because all cases return at the end
+		case -1:
+			return(<span className="text-danger"><strong>{err.response ? err.response.data : this.state.err.toString()}</strong></span>)
+		case 1:
+			return(<span className="text-dark"><strong>Uploading feed...</strong></span>)
+		case 2:
+			return(<span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span>)
+		default:
+			return null
+	}
+}
 
 class Home extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {filepath: "", filename: "", file: null, parsed_feed: null, err: null}; // filename = the name only, without path
+		this.state = {
+			filepath: "",
+			filename: "", // filename = the name only, without path
+			file: null,
+			parsed_feed: null,
+			err: null,
+			upload_status: 0, // 0: no feed uploaded, 1: upload startd but incomplete, 2: upload succeeded, -1: upload failed
+		};
 		this.fileSelected = this.fileSelected.bind(this);
 		this.upload = this.upload.bind(this);
 		//this.isServerAlive = this.isServerAlive.bind(this)
@@ -24,7 +43,7 @@ class Home extends React.Component{
 		console.log("File selected:");
 		console.log(event.target.files);
 		let fp = event.target.value;
-		this.setState({filepath: fp, filename: fp.slice(12), file: event.target.files[0]});
+		this.setState({filepath: fp, filename: fp.slice(12), file: event.target.files[0], upload_status: 0});
 		// the file path will always be "C:\\fakepath\\<FILENAME>"
 		// slice(n) removes the first n characters from a string (non-destructive)
 	}
@@ -32,19 +51,21 @@ class Home extends React.Component{
 	// uploads the file when user clicks "confirm upload"
 	async upload(event){
 		// Axios sends the file as a part of FormData
+		this.setState({upload_status: 1})
 		let fd = new FormData();
 		fd.append("file", this.state.file);
 		const config = {headers: {"content-type": "multipart/form-data"}, mode: "no-cors"};
 		//                        required for the file upload to succeed
 		try {
 			const res = await Axios.post(url, fd, config); // send form data
+			this.setState({upload_status: 2})
 			console.log(res.data);
 			this.setState({ parsed_feed: res.data, err: null });
 			this.props.onUpload(res.data);
 		}
 		catch (err) { // if the server returns an error
 			if (err) {
-				this.setState({err: err})
+				this.setState({err: err, upload_status: -1})
 				console.log(err);
 				if (err.response) {
 					alert(err.response.data); // shows a browser alert containing error data
@@ -146,9 +167,10 @@ class Home extends React.Component{
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
 								{/* if the server returns an error   then (if the error contains a message   then show the message   else show the raw response)   else show nothing */}
-								{this.state.err ? <span className="text-danger"><strong>{this.state.err.response ? this.state.err.response.data : this.state.err.toString()}</strong></span> : null }
+								{/*this.state.err ? <span className="text-danger"><strong>{this.state.err.response ? this.state.err.response.data : this.state.err.toString()}</strong></span> : null */}
 								{/* if the upload is successful   then show a message   else show nothing */}
-								{this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null}
+								{/*this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null*/}
+								{status_text(this.state.upload_status, this.state.err)}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
 							</div>
