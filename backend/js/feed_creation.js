@@ -999,6 +999,24 @@ module.exports = {
 
 
         //console.log(process.cwd())
+
+        // DELETE PREVIOUS FILES
+        fs.unlinkSync("./feed_creation/fc.zip")
+        fs.unlinkSync("./feed_creation/agency.txt")
+        fs.unlinkSync("./feed_creation/stops.txt")
+        fs.unlinkSync("./feed_creation/routes.txt")
+        fs.unlinkSync("./feed_creation/trips.txt")
+        fs.unlinkSync("./feed_creation/stop_times.txt")
+        fs.unlinkSync("./feed_creation/feed_info.txt")
+        fs.unlinkSync("./feed_creation/calendar.txt")
+        fs.unlinkSync("./feed_creation/calendar_dates.txt")
+        fs.unlinkSync("./feed_creation/ride_feed_info.txt")
+        fs.unlinkSync("./feed_creation/board_alight.txt")
+        fs.unlinkSync("./feed_creation/rider_trip.txt")
+        fs.unlinkSync("./feed_creation/ridership.txt")
+        fs.unlinkSync("./feed_creation/trip_capacity.txt")
+
+
         // WRITE THE FILES =========================
         fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
         fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);

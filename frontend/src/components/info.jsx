@@ -9,7 +9,7 @@ import Axios from 'axios';
 const HOST = "http://localhost:8080";
 const INFO_URL = "/info";
 const url = HOST + INFO_URL;
-const RIDERSHIP_TIME = "Weekly";
+const RIDERSHIP_TIME = "Total";
 
 const SERVER_CHECK_URL = "/server_check";
 

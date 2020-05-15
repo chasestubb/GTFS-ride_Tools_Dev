@@ -8,7 +8,7 @@ import Axios from 'axios';
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const url = "http://localhost:8080/info/agency/";
-const RIDERSHIP_TIME = "Weekly";
+const RIDERSHIP_TIME = "Total";
 
 // get the route type (route type is an enum on the standard)
 function get_route_type(type){
