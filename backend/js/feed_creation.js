@@ -85,7 +85,7 @@ function getRandomIntInclusive (min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
-};
+}
 
 // PAD NUMBER SIZE TO TWO DIGITS
 function pad(num) {
@@ -93,6 +93,7 @@ function pad(num) {
     while (s.length < 2) s = "0" + s;
     return s;
 }
+
 
 // TIME INCREMENTER ========================
 function incrementTime (input_time, amount) {
@@ -237,7 +238,7 @@ module.exports = {
     //   start_date       | static - always "20000101" = Jan 1, 2000
     //   end_date         | static - always "20500101" = Jan 1, 2050
 
-    calendarCreate: function(operation_days, start_date_input, end_date_input){
+    calendarCreate: function(operation_days, start_date_input, end_date_input, calendar_type){
         // var calendar = {
         //     service_id: "WEEKEND_CALENDAR",
         //     monday: 0,
@@ -250,76 +251,93 @@ module.exports = {
         //     start_date: start_date_input,
         //     end_date: end_date_input,
         // }
-
-        if (operation_days == 0){
-            return {
-                service_id: "WEEKEND_CALENDAR",
-                monday: 0,
-                tuesday: 0,
-                wednesday: 0,
-                thursday: 0,
-                friday: 0,
-                saturday: 1,
-                sunday: 1,
-                start_date: start_date_input,
-                end_date: end_date_input,
+        // if (operation_days == 0){
+        //     calendar.service_id = "WEEKEND_CALENDAR";
+        //     calendar.monday = 0;
+        //     calendar.tuesday = 0;
+        //     calendar.wednesday = 0;
+        //     calendar.thursday = 0;
+        //     calendar.friday = 0;
+        //     calendar.saturday = 1;
+        //     calendar.sunday = 1;
+        //     calendar.start_date = start_date_input;
+        //     calendar.end_date = end_date_input;
+        // }
+        if (calendar_type == 1){
+            //if the user selected not to use calendar.txt
+            return;
+        }
+        else{
+            if (operation_days == 0){
+                return {
+                    service_id: "WEEKEND_CALENDAR",
+                    monday: 0,
+                    tuesday: 0,
+                    wednesday: 0,
+                    thursday: 0,
+                    friday: 0,
+                    saturday: 1,
+                    sunday: 1,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                }
             }
-        }
-        if (operation_days == 1){
-            return {
-                service_id: "WEEKDAY_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 0,
-                sunday: 0,
-                start_date: start_date_input,
-                end_date: end_date_input,
+            if (operation_days == 1){
+                return {
+                    service_id: "WEEKDAY_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 0,
+                    sunday: 0,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                }
             }
-        }
-        if (operation_days == 2){
-            return {
-                service_id: "SATURDAY_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 1,
-                sunday: 0,
-                start_date: start_date_input,
-                end_date: end_date_input,
+            if (operation_days == 2){
+                return {
+                    service_id: "SATURDAY_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 1,
+                    sunday: 0,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                }
             }
-        }
-        if (operation_days == 3){
-            return {
-                service_id: "SUNDAY_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 0,
-                sunday: 1,
-                start_date: start_date_input,
-                end_date: end_date_input,
-            };
-        }
-        if (operation_days == 4){
-            return {
-                service_id: "ALL_CALENDAR",
-                monday: 1,
-                tuesday: 1,
-                wednesday: 1,
-                thursday: 1,
-                friday: 1,
-                saturday: 1,
-                sunday: 1,
-                start_date: start_date_input,
-                end_date: end_date_input,
-            };
+            if (operation_days == 3){
+                return {
+                    service_id: "SUNDAY_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 0,
+                    sunday: 1,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                };
+            }
+            if (operation_days == 4){
+                return {
+                    service_id: "ALL_CALENDAR",
+                    monday: 1,
+                    tuesday: 1,
+                    wednesday: 1,
+                    thursday: 1,
+                    friday: 1,
+                    saturday: 1,
+                    sunday: 1,
+                    start_date: start_date_input,
+                    end_date: end_date_input,
+                };
+            }
         }
         // return calendar;              
     },
@@ -336,31 +354,253 @@ module.exports = {
     //   date             | static - based on holiday represented
     //   exception_type   | static - always "2" for remove (as opposed to add)
 
-    calendarDatesCreate: function(calendar){
-        startYearNum = Math.floor(calendar.start_date / 10000); // number
-        endYearNum = Math.floor(calendar.end_date / 10000); // number
-       
-        var calendar_dates = [];
-        for(var i = startYearNum; i <= endYearNum; i++){
-
-            // NEW YEARS
-            var newyear_date = {
-                service_id: calendar.service_id,
-                date: i + "0101",
-                exception_type: 0,
-            };
-            calendar_dates.push(newyear_date);
-
-            // CHRISTMAS
-            var christmas_date = {
-                service_id: calendar.service_id,
-                date: i + "1225",
-                exception_type: 0,
-            };
-            calendar_dates.push(christmas_date);
+    calendarDatesCreate: function(calendar, operation_days, start_date_input, end_date_input, calendar_type){
+    
+        if (calendar_type == 0){
+            //do not use calendar_dates
+            return;
         }
+        else if (calendar_type == 2){
+            startYearNum = Math.floor(calendar.start_date / 10000); // number
+            endYearNum = Math.floor(calendar.end_date / 10000); // number
 
-        return calendar_dates;
+            //Use both calendar_dates.txt and calendar.txt
+            var calendar_dates = [];
+            for(var i = startYearNum; i <= endYearNum; i++){
+                // NEW YEARS
+                var newyear_date = {
+                    service_id: calendar.service_id,
+                    date: i + "0101",
+                    exception_type: 2,
+                };
+                calendar_dates.push(newyear_date);
+
+                // CHRISTMAS
+                var christmas_date = {
+                    service_id: calendar.service_id,
+                    date: i + "1225",
+                    exception_type: 2,
+                };
+                calendar_dates.push(christmas_date);
+            }
+
+            return calendar_dates;
+        }
+        else{
+            //Handle usage of only calendar_dates.txt
+            //First we get every day between the feed start and end date
+            var start_date_str = String(start_date_input);
+            var start_year = start_date_str.substr(0,4);
+            var start_month = start_date_str.substr(4,2);
+            //month starts at 0 -- Jan is Month 0
+            var month1 = start_month - 1;
+            var start_day = start_date_str.substr(6,2);
+            var start_date = new Date(start_year, month1, start_day);
+
+            var end_date_str = String(end_date_input);
+            var end_year = end_date_str.substr(0,4);
+            var end_month = end_date_str.substr(4,2);
+            var month2 = end_month - 1;
+            var end_day = end_date_str.substr(6,2);
+            var end_date = new Date(end_year, month2, end_day);
+            var calendar_dates = [];
+            for(var dates=[],dt=new Date(start_date); dt<=end_date; dt.setDate(dt.getDate()+1)){
+            dates.push(new Date(dt));
+        }
+            var temp_date = {
+                service_id: "", 
+                date: "",
+                exception_type: 0
+            }
+            if (operation_days == 1){
+                console.log("weekdays");
+                //get all weekdays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay() ==  6|| dates[i].getDay() == 0){
+                            dates.splice(i, 1);
+                            i = i - 1;
+                    }
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    temp_date.service_id = "WEEKDAY_CALENDAR";
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
+            }
+            if (operation_days == 0){
+                console.log("weekends");
+                //only weekends
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay() > 0 && dates[i].getDay() < 6){
+                        dates.splice(i,1);
+                        i = i - 1;
+                    }
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
+                    temp_date.service_id = "WEEKEND_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
+            }
+            if (operation_days == 2){
+                console.log("saturdays");
+                //No saturdays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].getDay() == 6){
+                        dates.splice(i,1);
+                        i = i - 1;
+                    }
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
+                    temp_date.service_id = "SATURDAY_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
+            }
+            if (operation_days == 3){
+                console.log("sundays");
+                //No sundays
+                for (var i = 0; i < dates.length; i++){
+
+                    if (dates[i].getDay() == 0){
+                        dates.splice(i,1);
+                        i = i - 1;
+                    }
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
+                    temp_date.service_id = "SUNDAY_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
+            }
+            if (operation_days == 4){
+                console.log("all");
+                //Keep all days except holidays
+                for (var i = 0; i < dates.length; i++){
+                    if (dates[i].isHoliday)
+                        dates.splice(i,1);
+                }
+                for (var i = 0; i < dates.length; i++){
+                    temp_date = {
+                        service_id: "", 
+                        date: "",
+                        exception_type: 1,
+                    }
+                    //converts back to our date format
+                    var month = dates[i].getUTCMonth() + 1
+                    var day = dates[i].getUTCDate();
+                    var year = dates[i].getUTCFullYear();
+
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
+                    temp_date.service_id = "ALL_CALENDAR";
+                    temp_date.exception_type = 1;
+                    calendar_dates.push(temp_date);
+                }
+            }
+   /*         for (var j = 0; j < calendar_dates.length; j++){
+                console.log("printing dates");
+                console.log(calendar_dates[j]);
+            }*/
+            console.log("Number of days in this calendar: " + calendar_dates.length)
+            
+           return calendar_dates;
+        }
     },
 
     // CREATE FEED_INFO.TXT (GTFS) ================
@@ -388,7 +628,7 @@ module.exports = {
             feed_start_date: feed_start_date1,
             feed_end_date: feed_end_date1,
             feed_version: "1.0.0",
-        }
+        };
     //   return feed_info;
     },
 
@@ -607,7 +847,7 @@ module.exports = {
                         trip_id: "TRIP" + count2, // trip id			  
                         arrival_time: local_arr_time, // arrival time begins at 06:00:00
                         departure_time: local_dep_time, // departure time begins at 06:02:00
-                        stop_id: stop_sequence_list[c], // stop id (taken from the sequence generated)
+                        stop_id: stop_sequence_list[c], // stop id (taken from the sequence generated)	  
                         stop_sequence: c + 1,		   	
                     };
                     
@@ -1004,8 +1244,8 @@ module.exports = {
         user_source, min_riders, max_riders, aggr_level,
         calendar_type, files){
         var agencies = this.agencyCreate(num_agencies);
-        var calendar = this.calendarCreate(operation_days, start_date, end_date);
-        var calendar_dates = this.calendarDatesCreate(calendar);
+        var calendar = this.calendarCreate(operation_days, start_date, end_date, calendar_type);
+        var calendar_dates = this.calendarDatesCreate(calendar, operation_days, start_date, end_date, calendar_type);
         var stops = this.stopsCreate(num_stops);
         var routes = this.routesCreate(num_routes, num_agencies);
         var trips = this.tripsCreate(num_routes, num_trips_per_route);
@@ -1018,11 +1258,14 @@ module.exports = {
         //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
         //var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
-
         // CSV STRINGIFY =========================
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
-        var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
-        var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+        
+        if(calendar_type != 1)
+            var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
+        if(calendar_type != 0)
+            var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+
         var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
         var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
         var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
@@ -1038,26 +1281,10 @@ module.exports = {
         //console.log(process.cwd())
 
         // DELETE PREVIOUS FILES
-        /*
-        if (fs.existsSync("./feed_creation/calendar.txt") && calendar_type === 1){
-            fs.unlinkSync("./feed_creation/calendar.txt")
-        }
-        if (fs.existsSync("./feed_creation/calendar_dates.txt") && calendar_type === 0){
-            fs.unlinkSync("./feed_creation/calendar_dates.txt")
-        }
-        if (fs.existsSync("./feed_creation/rider_trip.txt") && (files === 1 || files === 2 || files === 5)){
-            fs.unlinkSync("./feed_creation/rider_trip.txt")
-        }
-        if (fs.existsSync("./feed_creation/board_alight.txt") && (files === 0 || files === 2 || files === 4)){
-            fs.unlinkSync("./feed_creation/board_alight.txt")
-        }
-        if (fs.existsSync("./feed_creation/ridership.txt") && (files === 0 || files === 1 || files === 3)){
-            fs.unlinkSync("./feed_creation/ridership.txt")
-        }*/
         try {
-            var out = execSync('rm ./feed_creation/*') // delete previous files
+            var out = execSync('rm ./feed_creation/*') // delete all files in feed_creation dir
             console.log(out)
-        } catch (e){
+        } catch (e){ // rm will throw an error if the dir is empty, this statement will catch the error (preventing the server from breaking)
             console.log("RM")
             console.log(e)
         }
@@ -1070,8 +1297,12 @@ module.exports = {
         fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
         fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
         fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
-        fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
-        fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+
+        if(calendar_type != 1)
+            fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+        if(calendar_type != 0)
+            fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+
         fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
         fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
         fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
@@ -1088,16 +1319,19 @@ module.exports = {
             console.log("ZIP")
             console.log(e)
         }
-
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
-        return (FILEPATH + FILENAME);
-    }
-};
+        return (FILEPATH + FILENAME); 
+    } 
+}; 
 
 
 // test function
-//module.exports.Feed_Creation(2, 10, 100, 50, 5, 20200101, 20201231, 20200304, 0, 1000, 6)
+//Feed_Creation: function(num_agencies, num_routes, num_stops, num_trips, num_trips_per_route, start_date, end_date, feed_date, user_source, min_riders, max_riders, files, operation_days, calendar_type)
+//calendar_dates = this.calendarDatesCreate(calendar, operation_days, start_date, end_date, calendar_type);
+
+//module.exports.Feed_Creation(1, 5, 100, 10, 3, 20200501, 20200531, 20200531, 6, 6, 6, 6, 0, 1);
+//module.exports.calendarDatesCreate()
 //console.log(module.exports.tripsCreate(10, 5));
 
