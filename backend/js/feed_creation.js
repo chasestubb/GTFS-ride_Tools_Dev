@@ -336,7 +336,19 @@ module.exports = {
                     var month = dates[i].getUTCMonth() + 1
                     var day = dates[i].getUTCDate();
                     var year = dates[i].getUTCFullYear();
-                    temp_date.date = year +""+ month + day;
+
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
                     temp_date.exception_type = 1;
                     calendar_dates.push(temp_date);
                 }
@@ -363,7 +375,18 @@ module.exports = {
                     var month = dates[i].getUTCMonth() + 1
                     var day = dates[i].getUTCDate();
                     var year = dates[i].getUTCFullYear();
-                    temp_date.date = year +""+ month + day;
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
                     temp_date.service_id = "WEEKEND_CALENDAR";
                     temp_date.exception_type = 1;
                     calendar_dates.push(temp_date);
@@ -391,7 +414,18 @@ module.exports = {
                     var month = dates[i].getUTCMonth() + 1
                     var day = dates[i].getUTCDate();
                     var year = dates[i].getUTCFullYear();
-                    temp_date.date = year +""+ month + day;
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
                     temp_date.service_id = "SATURDAY_CALENDAR";
                     temp_date.exception_type = 1;
                     calendar_dates.push(temp_date);
@@ -420,7 +454,18 @@ module.exports = {
                     var month = dates[i].getUTCMonth() + 1
                     var day = dates[i].getUTCDate();
                     var year = dates[i].getUTCFullYear();
-                    temp_date.date = year +""+ month + day;
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
                     temp_date.service_id = "SUNDAY_CALENDAR";
                     temp_date.exception_type = 1;
                     calendar_dates.push(temp_date);
@@ -443,7 +488,19 @@ module.exports = {
                     var month = dates[i].getUTCMonth() + 1
                     var day = dates[i].getUTCDate();
                     var year = dates[i].getUTCFullYear();
-                    temp_date.date = year +""+ month + day;
+
+                    // Check for month and day < 10
+                    var month0, day0;
+                    if (month < 10)
+                        month0 = "0" + String(month);
+                    else
+                        month0 = month;
+                    if (day < 10)
+                        day0 = "0" + String(day);
+                    else
+                        day0 = day;
+
+                    temp_date.date = year + "" + month0 + day0;
                     temp_date.service_id = "ALL_CALENDAR";
                     temp_date.exception_type = 1;
                     calendar_dates.push(temp_date);
@@ -1081,11 +1138,14 @@ module.exports = {
         var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, num_routes, stopTimes);
         // var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
-
         // CSV STRINGIFY =========================
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
-        var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
-        var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+        
+        if(calendar_type != 1)
+            var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
+        if(calendar_type != 0)
+            var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+
         var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
         var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
         var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
@@ -1106,8 +1166,12 @@ module.exports = {
         fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
         fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
         fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
-        fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
-        fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+
+        if(calendar_type != 1)
+            fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+        if(calendar_type != 0)
+            fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+
         fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
         // fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
         fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
