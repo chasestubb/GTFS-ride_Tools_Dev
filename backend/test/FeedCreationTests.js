@@ -59,3 +59,21 @@ describe("FEED CREATION :: Type test: Array", function(){
         assert.typeOf(feedInfo, "array");
     });
 });
+
+describe("FEED CREATION :: Calendar test", function(){
+    it("testing argument values for weekend calendar", function(){
+    var calendar = feed_creation.calendarCreate(0, 20200421, 20200428, 0);
+    assert.equal(calendar.service_id, 'WEEKEND_CALENDAR', "service_id == WEEKEND_CALENDAR");
+    assert.equal(calendar.monday, 0, 'monday == 0');
+    assert.equal(calendar.tuesday, 0, " tuesday == 0");
+    assert.equal(calendar.saturday, 1, "saturday == 0");
+    assert.equal(calendar.sunday, 1, "sunday == 1");
+    });
+});
+
+describe("FEED CREATION :: Calendar test - bad operation days", function(){
+    it("testing unhandled operation days", function(){
+        var calendar = feed_creation.calendarCreate(9, 20200421,20200428, 0);
+        assert.equal(calendar.service_id, "", "service id == '' (empty)");
+    });
+});
