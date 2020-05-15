@@ -1153,7 +1153,7 @@ module.exports = {
             } else { // if this is a part of a new trip
                 board_alight[b].load_count = board_alight[b].boardings - board_alight[b].alightings // just count the number of boardings minus the number of alightings
             }
-            board_alight[b].current_load = board_alight[b].load_count * 100 / max_load // current_load is a percentage of the load (how full the vehicle is)
+            board_alight[b].current_load = Math.round(board_alight[b].load_count * 100 / max_load) // current_load is a percentage of the load (how full the vehicle is)
         }
         
         return board_alight;

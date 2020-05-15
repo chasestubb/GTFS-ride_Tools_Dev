@@ -227,7 +227,7 @@ class Info extends React.Component{
 								<div className="card-body">
 									Routes: <strong>{agency.routes}</strong><br/>
 									Service span: <strong>{agency.span}</strong><br/>
-									Weekly ridership: {this.state.is_gtfs_ride ? <strong>{agency.ridership}</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
+									{RIDERSHIP_TIME} ridership: {this.state.is_gtfs_ride ? <strong>{agency.ridership}</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
 								</div>
 							</div>
 						</div>
