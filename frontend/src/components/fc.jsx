@@ -341,7 +341,7 @@ class FC extends React.Component{
 									<th><strong className="text-dark">Feed dates</strong></th>
 									<tr>
 										<td>Service pattern </td>
-										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.set}>
+										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.setNumber}>
 											<option value={4}>7 days per week</option>
 											<option value={1}>Weekdays only</option>
 											<option value={2}>Weekdays + Saturdays</option>
@@ -351,7 +351,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Service pattern defined in </td>
-										<td><select name="calendar_type" value={this.state.params.calendar_type} onChange={this.set}>
+										<td><select name="calendar_type" value={this.state.params.calendar_type} onChange={this.setNumber}>
 											<option value={0}>calendar.txt only</option>
 											<option value={1}>calendar_dates.txt only</option>
 											<option value={2}>Both files (recommended)</option>
@@ -369,7 +369,7 @@ class FC extends React.Component{
 									<th><strong className="text-dark">Ridership</strong></th>
 									<tr>
 										<td>Most specific aggregation level </td>
-										<td><select name="aggr_level" value={this.state.params.aggr_level} onChange={this.set}>
+										<td><select name="aggr_level" value={this.state.params.aggr_level} onChange={this.setNumber}>
 											<option value={4}>Feed-level data</option>
 											<option value={3}>Agency-level data</option>
 											<option value={2}>Route-level data</option>
@@ -387,7 +387,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Ridership data collection method </td>
-										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
+										<td><select name="user_source" value={this.state.params.user_source} onChange={this.setNumber}>
 											<option value={1}>Automated Passenger Counter</option>
 											<option value={2}>Automated Fare Collector</option>
 											<option value={0}>Manual Counting</option>
@@ -397,7 +397,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Ridership files </td>
-										<td><select name="files" value={this.state.params.files} onChange={this.set}>
+										<td><select name="files" value={this.state.params.files} onChange={this.setNumber}>
 											<option value={2}>Only ridership.txt</option>
 											<option value={4}>ridership.txt and board_alight.txt</option>
 											<option value={6}>ridership.txt, board_alight.txt, and rider_trip.txt</option>

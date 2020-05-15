@@ -130,10 +130,11 @@ function getAgencyOfTrip(trip_id, trips, routes){
 }
 
 // increment date by 1 day
-function tomorrow(d){
-    var year = Math.floor(d / 10000)
-    var month = Math.floor((d % 10000) / 100);
-    var day = d % 100;
+// date is a number formatted as a GTFS date (20200317 = Mar 17, 2020)
+function tomorrow(date){
+    var year = Math.floor(date / 10000)
+    var month = Math.floor((date % 10000) / 100);
+    var day = date % 100;
     switch(month){
         case 1:
         case 3:
@@ -144,7 +145,7 @@ function tomorrow(d){
             if (day == 31){
                 return ((year * 10000) + ((month+1) * 100) + 1)
             } else {
-                return ++d
+                return ++date
             }
         case 4:
         case 6:
@@ -153,33 +154,98 @@ function tomorrow(d){
             if (day == 30){
                 return ((year * 10000) + ((month+1) * 100) + 1)
             } else {
-                return ++d
+                return ++date
             }
         case 2:
             if ((year % 4) == 0 && (year % 400) != 0){ // if leap year
                 if (day == 29){
                     return ((year * 10000) + 301)
                 } else {
-                    return ++d
+                    return ++date
                 }
             } else { // if not leap year
                 if (day == 28){
                     return ((year * 10000) + 301)
                 } else {
-                    return ++d
+                    return ++date
                 }
             }
         case 12:
             if (day == 31){
                 return (((year+1) * 10000) + 101)
             } else {
-                return ++d
+                return ++date
             }
         default:
-            return ++d;
+            return ++date;
     }
 }
 
+// converts GTFS-formatted date (20200317) to JS Date object
+// input type is number, not string
+function gtfs_to_js_date(date){
+    var year = Math.floor(date / 10000)
+    var month = Math.floor((date % 10000) / 100) - 1;
+    var day = date % 100;
+    return new Date(year, month, day)
+}
+
+// converts JS Date object to GTFS-formatted date (20200317)
+// returns a number
+function js_to_gtfs_date(date){
+    var year = date.getFullYear()
+    var month = date.getMonth()
+    var day = date.getDate()
+    var gtfs_date = year * 10000
+    gtfs_date += (month + 1) * 100 // JS date objects have months from 0 to 11
+    gtfs_date += day
+    return gtfs_date
+}
+
+/* increment date by 1 service day
+   date is a number formatted as a GTFS date (20200317 = Mar 17, 2020)
+   see the "ENUM VALUES" section above for the possible values of operation_days
+   holidays: if true then no service on Christmas day and New Year's day, if false then service as usual on those days
+*/ /* example:
+   if the service does not run on weekends (operation_days = 1) and May 15 2020 is Friday,
+   then next_service_day(20200515, 1) will return 20200518
+*/
+function next_service_day(date, operation_days, holidays){
+    //console.log(date + " = " + gtfs_to_js_date(date) + ": " + gtfs_to_js_date(date).getDay())
+    var next_day = tomorrow(date)
+
+    // skip if holiday
+    if (holidays && ((next_day % 10000 == 1225) || (next_day % 10000 == 0101))){
+        next_day = tomorrow(next_day)
+    }
+
+    // JS defines days as 0=Sunday, 1=Monday, ..., 6=Saturday
+    switch(operation_days){
+        case 0: // weekends only
+            while (gtfs_to_js_date(next_day).getDay() != 6 && gtfs_to_js_date(next_day).getDay() != 0){ // skip the date if not Saturday or Sunday
+                next_day = tomorrow(next_day)
+            }
+            break
+        case 1: // weekdays only
+            while (gtfs_to_js_date(next_day).getDay() == 6 || gtfs_to_js_date(next_day).getDay() == 0){ // skip the date if Saturday or Sunday
+                next_day = tomorrow(next_day)
+            }
+            break
+        case 2: // weekdays + Sat
+            if (gtfs_to_js_date(next_day).getDay() == 0){ // skip the date if Sunday
+                next_day = tomorrow(next_day)
+            }
+            break
+        case 3: // weekdays + Sun
+            if (gtfs_to_js_date(next_day).getDay() == 6){ // skip the date if Saturday
+                next_day = tomorrow(next_day)
+            }
+            break
+        //case 4: // every day -- no need for day check
+
+    }
+    return next_day
+}
 
 
 module.exports = {
@@ -1011,7 +1077,7 @@ module.exports = {
     //   source |
 
     // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
-    boardAlightCreate: function(trips, stops, num_trips, num_stops, num_routes, stop_times, user_source, rider_trip, start_date, end_date){
+    boardAlightCreate: function(trips, stops, num_trips, num_stops, num_routes, stop_times, user_source, rider_trip, start_date, end_date, operation_days){
         var board_alight = [];
 
         var d = start_date
@@ -1040,7 +1106,9 @@ module.exports = {
                     source : user_source,  
                 })
             }
-            d = tomorrow(d) // increment the date
+            // increment the date
+            //d = tomorrow(d)
+            d = next_service_day(d, operation_days, true)
         }
 
         // sort the rider_trip array by service_date
@@ -1091,7 +1159,7 @@ module.exports = {
         return board_alight;
     },
 
-    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level, start_date, end_date){
+    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level, start_date, end_date, operation_days){
         var num_riders = getRandomIntInclusive(min_riders, max_riders)
         var rider_trips = [];
         var num_stops_per_route = num_stops / num_routes;
@@ -1143,7 +1211,7 @@ module.exports = {
             rider_trips.push(temp_rider);
 
             // increment the date, and go back to the start date if the current date exceeds the end date
-            date = tomorrow(date)
+            date = next_service_day(date, operation_days, true)
             if (date > end_date){
                 date = start_date
             }
@@ -1253,8 +1321,8 @@ module.exports = {
         var feedInfo = this.feedInfoCreate(start_date, end_date);
         var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
 
-        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_date, end_date);
-        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_date, end_date);
+        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_date, end_date, operation_days);
+        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_date, end_date, operation_days);
         //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
         //var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
