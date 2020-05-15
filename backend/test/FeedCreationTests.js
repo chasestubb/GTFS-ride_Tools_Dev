@@ -53,13 +53,6 @@ describe("Type test: Object", function(){
     });
 });
 
-describe("FEED CREATION :: Type test: Array", function(){
-    it("Return type should be an array", function(){
-        var feedInfo = feed_creation.feedInfoCreate(20200421, 20200428);
-        assert.typeOf(feedInfo, "array");
-    });
-});
-
 describe("FEED CREATION :: Calendar test", function(){
     it("testing argument values for weekend calendar", function(){
     var calendar = feed_creation.calendarCreate(0, 20200421, 20200428, 0);
@@ -73,7 +66,7 @@ describe("FEED CREATION :: Calendar test", function(){
 
 describe("FEED CREATION :: Calendar test - bad operation days", function(){
     it("testing unhandled operation days", function(){
-        var calendar = feed_creation.calendarCreate(9, 20200421,20200428, 0);
-        assert.equal(calendar.service_id, "", "service id == '' (empty)");
+        var calendar = feed_creation.calendarCreate(9, 20200421, 20200428, 0);
+        assert.equal(calendar, undefined, "calendar should be undefined");
     });
 });
