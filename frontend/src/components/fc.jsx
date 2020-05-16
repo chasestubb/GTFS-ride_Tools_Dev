@@ -72,8 +72,8 @@ class FC extends React.Component{
 				end_date: null,
 				feed_date: null, // just make it the same as start_date
 				user_source: 1, // enum -- the ridership data collection method
-				min_riders: 100,
-				max_riders: 500,
+				min_riders: 20000,
+				max_riders: 50000,
 				aggr_level: 4, // enum -- minimum aggregation level
 				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
 				operation_days: 4, // enum -- defines the service days of the week
