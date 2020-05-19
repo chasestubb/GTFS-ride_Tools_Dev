@@ -84,7 +84,7 @@ class App extends React.Component{
 								<Switch>
 									{/* Home page */}
 									<Route exact path="/">
-										<Home onUpload={this.setFilename}/>
+										<Home filename={this.state.filename} onUpload={this.setFilename}/>
 									</Route>
 
 									{/* Agency-level info */}

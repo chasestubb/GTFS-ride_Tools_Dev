@@ -76,6 +76,8 @@ var fs = require('fs');
 var zip = require('cross-zip');
 var {execSync} = require('child_process')
 
+var Info = require("./info")
+
 var FILEPATH = "feed_creation/";
 var FILENAME = "fc.zip";
 //var FILEPATH = "./"
@@ -1146,7 +1148,7 @@ module.exports = {
         var max_load = 60 // the maximum load, used for current_load
         // special case for index 0 where there is no row/element before it
         board_alight[0].load_count = board_alight[0].boardings - board_alight[0].alightings // first load = boardings - alightings (no checks to the previous row)
-        board_alight[0].current_load = board_alight[0].load_count / max_load
+        board_alight[0].current_load = Math.round(board_alight[0].load_count * 100 / max_load)
         for (var b = 1; b < board_alight.length; b++){
             if (board_alight[b].trip_id == board_alight[b-1].trip_id){ // if this row is still part of the same trip as the last one
                 board_alight[b].load_count = board_alight[b-1].load_count + board_alight[b].boardings - board_alight[b].alightings // add the previous load count to the current calculation
@@ -1232,9 +1234,34 @@ module.exports = {
     // Attributes: 
     //   temp_ridership
 
-    ridershipCreate: function(operation_days, stops, num_stops, num_routes, routes, board_alight, num_riders, trips, num_trips){
+    ridershipCreate: function(operation_days, board_alight, agency, stops, trips, routes, start_date, end_date){
         var ridership = [];
-        var temp_ridership = {
+        var weekday = Number(operation_days !== 0) // converted to number so that true is 1 and false is 0 (instead of "true" and "false")
+        var saturday = Number(operation_days === 0 || operation_days === 2 || operation_days === 4)
+        var sunday = Number(operation_days === 0 || operation_days === 3 || operation_days === 4)
+        var service_pattern;
+        switch(operation_days){
+            case 0:
+                service_pattern = "WEEKEND_CALENDAR"
+                break
+            case 1:
+                service_pattern = "WEEKDAY_CALENDAR"
+                break
+            case 2:
+                service_pattern = "SATURDAY_CALENDAR"
+                break
+            case 3:
+                service_pattern = "SUNDAY_CALENDAR"
+                break
+            case 4:
+                service_pattern = "ALL_CALENDAR"
+                break
+            default:
+                service_pattern = "BASE_CALENDAR"
+                break
+        }
+
+        /*var temp_ridership = {
             total_boardings : 0,
             total_alightings : 0,
             ridership_start_date : 20000101,
@@ -1274,6 +1301,109 @@ module.exports = {
             var rand_id = routes[rand_route].route_id;
             temp_ridership.route_id = rand_id;
             ridership.push(temp_ridership);
+        }*/
+
+        // agency-level ridership
+        for (var a = 0; a < agency.length; a++){
+            var agency_ridership = Info.countAgencyRiders(agency[a], board_alight, trips, routes);
+            ridership.push({
+                total_boardings : agency_ridership,
+                total_alightings : agency_ridership,
+                ridership_start_date : start_date,
+                ridership_end_date : end_date,
+                ridership_start_time : "",
+                ridership_end_time : "",
+                service_id: service_pattern,
+                monday: weekday,
+                tuesday: weekday,
+                wednesday: weekday,
+                thursday: weekday,
+                friday: weekday,
+                saturday: saturday,
+                sunday: sunday,
+                agency_id : agency[a].agency_id,
+                route_id : "",
+                direction_id : "" ,
+                trip_id : "",
+                stop_id : "",
+            })
+        }
+
+        // route-level ridership
+        for (var r = 0; r < routes.length; r++){
+            var route_ridership = Info.countRouteRiders(routes[r], board_alight, trips);
+            ridership.push({
+                total_boardings : route_ridership,
+                total_alightings : route_ridership,
+                ridership_start_date : start_date,
+                ridership_end_date : end_date,
+                ridership_start_time : "",
+                ridership_end_time : "",
+                service_id: service_pattern,
+                monday: weekday,
+                tuesday: weekday,
+                wednesday: weekday,
+                thursday: weekday,
+                friday: weekday,
+                saturday: saturday,
+                sunday: sunday,
+                agency_id : "",
+                route_id : routes[r].route_id,
+                direction_id : "" ,
+                trip_id : "",
+                stop_id : "",
+            })
+        }
+
+        // trip-level ridership
+        for (var t = 0; t < trips.length; t++){
+            var trip_ridership = Info.countTripRiders(board_alight, trips[t]);
+            ridership.push({
+                total_boardings : trip_ridership,
+                total_alightings : trip_ridership,
+                ridership_start_date : start_date,
+                ridership_end_date : end_date,
+                ridership_start_time : "",
+                ridership_end_time : "",
+                service_id: service_pattern,
+                monday: weekday,
+                tuesday: weekday,
+                wednesday: weekday,
+                thursday: weekday,
+                friday: weekday,
+                saturday: saturday,
+                sunday: sunday,
+                agency_id : "",
+                route_id : "",
+                direction_id : trips[t].direction_id,
+                trip_id : trips[t].trip_id,
+                stop_id : "",
+            })
+        }
+
+        // stop-level ridership
+        for (var s = 0; s < stops.length; s++){
+            ridership.push({
+                total_boardings : Info.countStopRiders(board_alight, stops[s]),
+                total_alightings : Info.countStopAlightings(board_alight, stops[s]),
+                ridership_start_date : start_date,
+                ridership_end_date : end_date,
+                ridership_start_time : "",
+                ridership_end_time : "",
+                service_id: service_pattern,
+                monday: weekday,
+                tuesday: weekday,
+                wednesday: weekday,
+                thursday: weekday,
+                friday: weekday,
+                saturday: saturday,
+                sunday: sunday,
+                agency_id : "",
+                route_id : "",
+                direction_id : "",
+                trip_id : "",
+                stop_id : stops[s].stop_id,
+            })
         }
         
         return ridership;
@@ -1323,7 +1453,7 @@ module.exports = {
 
         var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_date, end_date, operation_days);
         var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_date, end_date, operation_days);
-        //var ridership = this.ridershipCreate(calendar, stops, num_stops, num_routes, routes, boardAlight, num_riders, trips, num_trips);
+        var ridership = this.ridershipCreate(operation_days, boardAlight, agencies, stops, trips, routes, start_date, end_date);
         //var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
 
         // CSV STRINGIFY =========================
@@ -1340,9 +1470,11 @@ module.exports = {
         var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
         var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
         var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
-        var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_count","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
-        var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
-        // var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
+        if(files == 4 || files == 6)
+            var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_count","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
+        if(files == 6)
+            var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
+        var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
         // var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
 
 
@@ -1372,9 +1504,11 @@ module.exports = {
             fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
 
         fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
-        fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
-        fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
-        // fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV)
+        if(files == 4 || files == 6)
+            fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
+        if(files == 6)
+            fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
+        fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV) // always generated
         // fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================

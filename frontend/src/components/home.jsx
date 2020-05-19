@@ -161,15 +161,13 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">Upload a Feed</h5>
 							</div>
 							<div className="card-body">
+								{this.props.filename == "" ? <span><strong className="text-danger">You have not uploaded any feeds.</strong> Uploads are optional for Test Feed Creation.</span> : <span className="text-info">You have uploaded <strong>{this.props.filename}</strong></span>}
+								<br/>
 								<strong>1. Choose a feed file<br/></strong>
 								<input type="file" name="fileupload" accept=".zip" onChange={this.fileSelected}/><br/>
 								<br/>
 								<strong>2. Upload the selected file: </strong>{this.state.filename}<br/>
 								{uploadConfirmBtn}<br/>
-								{/* if the server returns an error   then (if the error contains a message   then show the message   else show the raw response)   else show nothing */}
-								{/*this.state.err ? <span className="text-danger"><strong>{this.state.err.response ? this.state.err.response.data : this.state.err.toString()}</strong></span> : null */}
-								{/* if the upload is successful   then show a message   else show nothing */}
-								{/*this.state.parsed_feed ? <span className="text-primary"><strong>Upload successful.</strong> Check the top right corner to see the currently loaded feed.</span> : null*/}
 								{status_text(this.state.upload_status, this.state.err)}
 								<br/>
 								Accepted file types: zipped GTFS or GTFS-ride feeds (.zip). Password-protected zip files are not supported.
