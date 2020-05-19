@@ -210,8 +210,9 @@ class Info extends React.Component{
 						<h4 className="h4 mb-0 text-gray-800">Agencies ({this.state.agency_list.length})</h4>
 					</div>
 					<div className="row">
-						<h5>Click on an agency's name for more info.</h5><br/><br/>
+						<h5>Click on an agency's name for more info. Scroll down to see the list of stops.</h5><br/>
 					</div>
+					
 					
 					{/* Content Row */}
 					<div className="row">
