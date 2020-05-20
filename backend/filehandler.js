@@ -257,7 +257,11 @@ app.get(INFO_URL, (req, res) => {
                 ridership: 0,
             };
             if (gtfs_ride_feed){
-                agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
+                if (board_alight){
+                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
+                } else {
+                    agency.ridership = -1
+                }                
             }
             feed_info_.agencies.push(agency);
         }
@@ -274,7 +278,11 @@ app.get(INFO_URL, (req, res) => {
                 ridership: 0,
             }
             if (gtfs_ride_feed){
-                stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                if (board_alight){
+                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                } else {
+                    stop.ridership = -1
+                }                
             }
             feed_info_.stops.push(stop)
         }
@@ -293,7 +301,7 @@ app.get(INFO_URL, (req, res) => {
     }
 })
 
-// AGENCY INFO
+// FEED_INFO -> AGENCY INFO
 app.get(INFO_AGENCY_URL, (req, res) => {
     console.log("FEED INFO -> AGENCY INFO")
     if (agencies && routes && trips && stops && stop_times){
@@ -337,7 +345,11 @@ app.get(INFO_AGENCY_URL, (req, res) => {
                     trips: (Info.tripsPerRoute(route, trips)).length,
                 }
                 if (gtfs_ride_feed){
-                    route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+                    if (board_alight){
+                        route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+                    } else {
+                        route_info.ridership = -1
+                    }
                 }
                 agency_info.routes.push(route_info);
             }
@@ -369,7 +381,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
         agency_info.is_gtfs_ride = gtfs_ride_feed
 
         // GTFS-ride specific fields
-        if (gtfs_ride_feed){
+        if (gtfs_ride_feed && board_alight){
             agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
         }
 
@@ -384,7 +396,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
     }
 })
     
-// ROUTE INFO
+// FEED_INFO -> ROUTE INFO
 app.get(INFO_ROUTE_URL, (req, res) => {
     console.log("FEED INFO -> ROUTE INFO")
     if (agencies && routes && trips && stops && stop_times){
@@ -433,7 +445,11 @@ app.get(INFO_ROUTE_URL, (req, res) => {
                     ridership: 0,
                 }
                 if (gtfs_ride_feed){
-                    trip_info.ridership = Info.countTripRiders(board_alight, trip)
+                    if (board_alight){
+                        trip_info.ridership = Info.countTripRiders(board_alight, trip)
+                    } else {
+                        trip_info.ridership = -1
+                    }
                 }
                 route_info.trips.push(trip_info)
             }
@@ -445,7 +461,11 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 
         // GTFS-ride specific fields
         if (gtfs_ride_feed){
-            route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+            if (board_alight){
+                route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+            } else {
+                route_info.ridership = -1
+            }
         }
 
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
@@ -470,15 +490,8 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 7.  Client receives the response
 8.  Client sends GET response to request the feed
 9.  Client waits for the feed to be generated
--- OPTION 1 (preferred): -- DIDN'T WORK
 10. Server sends file to the client
 11. Client downloads the file
--- OPTION 2 (if potion 1 does not work):
-10. Server sends file link to the client
-11. Client shows the link on the UI
-12. User clicks on the link
-13. Server sends file to the client
-14. Client downloads the file
 -------------------------------------------------------------------------------- */
 
 // --------------------------------------------------------------------------------

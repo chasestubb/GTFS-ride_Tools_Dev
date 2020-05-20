@@ -18,8 +18,8 @@ const navoptions = [
 	//{id: "tm",  name: "Time Merge",         icon: "fas fa-calendar-alt"}, // now in merge
 	{id: "merge", name: "Merge",              icon: "fas fa-object-group"},
 	//{id: "as",  name: "Agency Split",       icon: "fas fa-landmark"}, // now in split
-	{id: "ra",    name: "Ridership Anomaly",  icon: "fas fa-search"},
-	{id: "sc",    name: "Service Changes",    icon: "fas fa-edit"}
+	//{id: "ra",  name: "Ridership Anomaly",  icon: "fas fa-search"}, // not a priority
+	//{id: "sc",  name: "Service Changes",    icon: "fas fa-edit"}, // not a priority
 ];
 
 class Sidebar extends React.Component{
@@ -31,7 +31,7 @@ class Sidebar extends React.Component{
 			<li className="nav-item">
 				<NavLink className="nav-link" activeClassName="active" exact to="/">
 				<i className="fas fa-home"></i>
-					<span>Home/About</span></NavLink>
+					<span>Home</span></NavLink>
 			</li>
 		)
 
