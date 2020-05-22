@@ -1,20 +1,6 @@
-//Create a feed representing only the specified period of time or date
-var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
-var fs = require('fs');
-var routes = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/routes.txt"), {columns: true}) 
-var agencies = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/agency.txt"), {columns: true})
-var trips = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/trips.txt"), {columns: true})
-var stops = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/stops.txt"), {columns: true})
-var stop_times = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/stop_times.txt"), {columns: true})
-var calendar = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/calendar.txt"), {columns: true})
-var calendar_dates = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/calendar_dates.txt"), {columns: true})
-var frequencies = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/frequencies.txt"), {columns: true})
-var feed_info = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/feed_info.txt"), {columns: true})
-var board_alight = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/board_alight.txt"), {columns: true})
-var trip_capacity = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/trip_capacity.txt"), {columns: true})
-var rider_trip = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/rider_trip.txt"), {columns: true})
-var ridership = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/ridership.txt"), {columns: true})
-var ride_feed_info = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/ride_feed_info.txt"), {columns: true})
+var FILEPATH = "split/";
+var FILENAME = "split_feed.zip";
+
 
 module.exports = {
 
@@ -158,6 +144,39 @@ module.exports = {
             }
         }
     },
+    createFiles: function(){
+        var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
+        var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
+        var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+        var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
+        var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
+        var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
+        var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
+        var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
+        var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
+        var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
+        var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
+        var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
+        var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
+
+
+        //console.log(process.cwd())
+        // WRITE THE FILES =========================
+        fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
+        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
+        fs.writeFileSync(FILEPATH + "routes.txt", routesCSV);
+        fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
+        fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
+        fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
+        fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+        fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+        fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
+        fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
+        fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
+        fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV)
+        fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
+
+    },
 //SPLIT OPTIONS 0 = times, 1 = agencies, 2 = dates
     Split: function(split_options, arrival_limit, departure_limit, desired_agency, start_date_input, end_date_input){
         //Parameters are bounds for the desired time
@@ -255,14 +274,6 @@ module.exports = {
                 for ( i = 0; i < stop_times.length; i++){
                     this.removeFromBoardAlight(stop_times[i].stop_id, stop_times[i].trip_id);
                 }
-   /*             console.log("stop times after");
-                console.log(stop_times);
-                console.log("stops after");
-                console.log(stops);
-                console.log("ridership after");
-                console.log(ridership);
-                console.log("board alight after");
-                console.log(board_alight); */
             }
         }
         else if (split_options == 1){
@@ -281,16 +292,6 @@ module.exports = {
                 this.removeFromStopTimes(trips[j].trip_id);
             }
             this.removeFromStops();
-     /*       console.log("agencies");
-            console.log(agencies);
-            console.log("routes");
-            console.log(routes);
-            console.log("trips");
-            console.log(trips);
-            console.log("stop times");
-            console.log(stop_times);
-            console.log("stops");
-            console.log(stops);*/
         }
         else if (split_options == 2){
             //DATE FILTER
@@ -300,21 +301,28 @@ module.exports = {
             this.removeFromRiderTrip(start_date_input, end_date_input);
             this.removeFromCalendar(start_date_input, end_date_input);
             this.removeFromCalendarDates(start_date_input, end_date_input);
-    /*        console.log("board alight");
-            console.log(board_alight);
-            console.log("ridership");
-            console.log(ridership);
-            console.log("trip capacity");
-            console.log(trip_capacity);
-            console.log("rider trip");
-            console.log(rider_trip);
-            console.log("calendar");
-            console.log(calendar);
-            console.log("calendar_dates");
-            console.log(calendar_dates); */
 
         }
-    }
+        //CREATING FILES
+        this.createFiles();
+        // ZIP ALL FILES =========================
+        var current_dir = process.cwd(); // save current working dir
+        process.chdir(FILEPATH) // change dir
+        console.log("current dir: " + process.cwd())
+        try {
+            //zip.zipSync("*.txt", FILENAME); // zip the files
+            var out = execSync('zip -r -y fc.zip *.txt')
+            console.log(out)
+        } catch (e){
+            console.log("ZIP")
+            console.log(e)
+        }
+        
+        process.chdir(current_dir); // undo change dir
+
+        // RETURN THE ZIP FILENAME
+        return (FILEPATH + FILENAME); 
+    } 
 }
 
 
