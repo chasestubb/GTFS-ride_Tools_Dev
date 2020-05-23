@@ -32,6 +32,8 @@ const INFO_AGENCY_URL = '/info/agency/:index';
 const INFO_ROUTE_URL = '/info/route/:index';
 const FC_POST_URL = '/fc/params'
 const FC_GET_URL = '/fc/getfile'
+const LIST_AGENCY_URL = "/agencies"
+const SPLIT_URL = "/split"
 
 
 
@@ -505,11 +507,11 @@ app.post(FC_POST_URL, async (req, res) => {
     // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
     fc_promise = new Promise((resolve, reject) => {
         console.log("Params received")
+        res.writeHead(200)
+        res.write("Params received")
+        res.end()
         resolve (feed_creation(req.body)) // generate the feed file and resolve the promise when done
     })
-    res.writeHead(200)
-    res.write("Params received")
-    res.end()
 })
 
 // --------------------------------------------------------------------------------
@@ -536,6 +538,31 @@ app.get(FC_GET_URL, async (req, res) => {
         res.end() // res.end() is here to prevent the connection from being closed while the download is incomplete
     })
     
+})
+
+
+// --------------------------------------------------------------------------------
+// GET AGENCY LIST FOR SPLIT
+app.get(LIST_AGENCY_URL, (req, res) => {
+    console.log("LIST AGENCY")
+    if (agencies){
+        var agency_list = []
+        for (var a = 0; a < agencies.length; a++){
+            agency_list.push({
+                id: agencies[a].agency_id,
+                name: agencies[a].agency_name,
+            })
+            console.log(agencies[a].agency_id + " " + agencies[a].agency_name)
+        }
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
+        res.write(JSON.stringify(agency_list))
+        res.send()
+    } else {
+        res.writeHead(400)
+        res.write("Could not find an agency on the feed")
+        res.send()
+    }
+   
 })
 
 // --------------------------------------------------------------------------------
