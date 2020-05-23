@@ -1,7 +1,4 @@
-var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
-var fs = require('fs');
-var stops = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/stops.txt"), {columns: true})
-var stop_times = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/stop_times.txt"), {columns: true})
+var FILEPATH = "clean/";
 module.exports = {
     Clean: function(){
         //Removes orphan stops (stops that are never visited on a trip)
@@ -27,6 +24,9 @@ module.exports = {
             }
         }
         console.log(stops)
+        //CREATE UPDATED STOPS FILE
+        var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
+        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
     }
 }
 
