@@ -1,5 +1,8 @@
 var FILEPATH = "split/";
 var FILENAME = "split_feed.zip";
+var fs = require('fs');
+var csvStringifySync = require('csv-stringify/lib/sync');
+
 
 
 module.exports = {
