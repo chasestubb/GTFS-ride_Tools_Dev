@@ -1,6 +1,8 @@
 var info = require('../js/info.js');
 var assert = require('chai').assert;
 
+
+
 //test matching method
 describe("INFO :: Matching id test", function(){
     it("The number of matched ids should be 3", function(){
@@ -39,7 +41,6 @@ describe("INFO :: Matching id test", function(){
 });
 
 //test counting method
-
 describe("INFO :: Counting method", function(){
     it("The number counted should matched expected count", function(){
         var trip = {

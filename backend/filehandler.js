@@ -12,6 +12,8 @@ var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into 
 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
+var Split = require("./js.split");
+var Clean = require("./js/clean");
 
 // express stuff
 var app = express()
@@ -34,6 +36,7 @@ const FC_POST_URL = '/fc/params'
 const FC_GET_URL = '/fc/getfile'
 const LIST_AGENCY_URL = "/agencies"
 const SPLIT_URL = "/split"
+const CLEAN_URL = '/clean'
 
 
 
@@ -59,6 +62,7 @@ var filename = ""
 
 
 var fc_promise
+var split_promise
 
 // asynchronously call Feed_Creation.Feed_Creation()
 // Feed_Creation.Feed_Creation() is completely synchronous so we only need to wait for one thing
@@ -551,6 +555,46 @@ app.get(FC_GET_URL, async (req, res) => {
     })
     
 })
+//---------------------------------------------------------------------------
+// SPLIT - PARAMETERS
+app.post(FC_POST_URL, async (req, res) => {
+    console.log("SPLIT PARAMS")
+    console.log(req.url)
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    
+    // make promise for generating feed file (async)
+    // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
+    split_promise = new Promise((resolve, reject) => {
+        console.log("Params received")
+        resolve (split(req.body)) // generate the feed file and resolve the promise when done
+    })
+    res.writeHead(200)
+    res.write("Params received")
+    res.end()
+})
+//--------------------------------------------------------------------------------------------
+// SPLIT - OUTPUT
+app.get(SPLIT_URL, async(req, res) => {
+    console.log("SPLIT")
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+    res.setHeader("Content-Type", "application/zip")
+
+    // wait for split to finish
+    // promise will be filename when resolved
+    var split_filename = await split_promise
+    var split_filepath = process.cwd() + "/" + split_filename
+    res.download(split_filepath, function(err){
+        if (err){
+            console.log("Error sending file: " + err)
+        } else {
+            console.log("File sent to client")
+        }
+        res.end() // res.end() is here to prevent the connection from being closed while the download is incomplete
+    })
+    
+})
+
 
 
 // --------------------------------------------------------------------------------
