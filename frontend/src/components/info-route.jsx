@@ -158,7 +158,10 @@ class Info_Route extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800"><button className="back-button" onClick={() => window.history.back()}><i className="fas fa-chevron-left back-button"></i></button><strong>{this.state.short_name}</strong>{(this.state.short_name && this.state.long_name) ? " - " : null}{this.state.long_name}</h1>
+							<h1 className="h3 mb-0 text-gray-800">
+								<button className="back-button" onClick={() => window.history.back()}><i className="fas fa-chevron-left back-button"></i></button>
+								<strong>{this.state.short_name}</strong>{(this.state.short_name && this.state.long_name) ? " - " : null}{this.state.long_name}
+							</h1>
 						</div>
 					</div>
 		
@@ -287,7 +290,7 @@ class Info_Route extends React.Component{
 					<div className="row">
 		
 						{/* Content Column - ROUTES */}
-						{this.state.trips.map(trip => 
+						{this.state.trips.length ? this.state.trips.map(trip => 
 							<div className="col-lg-6 mb-4">
 		
 								<div className="card shadow mb-4">
@@ -304,7 +307,7 @@ class Info_Route extends React.Component{
 									</div>
 								</div>
 							</div>
-						)}
+						) : <h5>{this.state.short_name}{(this.state.short_name && this.state.long_name) ? " - " : null} has no trips on this feed</h5>}
 						
 					</div>
 					

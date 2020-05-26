@@ -261,7 +261,7 @@ class Info_Agency extends React.Component{
 						<h4 className="h4 mb-0 text-gray-800">Routes ({(this.state.routes).length})</h4>
 					</div>
 					<div className="row">
-						<h5>Click on a route name for more info.</h5><br/><br/>
+						{this.state.routes.length ? <h5>Click on a route name for more info.</h5> : <h5>{this.state.name} has no routes on this feed</h5>}
 					</div>
 					<div className="row">
 		

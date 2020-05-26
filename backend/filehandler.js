@@ -239,14 +239,26 @@ app.get(INFO_URL, (req, res) => {
     console.log("FEED INFO")
     if (agencies && routes && trips && stops && stop_times){
         // initialize object
-        var feed_info_ = {
-            filename: filename,
-            is_gtfs_ride: gtfs_ride_feed,
-            agencies: [],
-            stops: [],
-            num_trips: trips.length,
-            date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+        if (feed_info){
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+            }
+        } else {
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: ["-", "-"],
+            }
         }
+        
 
         // parse agencies' info
         for (x = 0; x < agencies.length; x++){

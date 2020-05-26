@@ -122,6 +122,7 @@ class Split extends React.Component{
 										)}
 									</select>
 								</div>
+								<button>Split the feed</button>
 								
 							</div>
 						</div>
