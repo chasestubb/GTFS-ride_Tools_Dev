@@ -2,6 +2,8 @@ var FILEPATH = "split/";
 var FILENAME = "split_feed.zip";
 var fs = require('fs');
 var csvStringifySync = require('csv-stringify/lib/sync');
+var {execSync} = require('child_process');
+
 
 
 
@@ -321,7 +323,7 @@ module.exports = {
         console.log("current dir: " + process.cwd())
         try {
             //zip.zipSync("*.txt", FILENAME); // zip the files
-            var out = execSync('zip -r -y fc.zip *.txt')
+            var out = execSync('zip -r -y split.zip *.txt')
             console.log(out)
         } catch (e){
             console.log("ZIP")
