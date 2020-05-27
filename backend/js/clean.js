@@ -3,14 +3,15 @@ var FILENAME = "clean_feed.zip"
 var fs = require('fs');
 var {execSync} = require('child_process');
 var zip = require('cross-zip');
-
 var csvStringifySync = require('csv-stringify/lib/sync');
+
+/* Testing purposes
 var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
 var routes = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/routes.txt"), {columns: true}) 
 var stops = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/stops.txt"), {columns: true})
 var stop_times = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/stop_times.txt"), {columns: true})
 var trips = csv_parse(fs.readFileSync("../testFeeds/Specification_example_feed/trips.txt"), {columns: true})
-
+*/
 
 module.exports = {
     removeOrphanStops:function(){
