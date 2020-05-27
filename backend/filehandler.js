@@ -12,8 +12,8 @@ var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into 
 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
-var Split = require("./js.split");
-var Clean = require("./js/clean");
+var Split = require("./js/split");
+//var Clean = require("./js/clean");
 
 // express stuff
 var app = express()
@@ -35,7 +35,8 @@ const INFO_ROUTE_URL = '/info/route/:index';
 const FC_POST_URL = '/fc/params'
 const FC_GET_URL = '/fc/getfile'
 const LIST_AGENCY_URL = "/agencies"
-const SPLIT_URL = "/split"
+const SPLIT_POST_URL = "/split/params"
+const SPLIT_GET_URL = "/split/getfile"
 const CLEAN_URL = '/clean'
 
 
@@ -76,6 +77,18 @@ async function feed_creation(params){
         params.calendar_type, params.files)
     console.log("Feed successfully created")
     return fc_filename
+}
+
+async function split(split_by, arr_limit, dep_limit, agency_sel, start, end){
+    console.log("Splitting feed...")
+    var split_filename = Split.Split(
+        agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+        frequencies, stop_times, feed_info,
+        board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
+        split_by, arr_limit, dep_limit, agency_sel, start, end
+    )
+    console.log("Feed split succeeded")
+    return split_filename
 }
 
 
@@ -557,27 +570,30 @@ app.get(FC_GET_URL, async (req, res) => {
 })
 //---------------------------------------------------------------------------
 // SPLIT - PARAMETERS
-app.post(FC_POST_URL, async (req, res) => {
+app.post(SPLIT_POST_URL, async (req, res) => {
     console.log("SPLIT PARAMS")
     console.log(req.url)
     res.setHeader("Access-Control-Allow-Origin", CORS);
+    var params = req.body
     
     // make promise for generating feed file (async)
     // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
     split_promise = new Promise((resolve, reject) => {
         console.log("Params received")
-        resolve (split(req.body)) // generate the feed file and resolve the promise when done
+        res.writeHead(200)
+        res.write("Params received")
+        res.end()
+        console.log("splitting feed with params:")
+        console.log(params)
+        resolve (split(params.split_by, params.dep_time, params.arr_time, params.start_date, params.end_date, params.agency_id)) // generate the feed file and resolve the promise when done
     })
-    res.writeHead(200)
-    res.write("Params received")
-    res.end()
 })
 //--------------------------------------------------------------------------------------------
 // SPLIT - OUTPUT
-app.get(SPLIT_URL, async(req, res) => {
+app.get(SPLIT_GET_URL, async(req, res) => {
     console.log("SPLIT")
     res.setHeader("Access-Control-Allow-Origin", CORS);
-    res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
     res.setHeader("Content-Type", "application/zip")
 
     // wait for split to finish

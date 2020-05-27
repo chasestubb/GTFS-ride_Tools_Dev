@@ -1,7 +1,8 @@
 var FILEPATH = "split/";
-var FILENAME = "split_feed.zip";
+var FILENAME = "split.zip";
 var fs = require('fs');
 var csvStringifySync = require('csv-stringify/lib/sync');
+var {execSync} = require('child_process')
 
 
 
@@ -147,20 +148,23 @@ module.exports = {
             }
         }
     },
-    createFiles: function(){
+    createFiles: function(
+            agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+            frequencies, stop_times, feed_info,
+            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info){
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
         var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
         var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
         var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
         var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
         var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
-        var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
-        var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
-        var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
-        var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
-        var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
+        var stopTimesCSV = csvStringifySync(stop_times, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
+        var feedInfoCSV = csvStringifySync([feed_info], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
+        var rideFeedInfoCSV = csvStringifySync([ride_feed_info], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
+        var boardAlightCSV = csvStringifySync(board_alight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
+        var riderTripCSV = csvStringifySync(rider_trip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
         var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
-        var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
+        var tripCapacityCSV = csvStringifySync(trip_capacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
 
 
         //console.log(process.cwd())
@@ -181,20 +185,32 @@ module.exports = {
 
     },
 //SPLIT OPTIONS 0 = times, 1 = agencies, 2 = dates
-    Split: function(split_options, arrival_limit, departure_limit, desired_agency, start_date_input, end_date_input){
+    Split: function(
+            agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+            frequencies, stop_times, feed_info,
+            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
+            split_options, arrival_limit, departure_limit, desired_agency, start_date_input, end_date_input
+        ){
         //Parameters are bounds for the desired time
         //Ex. Desired arrival at 8:00 and departure at 8:05
         //Bus arrives at 7:59 and departs at 8:05 -- The bus will be removed
         //Bus arrives at 8:01 and departs at 8:04 -- The bus will be removed
         //Bus arrives at 8:00 and departs at 8:06 -- The bus will be removed
         if (split_options == 0){
-            var [hour, minute, second] = arrival_limit.split(':');
+            var hour, minute, second
+            if (arrival_limit != null){
+                [hour, minute, second] = arrival_limit.split(':');
+            }
             var arrival_hour = Number(hour);
             var arrival_minute = Number(minute);
-            var [dh, dm, depart_second] = departure_limit.split(':');
+            var dh, dm, depart_second
+            if (departure_limit != null){
+                [dh, dm, depart_second] = departure_limit.split(':');
+            }
             var depart_hour = Number(dh);
             var depart_minute = Number(dm);
             for (var i = 0; i < stop_times.length; i++){
+                console.log("i = " + i)
                 var [sh, sm, stop_second] = stop_times[i].arrival_time.split(':');
                 var [sh2, sm2, stop_second] = stop_times[i].departure_time.split(':');
                 var stop_arrival_hour = Number(sh)
@@ -207,6 +223,7 @@ module.exports = {
                     //error handling -- checks for input              
                     if (stop_arrival_hour < arrival_hour){
                         console.log("stop hour" + stop_arrival_hour + " < arrival hour" + arrival_hour);
+                        stop_times.splice(i, 1);
                         i = i - 1;
                         continue;
                     }
@@ -307,14 +324,17 @@ module.exports = {
 
         }
         //CREATING FILES
-        this.createFiles();
+        this.createFiles(
+            agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+            frequencies, stop_times, feed_info,
+            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info);
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
         process.chdir(FILEPATH) // change dir
         console.log("current dir: " + process.cwd())
         try {
             //zip.zipSync("*.txt", FILENAME); // zip the files
-            var out = execSync('zip -r -y fc.zip *.txt')
+            var out = execSync('zip -r -y ' + FILENAME + ' *.txt')
             console.log(out)
         } catch (e){
             console.log("ZIP")
