@@ -4,6 +4,8 @@ var fs = require('fs');
 var {execSync} = require('child_process');
 var zip = require('cross-zip');
 var csvStringifySync = require('csv-stringify/lib/sync');
+var orphanStops = "";
+var orphanRoutes = "";
 
 /* Testing purposes
 var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
@@ -30,6 +32,7 @@ module.exports = {
                 }
             }
             if (found == 0){
+                orphanStops += stops[j];
                 stops.splice(j, 1);
             }
             else if (found == 1){
@@ -53,6 +56,7 @@ module.exports = {
                 }
             }
             if (found == 0){
+                orphanRoutes += routes[j];
                 routes.splice(j, 1);
             }
             else if (found == 1){
@@ -91,7 +95,7 @@ module.exports = {
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
-        return (FILEPATH + FILENAME); 
+        return { zip_filename:(FILEPATH + FILENAME), orphan_stops: orphanStops, orphan_routes: orphanRoutes}; 
     }
 }
 
