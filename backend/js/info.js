@@ -211,6 +211,16 @@ module.exports = {
         }
         return count;
     },
+    countStopAlightings: function(board_alight, stop){
+        var count = 0;
+        for ( var i = 0; i < board_alight.length; i++){
+        var match = board_alight[i].stop_id;
+        var compare = match.localeCompare(stop.stop_id);
+        if (compare == 0)
+            count = count + Number(board_alight[i].alightings);
+        }
+        return count;
+    },
 
     
 

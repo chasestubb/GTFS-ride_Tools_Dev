@@ -1,22 +1,17 @@
 import React from 'react';
 import Axios from 'axios';
+import * as Settings from './settings'
 //import fileDownload from 'js-file-download';
 
-// set this to true if the program should prohibit start date to be later than end date, set it to false to allow
-const CHECK_DATE = true;
+const CHECK_DATE = Settings.CHECK_DATE
 
-// FOR PRODUCTION, CHANGE THIS TO THE SERVER HOST
-const HOST = "http://localhost:8080";
-
-// DO NOT CHANGE THESE UNLESS YOU CHANGE THEM ON THE SERVER AS WELL
-const postURL = HOST + "/fc/params";
-const getURL = HOST + "/fc/getfile";
-const SERVER_CHECK_URL = "/server_check";
+const postURL = Settings.HOST + "/fc/params";
+const getURL = Settings.HOST + "/fc/getfile";
 
 /* ENUM VALUES
 
 	user_source:
-	see GTFS-ride documentation
+	see GTFS-ride documentation on board_alight.txt -> source
 
 	calendar_type:
 	0 = calendar.txt only
@@ -32,7 +27,7 @@ const SERVER_CHECK_URL = "/server_check";
 
 	fileStatus:
 	0 = no requests sent
-	1 = request sent to server
+	1 = sending request to server
 	2 = server received the request and is now processing it
 	3 = file ready
 	-1 = server unreachable
@@ -53,6 +48,7 @@ const SERVER_CHECK_URL = "/server_check";
 	1 = trip
 	2 = route
 	3 = agency
+	4 = feed
 
 */
 
@@ -62,18 +58,18 @@ class FC extends React.Component{
 		super(props);
 		this.state = {
 			params: { // form data goes here
-				agencies: 1,
-				routes: 1,
-				stops: 2,
-				trips: 1,
-				trips_per_route: 1,
+				agencies: 2,
+				routes: 10,
+				stops: 50,
+				trips: 40,
+				trips_per_route: 4,
 				start_date: null,
 				end_date: null,
 				feed_date: null, // just make it the same as start_date
-				user_source: 1, // enum
-				min_riders: 1,
-				max_riders: 1,
-				aggr_level: 0, // enum
+				user_source: 1, // enum -- the ridership data collection method
+				min_riders: 20000,
+				max_riders: 50000,
+				aggr_level: 4, // enum -- minimum aggregation level
 				calendar_type: 2, // enum -- defines whether calendar.txt or calendar_dates.txt is used
 				operation_days: 4, // enum -- defines the service days of the week
 				files: 6, // enum -- defines what files are being generated (we only support 2, 4, or 6)
@@ -84,7 +80,6 @@ class FC extends React.Component{
 			err: "",
 		}
 		this.setNumber = this.setNumber.bind(this);
-		//this.setDate = this.setDate.bind(this);
 		this.set = this.set.bind(this);
 		this.submit = this.submit.bind(this);
 		this.isServerAlive = this.isServerAlive.bind(this);
@@ -94,7 +89,7 @@ class FC extends React.Component{
 
 	// sends a test request to the server to check if the server is up
 	async isServerAlive(){
-		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
+		Axios.get(Settings.HOST + Settings.SERVER_CHECK_URL).then((res) => {
 			console.log(res)
 			this.setState({status: res.status, fileStatus: 0});
 		}).catch((err) => {
@@ -197,7 +192,9 @@ class FC extends React.Component{
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
 		const config = {mode: "no-cors"};
+		this.setState({fileStatus: 1})
 		await Axios.post(postURL, {...json}, config).then((res) => {
+			this.setState({fileStatus: 2})
 		}).catch ((err) => {
 			if (err) {
 				console.log(err);
@@ -207,7 +204,6 @@ class FC extends React.Component{
 				}
 			}
 		})
-		this.setState({fileStatus: 1})
 	}
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
@@ -281,7 +277,7 @@ class FC extends React.Component{
 	statusText(){
 		switch (Number(this.state.fileStatus)){
 			case 1:
-				return("Your request has been sent to the server.")
+				return("Sending a request to the server...")
 			case 2:
 				return("The server is has received the request and is now generating the files.")
 			case 3:
@@ -341,7 +337,7 @@ class FC extends React.Component{
 									<th><strong className="text-dark">Feed dates</strong></th>
 									<tr>
 										<td>Service pattern </td>
-										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.set}>
+										<td><select name="operation_days" value={this.state.params.service_days} onChange={this.setNumber}>
 											<option value={4}>7 days per week</option>
 											<option value={1}>Weekdays only</option>
 											<option value={2}>Weekdays + Saturdays</option>
@@ -351,7 +347,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Service pattern defined in </td>
-										<td><select name="calendar_type" value={this.state.params.calendar_type} onChange={this.set}>
+										<td><select name="calendar_type" value={this.state.params.calendar_type} onChange={this.setNumber}>
 											<option value={0}>calendar.txt only</option>
 											<option value={1}>calendar_dates.txt only</option>
 											<option value={2}>Both files (recommended)</option>
@@ -369,11 +365,12 @@ class FC extends React.Component{
 									<th><strong className="text-dark">Ridership</strong></th>
 									<tr>
 										<td>Most specific aggregation level </td>
-										<td><select name="aggr_level" value={this.state.params.aggr_level} onChange={this.set}>
-											<option value={0}>Stop-level data</option>
-											<option value={1}>Trip-level data</option>
-											<option value={2}>Route-level data</option>
+										<td><select name="aggr_level" value={this.state.params.aggr_level} onChange={this.setNumber}>
+											<option value={4}>Feed-level data</option>
 											<option value={3}>Agency-level data</option>
+											<option value={2}>Route-level data</option>
+											<option value={1}>Trip-level data</option>
+											<option value={0}>Stop-level data</option>
 										</select></td>
 									</tr>
 									<tr>
@@ -386,7 +383,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Ridership data collection method </td>
-										<td><select name="user_source" value={this.state.params.user_source} onChange={this.set}>
+										<td><select name="user_source" value={this.state.params.user_source} onChange={this.setNumber}>
 											<option value={1}>Automated Passenger Counter</option>
 											<option value={2}>Automated Fare Collector</option>
 											<option value={0}>Manual Counting</option>
@@ -396,7 +393,7 @@ class FC extends React.Component{
 									</tr>
 									<tr>
 										<td>Ridership files </td>
-										<td><select name="files" value={this.state.params.files} onChange={this.set}>
+										<td><select name="files" value={this.state.params.files} onChange={this.setNumber}>
 											<option value={2}>Only ridership.txt</option>
 											<option value={4}>ridership.txt and board_alight.txt</option>
 											<option value={6}>ridership.txt, board_alight.txt, and rider_trip.txt</option>
@@ -404,7 +401,7 @@ class FC extends React.Component{
 									</tr>
 								</table>
 								<br/>
-								<button onClick={this.submit}>Generate Feed</button>
+								<button onClick={this.submit} disabled={this.state.fileStatus === 1 || this.state.fileStatus === 2}>Generate Feed</button>
 							</div>
 						</div>
 					</div>
