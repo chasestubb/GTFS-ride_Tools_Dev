@@ -1,17 +1,12 @@
 import React from 'react';
 import Axios from 'axios';
+import * as Settings from './settings'
 //import fileDownload from 'js-file-download';
 
-// set this to true if the program should prohibit start date to be later than end date, set it to false to allow
-const CHECK_DATE = true;
+const CHECK_DATE = Settings.CHECK_DATE
 
-// FOR PRODUCTION, CHANGE THIS TO THE SERVER HOST
-const HOST = "http://localhost:8080";
-
-// DO NOT CHANGE THESE UNLESS YOU CHANGE THEM ON THE SERVER AS WELL
-const postURL = HOST + "/fc/params";
-const getURL = HOST + "/fc/getfile";
-const SERVER_CHECK_URL = "/server_check";
+const postURL = Settings.HOST + "/fc/params";
+const getURL = Settings.HOST + "/fc/getfile";
 
 /* ENUM VALUES
 
@@ -32,7 +27,7 @@ const SERVER_CHECK_URL = "/server_check";
 
 	fileStatus:
 	0 = no requests sent
-	1 = request sent to server
+	1 = sending request to server
 	2 = server received the request and is now processing it
 	3 = file ready
 	-1 = server unreachable
@@ -94,7 +89,7 @@ class FC extends React.Component{
 
 	// sends a test request to the server to check if the server is up
 	async isServerAlive(){
-		Axios.get(HOST + SERVER_CHECK_URL).then((res) => {
+		Axios.get(Settings.HOST + Settings.SERVER_CHECK_URL).then((res) => {
 			console.log(res)
 			this.setState({status: res.status, fileStatus: 0});
 		}).catch((err) => {
@@ -197,7 +192,9 @@ class FC extends React.Component{
 	// sendPost sends a POST requests and the server responds with a simple message when it has confirmed the request
 	async sendPost(json){
 		const config = {mode: "no-cors"};
+		this.setState({fileStatus: 1})
 		await Axios.post(postURL, {...json}, config).then((res) => {
+			this.setState({fileStatus: 2})
 		}).catch ((err) => {
 			if (err) {
 				console.log(err);
@@ -207,7 +204,6 @@ class FC extends React.Component{
 				}
 			}
 		})
-		this.setState({fileStatus: 1})
 	}
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
@@ -281,7 +277,7 @@ class FC extends React.Component{
 	statusText(){
 		switch (Number(this.state.fileStatus)){
 			case 1:
-				return("Your request has been sent to the server.")
+				return("Sending a request to the server...")
 			case 2:
 				return("The server is has received the request and is now generating the files.")
 			case 3:
@@ -405,7 +401,7 @@ class FC extends React.Component{
 									</tr>
 								</table>
 								<br/>
-								<button onClick={this.submit}>Generate Feed</button>
+								<button onClick={this.submit} disabled={this.state.fileStatus === 1 || this.state.fileStatus === 2}>Generate Feed</button>
 							</div>
 						</div>
 					</div>

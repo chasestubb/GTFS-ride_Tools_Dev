@@ -12,8 +12,8 @@ var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into 
 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
-var Split = require("./js.split");
-var Clean = require("./js/clean");
+var Split = require("./js/split");
+//var Clean = require("./js/clean");
 
 // express stuff
 var app = express()
@@ -34,7 +34,9 @@ const INFO_AGENCY_URL = '/info/agency/:index';
 const INFO_ROUTE_URL = '/info/route/:index';
 const FC_POST_URL = '/fc/params'
 const FC_GET_URL = '/fc/getfile'
-const SPLIT_URL = '/split'
+const LIST_AGENCY_URL = "/agencies"
+const SPLIT_POST_URL = "/split/params"
+const SPLIT_GET_URL = "/split/getfile"
 const CLEAN_URL = '/clean'
 
 
@@ -75,6 +77,18 @@ async function feed_creation(params){
         params.calendar_type, params.files)
     console.log("Feed successfully created")
     return fc_filename
+}
+
+async function split(split_by, arr_limit, dep_limit, agency_sel, start, end){
+    console.log("Splitting feed...")
+    var split_filename = Split.Split(
+        agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+        frequencies, stop_times, feed_info,
+        board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
+        split_by, arr_limit, dep_limit, agency_sel, start, end
+    )
+    console.log("Feed split succeeded")
+    return split_filename
 }
 
 
@@ -242,14 +256,26 @@ app.get(INFO_URL, (req, res) => {
     console.log("FEED INFO")
     if (agencies && routes && trips && stops && stop_times){
         // initialize object
-        var feed_info_ = {
-            filename: filename,
-            is_gtfs_ride: gtfs_ride_feed,
-            agencies: [],
-            stops: [],
-            num_trips: trips.length,
-            date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+        if (feed_info){
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: [feed_info[0].feed_start_date, feed_info[0].feed_end_date],
+            }
+        } else {
+            var feed_info_ = {
+                filename: filename,
+                is_gtfs_ride: gtfs_ride_feed,
+                agencies: [],
+                stops: [],
+                num_trips: trips.length,
+                date: ["-", "-"],
+            }
         }
+        
 
         // parse agencies' info
         for (x = 0; x < agencies.length; x++){
@@ -262,7 +288,11 @@ app.get(INFO_URL, (req, res) => {
                 ridership: 0,
             };
             if (gtfs_ride_feed){
-                agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
+                if (board_alight){
+                    agency.ridership = Info.countAgencyRiders(agencies[x], board_alight, trips, routes)
+                } else {
+                    agency.ridership = -1
+                }                
             }
             feed_info_.agencies.push(agency);
         }
@@ -279,7 +309,11 @@ app.get(INFO_URL, (req, res) => {
                 ridership: 0,
             }
             if (gtfs_ride_feed){
-                stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                if (board_alight){
+                    stop.ridership = Info.countStopRiders(board_alight, stops[x]);
+                } else {
+                    stop.ridership = -1
+                }                
             }
             feed_info_.stops.push(stop)
         }
@@ -298,7 +332,7 @@ app.get(INFO_URL, (req, res) => {
     }
 })
 
-// AGENCY INFO
+// FEED_INFO -> AGENCY INFO
 app.get(INFO_AGENCY_URL, (req, res) => {
     console.log("FEED INFO -> AGENCY INFO")
     if (agencies && routes && trips && stops && stop_times){
@@ -342,7 +376,11 @@ app.get(INFO_AGENCY_URL, (req, res) => {
                     trips: (Info.tripsPerRoute(route, trips)).length,
                 }
                 if (gtfs_ride_feed){
-                    route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+                    if (board_alight){
+                        route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+                    } else {
+                        route_info.ridership = -1
+                    }
                 }
                 agency_info.routes.push(route_info);
             }
@@ -374,7 +412,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
         agency_info.is_gtfs_ride = gtfs_ride_feed
 
         // GTFS-ride specific fields
-        if (gtfs_ride_feed){
+        if (gtfs_ride_feed && board_alight){
             agency_info.ridership = Info.countAgencyRiders(agency, board_alight, trips, routes);
         }
 
@@ -389,7 +427,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
     }
 })
     
-// ROUTE INFO
+// FEED_INFO -> ROUTE INFO
 app.get(INFO_ROUTE_URL, (req, res) => {
     console.log("FEED INFO -> ROUTE INFO")
     if (agencies && routes && trips && stops && stop_times){
@@ -438,7 +476,11 @@ app.get(INFO_ROUTE_URL, (req, res) => {
                     ridership: 0,
                 }
                 if (gtfs_ride_feed){
-                    trip_info.ridership = Info.countTripRiders(board_alight, trip)
+                    if (board_alight){
+                        trip_info.ridership = Info.countTripRiders(board_alight, trip)
+                    } else {
+                        trip_info.ridership = -1
+                    }
                 }
                 route_info.trips.push(trip_info)
             }
@@ -450,7 +492,11 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 
         // GTFS-ride specific fields
         if (gtfs_ride_feed){
-            route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+            if (board_alight){
+                route_info.ridership = Info.countRouteRiders(route, board_alight, trips)
+            } else {
+                route_info.ridership = -1
+            }
         }
 
         res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Access-Control-Allow-Credentials': true, "content-type": "application/json"});
@@ -475,15 +521,8 @@ app.get(INFO_ROUTE_URL, (req, res) => {
 7.  Client receives the response
 8.  Client sends GET response to request the feed
 9.  Client waits for the feed to be generated
--- OPTION 1 (preferred): -- DIDN'T WORK
 10. Server sends file to the client
 11. Client downloads the file
--- OPTION 2 (if potion 1 does not work):
-10. Server sends file link to the client
-11. Client shows the link on the UI
-12. User clicks on the link
-13. Server sends file to the client
-14. Client downloads the file
 -------------------------------------------------------------------------------- */
 
 // --------------------------------------------------------------------------------
@@ -497,11 +536,11 @@ app.post(FC_POST_URL, async (req, res) => {
     // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
     fc_promise = new Promise((resolve, reject) => {
         console.log("Params received")
+        res.writeHead(200)
+        res.write("Params received")
+        res.end()
         resolve (feed_creation(req.body)) // generate the feed file and resolve the promise when done
     })
-    res.writeHead(200)
-    res.write("Params received")
-    res.end()
 })
 
 // --------------------------------------------------------------------------------
@@ -531,27 +570,30 @@ app.get(FC_GET_URL, async (req, res) => {
 })
 //---------------------------------------------------------------------------
 // SPLIT - PARAMETERS
-app.post(FC_POST_URL, async (req, res) => {
+app.post(SPLIT_POST_URL, async (req, res) => {
     console.log("SPLIT PARAMS")
     console.log(req.url)
     res.setHeader("Access-Control-Allow-Origin", CORS);
+    var params = req.body
     
     // make promise for generating feed file (async)
     // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
     split_promise = new Promise((resolve, reject) => {
         console.log("Params received")
-        resolve (split(req.body)) // generate the feed file and resolve the promise when done
+        res.writeHead(200)
+        res.write("Params received")
+        res.end()
+        console.log("splitting feed with params:")
+        console.log(params)
+        resolve (split(params.split_by, params.dep_time, params.arr_time, params.start_date, params.end_date, params.agency_id)) // generate the feed file and resolve the promise when done
     })
-    res.writeHead(200)
-    res.write("Params received")
-    res.end()
 })
 //--------------------------------------------------------------------------------------------
 // SPLIT - OUTPUT
-app.get(SPLIT_URL, async(req, res) => {
+app.get(SPLIT_GET_URL, async(req, res) => {
     console.log("SPLIT")
     res.setHeader("Access-Control-Allow-Origin", CORS);
-    res.setHeader("Content-Disposition", "attachment; filename=feed_creation.zip")
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
     res.setHeader("Content-Type", "application/zip")
 
     // wait for split to finish
@@ -569,6 +611,31 @@ app.get(SPLIT_URL, async(req, res) => {
     
 })
 
+
+
+// --------------------------------------------------------------------------------
+// GET AGENCY LIST FOR SPLIT
+app.get(LIST_AGENCY_URL, (req, res) => {
+    console.log("LIST AGENCY")
+    if (agencies){
+        var agency_list = []
+        for (var a = 0; a < agencies.length; a++){
+            agency_list.push({
+                id: agencies[a].agency_id,
+                name: agencies[a].agency_name,
+            })
+            console.log(agencies[a].agency_id + " " + agencies[a].agency_name)
+        }
+        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
+        res.write(JSON.stringify(agency_list))
+        res.send()
+    } else {
+        res.writeHead(400)
+        res.write("Could not find an agency on the feed")
+        res.send()
+    }
+   
+})
 
 // --------------------------------------------------------------------------------
 // CLIENT CHECKS IF SERVER IS ALIVE

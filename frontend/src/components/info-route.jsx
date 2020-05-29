@@ -33,6 +33,38 @@ function get_route_type(type){
 	}
 }
 
+/* displays ridership data
+
+   params:
+   - ride -- whether or not the feed is GTFS-ride (true = GTFS-ride, false = GTFS)
+   - num -- the ridership count
+
+   output format:
+   - nothing if ride is false
+   - "<time> ridership: missing board_alight.txt" if num == -1
+   - "<time> ridership: <num>" otherwise
+   <time> is the RIDERSHIP_TIME constant defined above
+*/
+function ridership_num (ride, num){
+	if (ride){
+		if (num == -1){ // missing board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <em>missing board_alight.txt</em>
+				</span>
+			)
+		} else { // have board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <strong>{num}</strong>
+				</span>
+			)
+		}
+	} else { // not GTFS-ride
+		return null
+	}
+}
+
 // finds whether the text color should be white or black (based on the background color) if it is not provided in the feed
 function get_fgcolor(bgcolor){
 	var rgb = String(bgcolor)
@@ -126,7 +158,10 @@ class Info_Route extends React.Component{
 		
 						{/* Page Heading */}
 						<div className="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 className="h3 mb-0 text-gray-800"><button className="back-button" onClick={() => window.history.back()}><i className="fas fa-chevron-left back-button"></i></button><strong>{this.state.short_name}</strong>{(this.state.short_name && this.state.long_name) ? " - " : null}{this.state.long_name}</h1>
+							<h1 className="h3 mb-0 text-gray-800">
+								<button className="back-button" onClick={() => window.history.back()}><i className="fas fa-chevron-left back-button"></i></button>
+								<strong>{this.state.short_name}</strong>{(this.state.short_name && this.state.long_name) ? " - " : null}{this.state.long_name}
+							</h1>
 						</div>
 					</div>
 		
@@ -175,7 +210,7 @@ class Info_Route extends React.Component{
 											<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. {RIDERSHIP_TIME} Riderships</div>
 											<div className="row no-gutters align-items-center">
 												<div className="col-auto">
-												<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership ? this.state.ridership : "no data"}</div>
+												<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership ? (this.state.ridership == -1 ? "---" : this.state.ridership) : "no data"}</div>
 												</div>
 											</div>
 										</div>
@@ -255,7 +290,7 @@ class Info_Route extends React.Component{
 					<div className="row">
 		
 						{/* Content Column - ROUTES */}
-						{this.state.trips.map(trip => 
+						{this.state.trips.length ? this.state.trips.map(trip => 
 							<div className="col-lg-6 mb-4">
 		
 								<div className="card shadow mb-4">
@@ -268,11 +303,11 @@ class Info_Route extends React.Component{
 										End time: <strong>{trip.end_time}</strong> <br/>
 										Headsign: <strong>{trip.headsign}</strong> <br/>
 										Direction: <strong>{trip.direction}</strong> <br/>
-										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} <strong>{trip.ridership}</strong></span> : null} <br/>
+										{ridership_num(this.state.is_gtfs_ride, trip.ridership)} <br/>
 									</div>
 								</div>
 							</div>
-						)}
+						) : <h5>{this.state.short_name}{(this.state.short_name && this.state.long_name) ? " - " : null} has no trips on this feed</h5>}
 						
 					</div>
 					

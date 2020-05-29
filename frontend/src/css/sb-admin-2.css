@@ -11048,3 +11048,6 @@ img {
   height: 0.75em;
 }
 
+.hidden{
+  display: none;
+}

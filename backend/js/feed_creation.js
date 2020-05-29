@@ -122,9 +122,9 @@ function incrementTime (input_time, amount) {
 
 // get a trip's agency
 // returns null if it could not find an agency
-function getAgencyOfTrip(trip_id, trips, routes){
+function getAgencyOfTrip(trip_index, trips, routes){
     for (var r = 0; r < routes.length; r++){
-        if (routes[r].route_id == trips[trip_id].route_id){
+        if (routes[r].route_id == trips[trip_index].route_id){
             return routes[r].agency_id
         }
     }
@@ -159,7 +159,8 @@ function tomorrow(date){
                 return ++date
             }
         case 2:
-            if ((year % 4) == 0 && (year % 400) != 0){ // if leap year
+            // if leap year (if year is divisible by 4 and not 100, or year is divisible by 400)
+            if (((year % 4) == 0 && (year % 100) != 0) || (year % 400) == 0){
                 if (day == 29){
                     return ((year * 10000) + 301)
                 } else {
@@ -204,48 +205,65 @@ function js_to_gtfs_date(date){
     return gtfs_date
 }
 
-/* increment date by 1 service day
+
+/* check if date is a service day
+   returns the same day if it is, returns the next service day if it is not
+
    date is a number formatted as a GTFS date (20200317 = Mar 17, 2020)
    see the "ENUM VALUES" section above for the possible values of operation_days
    holidays: if true then no service on Christmas day and New Year's day, if false then service as usual on those days
-*/ /* example:
+
+   example:
    if the service does not run on weekends (operation_days = 1) and May 15 2020 is Friday,
    then next_service_day(20200515, 1) will return 20200518
 */
-function next_service_day(date, operation_days, holidays){
-    //console.log(date + " = " + gtfs_to_js_date(date) + ": " + gtfs_to_js_date(date).getDay())
-    var next_day = tomorrow(date)
-
+function skip_day(date, operation_days, holidays){
     // skip if holiday
-    if (holidays && ((next_day % 10000 == 1225) || (next_day % 10000 == 0101))){
-        next_day = tomorrow(next_day)
+    if (holidays && ((date % 10000 == 1225) || (date % 10000 == 0101))){
+        date = tomorrow(date)
     }
 
     // JS defines days as 0=Sunday, 1=Monday, ..., 6=Saturday
     switch(operation_days){
         case 0: // weekends only
-            while (gtfs_to_js_date(next_day).getDay() != 6 && gtfs_to_js_date(next_day).getDay() != 0){ // skip the date if not Saturday or Sunday
-                next_day = tomorrow(next_day)
+            while (gtfs_to_js_date(date).getDay() != 6 && gtfs_to_js_date(date).getDay() != 0){ // skip the date if not Saturday or Sunday
+                date = tomorrow(date)
             }
             break
         case 1: // weekdays only
-            while (gtfs_to_js_date(next_day).getDay() == 6 || gtfs_to_js_date(next_day).getDay() == 0){ // skip the date if Saturday or Sunday
-                next_day = tomorrow(next_day)
+            while (gtfs_to_js_date(date).getDay() == 6 || gtfs_to_js_date(date).getDay() == 0){ // skip the date if Saturday or Sunday
+                date = tomorrow(date)
             }
             break
         case 2: // weekdays + Sat
-            if (gtfs_to_js_date(next_day).getDay() == 0){ // skip the date if Sunday
-                next_day = tomorrow(next_day)
+            if (gtfs_to_js_date(date).getDay() == 0){ // skip the date if Sunday
+                date = tomorrow(date)
             }
             break
         case 3: // weekdays + Sun
-            if (gtfs_to_js_date(next_day).getDay() == 6){ // skip the date if Saturday
-                next_day = tomorrow(next_day)
+            if (gtfs_to_js_date(date).getDay() == 6){ // skip the date if Saturday
+                date = tomorrow(date)
             }
             break
         //case 4: // every day -- no need for day check
 
     }
+    return date
+}
+
+/* increment date by 1 service day
+
+   date is a number formatted as a GTFS date (20200317 = Mar 17, 2020)
+   see the "ENUM VALUES" section above for the possible values of operation_days
+   holidays: if true then no service on Christmas day and New Year's day, if false then service as usual on those days
+
+   example:
+   if the service does not run on weekends (operation_days = 1) and May 15 2020 is Friday,
+   then next_service_day(20200515, 1) will return 20200518
+*/
+function next_service_day(date, operation_days, holidays){
+    var next_day = tomorrow(date)
+    next_day = skip_day(next_day, operation_days, holidays)
     return next_day
 }
 
@@ -1261,48 +1279,6 @@ module.exports = {
                 break
         }
 
-        /*var temp_ridership = {
-            total_boardings : 0,
-            total_alightings : 0,
-            ridership_start_date : 20000101,
-            ridership_end_date : 20000101,
-            ridership_start_time : 0,
-            ridership_end_time : 0,
-            service_id: "BASE_CALENDAR",
-            monday: 1,
-            tuesday: 1,
-            wednesday: 1,
-            thursday: 1,
-            friday: 1,
-            saturday: 1,
-            sunday: 1,
-            agency_id : "RIDE",
-            route_id : "",
-            direction_id : "" ,
-            trip_id : "",
-            stop_id : "",
-        };
-        
-        for (var j = 0; j < num_riders; j++){    
-            for ( var i = 0; i< num_stops; i++ ){
-                if (board_alight.stop_id == stops[i].stop_id){
-                    temp_ridership.stop_id = stops[i].stop_id;
-                    temp_ridership.trip_id = stops[i].trip_id;
-                    temp_ridership.total_boardings == temp_ridership.total_boardings + board_alight.boardings;
-                    temp_ridership.total_alightings == temp_ridership.total_alightings + board_alight.alightings;
-                    for ( var k = 0; k < num_trips; k++){
-                        if (trips[k].trip_id == stops[i].stop_id){
-                            temp_ridership.direction_id = trips[k].direction_id;
-                        }
-                    }
-                }
-            }
-            var rand_route = getRandomIntInclusive(1, num_routes);
-            var rand_id = routes[rand_route].route_id;
-            temp_ridership.route_id = rand_id;
-            ridership.push(temp_ridership);
-        }*/
-
         // agency-level ridership
         for (var a = 0; a < agency.length; a++){
             var agency_ridership = Info.countAgencyRiders(agency[a], board_alight, trips, routes);
@@ -1409,26 +1385,20 @@ module.exports = {
         return ridership;
     },
 
-    tripCapacityCreate: function(trips, num_trips, agencies, num_agencies){
+    tripCapacityCreate: function(trips, num_trips, agencies, num_agencies, routes){
         var trip_capacities = [];
-        
-        var temp_trip = {
-            agency_id : "",
-            trip_id : "",
-            service_date : 20000101,
-            vehicle_description : "Bus",
-            seated_capacity : 75,
-            standing_capacity : 30,
-            wheelchair_capacity : 5,
-            bike_capacity : 15
-        };
-        
+  
         for (var i = 0; i < num_trips; i++){
-            temp_trip.trip_id = trips[i];
-            var rand_agency_index = getRandomIntInclusive(1, num_agencies);
-            var rand_agency = agencies[rand_agency_index].agency_id;
-            temp_trip.agency_id = rand_agency;
-            trip_capacities.push(temp_trip);
+            trip_capacities.push({
+                agency_id : getAgencyOfTrip(i, trips, routes),
+                trip_id : trips[i].trip_id,
+                service_date : "",
+                vehicle_description : "Bus",
+                seated_capacity : 35,
+                standing_capacity : 25,
+                wheelchair_capacity : 2,
+                bike_capacity : 2,
+            });
         }
         return trip_capacities;
     },
@@ -1441,6 +1411,11 @@ module.exports = {
         start_date, end_date, feed_date, operation_days,
         user_source, min_riders, max_riders, aggr_level,
         calendar_type, files){
+
+        // ridership should start on the next service day if feed does not start on a service day
+        // example case: service is only available on weekdays, but feed starts on Saturday
+        start_service_date = skip_day(start_date, operation_days, true)
+
         var agencies = this.agencyCreate(num_agencies);
         var calendar = this.calendarCreate(operation_days, start_date, end_date, calendar_type);
         var calendar_dates = this.calendarDatesCreate(calendar, operation_days, start_date, end_date, calendar_type);
@@ -1451,10 +1426,10 @@ module.exports = {
         var feedInfo = this.feedInfoCreate(start_date, end_date);
         var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
 
-        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_date, end_date, operation_days);
-        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_date, end_date, operation_days);
-        var ridership = this.ridershipCreate(operation_days, boardAlight, agencies, stops, trips, routes, start_date, end_date);
-        //var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies);
+        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_service_date, end_date, operation_days);
+        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_service_date, end_date, operation_days);
+        var ridership = this.ridershipCreate(operation_days, boardAlight, agencies, stops, trips, routes, start_service_date, end_date);
+        var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies, routes);
 
         // CSV STRINGIFY =========================
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
@@ -1475,7 +1450,7 @@ module.exports = {
         if(files == 6)
             var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
         var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
-        // var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
+        var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
 
 
         //console.log(process.cwd())
@@ -1483,9 +1458,10 @@ module.exports = {
         // DELETE PREVIOUS FILES
         try {
             var out = execSync('rm ./feed_creation/*') // delete all files in feed_creation dir
-            console.log(out)
+            console.log("File deletion output:")
+            console.log(out.toString())
         } catch (e){ // rm will throw an error if the dir is empty, this statement will catch the error (preventing the server from breaking)
-            console.log("RM")
+            console.log("RM error:")
             console.log(e)
         }
 
@@ -1509,14 +1485,116 @@ module.exports = {
         if(files == 6)
             fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
         fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV) // always generated
-        // fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
+        fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
         process.chdir(FILEPATH); // change dir
         try {
             var out = execSync('zip -r -y fc.zip *.txt') // zip the files
-            console.log(out)
+            console.log("File compression (zipping) output:")
+            console.log(out.toString())
+        } catch (e){
+            console.log("ZIP error:")
+            console.log(e)
+        }
+        process.chdir(current_dir); // undo change dir
+
+        // RETURN THE ZIP FILENAME
+        return (FILEPATH + FILENAME); 
+    },
+
+    // this function generates GTFS-ride files from a GTFS feed
+    // it will only generate the GTFS-ride files and won't generate GTFS files not part of GTFS-ride
+    // this function may take a long time, please call it asynchronously if possible
+    Feed_Creation_from_GTFS: function(
+        agencies, calendar, calendar_dates, stops, routes, trips, stop_times, feed_info,
+        feed_date, operation_days, user_source, min_riders, max_riders, aggr_level, files){
+
+        var start_date = feed_info[0].feed_start_date
+        var end_date = feed_info[0].feed_end_date
+        var stopTimes = stop_times
+        if (!feed_date){
+            feed_date = start_date
+        }
+
+        var num_agencies = agencies.length
+        var num_routes = routes.length
+        var num_stops = stops.length
+        var num_trips = trips.length
+       
+        var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
+        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_date, end_date, operation_days);
+        var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_date, end_date, operation_days);
+        var ridership = this.ridershipCreate(operation_days, boardAlight, agencies, stops, trips, routes, start_date, end_date);
+        var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies, routes);
+
+        // CSV STRINGIFY =========================
+        /*var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
+        
+        if(calendar_type != 1)
+            var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
+        if(calendar_type != 0)
+            var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+
+        var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
+        var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
+        var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
+        var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
+        var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
+        */
+        
+        var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
+        if(files == 4 || files == 6)
+            var boardAlightCSV = csvStringifySync(boardAlight, {header: true, columns: ["trip_id","stop_id","stop_sequence","record_use","schedule_relationship","boardings","alightings","current_load","load_count","load_type","rack_down","bike_boardings","bike_alightings","ramp_used","ramp_boardings","ramp_alightings","service_date","service_arrival_time","service_departure_time","source"]})
+        if(files == 6)
+            var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
+        var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
+        var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
+
+
+        //console.log(process.cwd())
+
+        // DELETE PREVIOUS FILES
+        try {
+            var out = execSync('rm ./feed_creation/*') // delete all files in feed_creation dir
+            console.log("File deletion output:")
+            console.log(out.toString())
+        } catch (e){ // rm will throw an error if the dir is empty, this statement will catch the error (preventing the server from breaking)
+            console.log("RM")
+            console.log(e)
+        }
+
+
+        // WRITE THE FILES =========================
+        /*fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
+        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
+        fs.writeFileSync(FILEPATH + "routes.txt", routesCSV);
+        fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
+        fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
+        fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
+
+        if(calendar_type != 1)
+            fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+        if(calendar_type != 0)
+            fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+        */
+
+        fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
+        if(files == 4 || files == 6)
+            fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
+        if(files == 6)
+            fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
+        fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV) // always generated
+        fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
+
+        // ZIP ALL FILES =========================
+        var current_dir = process.cwd(); // save current working dir
+        process.chdir(FILEPATH); // change dir
+        try {
+            var out = execSync('zip -r -y fc.zip *.txt') // zip the files
+            console.log("File compression (zipping) output:")
+            console.log(out.toString())
         } catch (e){
             console.log("ZIP")
             console.log(e)

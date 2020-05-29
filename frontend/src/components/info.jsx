@@ -13,11 +13,35 @@ const RIDERSHIP_TIME = "Total";
 
 const SERVER_CHECK_URL = "/server_check";
 
-function agency_plural(count){
-	if (count == 1){
-		return "agency";
-	} else {
-		return "agencies";
+/* displays ridership data
+
+   params:
+   - ride -- whether or not the feed is GTFS-ride (true = GTFS-ride, false = GTFS)
+   - num -- the ridership count
+
+   output format:
+   - nothing if ride is false
+   - "<time> ridership: missing board_alight.txt" if num == -1
+   - "<time> ridership: <num>" otherwise
+   <time> is the RIDERSHIP_TIME constant defined above
+*/
+function ridership_num (ride, num){
+	if (ride){
+		if (num == -1){ // missing board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <em>missing board_alight.txt</em>
+				</span>
+			)
+		} else { // have board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <strong>{num}</strong>
+				</span>
+			)
+		}
+	} else { // not GTFS-ride
+		return null
 	}
 }
 
@@ -228,7 +252,7 @@ class Info extends React.Component{
 								<div className="card-body">
 									Routes: <strong>{agency.routes}</strong><br/>
 									Service span: <strong>{agency.span}</strong><br/>
-									{RIDERSHIP_TIME} ridership: {this.state.is_gtfs_ride ? <strong>{agency.ridership}</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
+									{ridership_num(this.state.is_gtfs_ride, agency.ridership)}
 								</div>
 							</div>
 						</div>
@@ -259,7 +283,7 @@ class Info extends React.Component{
 										Location: {stop.pos ? <a href={"http://www.google.com/maps/place/" + stop.pos[0] + "," + stop.pos[1]} target="_blank" rel="noopener noreferrer"><strong>{stop.pos[0]}, {stop.pos[1]}</strong></a> : <em>no data</em>} <br/>
 										{/*                      ^ opens the coordinates on Google Maps                                       ^ opens it on a new tab */}
 										Description: {stop.desc ? <strong>{stop.desc}</strong> : <em>no data</em>} <br/>
-										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} {stop.ridership !== undefined ? <strong>{stop.ridership}</strong> : <em>no data</em>} <br/></span> : null}
+										{ridership_num(this.state.is_gtfs_ride, stop.ridership)}
 									</div>
 								</div>
 							</div>
