@@ -159,13 +159,16 @@ sup {
 }
 
 a {
-  color: #4e73df;
-  text-decoration: none;
+  /*color: #4e73df;*/
+  color: #224abe;
+  /*text-decoration: none;*/
+  text-decoration: underline;
   background-color: transparent;
 }
 
 a:hover {
-  color: #224abe;
+  /*color: #224abe;*/
+  color: #4e73df;
   text-decoration: underline;
 }
 
@@ -3874,6 +3877,7 @@ input[type="button"].btn-block {
 .nav-link {
   display: block;
   padding: 0.5rem 1rem;
+  text-decoration: none;
 }
 
 .nav-link:hover, .nav-link:focus {
@@ -11042,4 +11046,8 @@ img {
 
 .empty-tr{
   height: 0.75em;
+}
+
+.hidden{
+  display: none;
 }

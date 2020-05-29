@@ -8,7 +8,7 @@ import Axios from 'axios';
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
 const url = "http://localhost:8080/info/agency/";
-const RIDERSHIP_TIME = "Weekly";
+const RIDERSHIP_TIME = "Total";
 
 // get the route type (route type is an enum on the standard)
 function get_route_type(type){
@@ -31,6 +31,38 @@ function get_route_type(type){
 			return(<span><strong>furnicular</strong></span>)
 		default:
 			return(<span><em>unknown</em></span>)
+	}
+}
+
+/* displays ridership data
+
+   params:
+   - ride -- whether or not the feed is GTFS-ride (true = GTFS-ride, false = GTFS)
+   - num -- the ridership count
+
+   output format:
+   - nothing if ride is false
+   - "<time> ridership: missing board_alight.txt" if num == -1
+   - "<time> ridership: <num>" otherwise
+   <time> is the RIDERSHIP_TIME constant defined above
+*/
+function ridership_num (ride, num){
+	if (ride){
+		if (num == -1){ // missing board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <em>missing board_alight.txt</em>
+				</span>
+			)
+		} else { // have board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <strong>{num}</strong>
+				</span>
+			)
+		}
+	} else { // not GTFS-ride
+		return null
 	}
 }
 
@@ -145,7 +177,7 @@ class Info_Agency extends React.Component{
 							</div>
 						</div>
 		
-						{/* Average daily riderships */}
+						{/* Average riderships */}
 						<div className="col-xl-3 col-md-6 mb-4">
 							<div className="card border-left-accent shadow h-100 py-2">
 								<div className="card-body">
@@ -154,7 +186,7 @@ class Info_Agency extends React.Component{
 											<div className="text-xs font-weight-bold text-accent text-uppercase mb-1">Avg. {RIDERSHIP_TIME} Riderships</div>
 											<div className="row no-gutters align-items-center">
 												<div className="col-auto">
-												<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership ? this.state.ridership : "no data"}</div>
+												<div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">{this.state.ridership ? (this.state.ridership == -1 ? "---" : this.state.ridership) : "no data"}</div>
 												</div>
 											</div>
 										</div>
@@ -224,8 +256,12 @@ class Info_Agency extends React.Component{
 							</div>
 						</div>
 					</div>
-					<div className="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 className="h3 mb-0 text-gray-800">Routes ({(this.state.routes).length})</h1>
+					{/* Content Row */}
+					<div className="row">
+						<h4 className="h4 mb-0 text-gray-800">Routes ({(this.state.routes).length})</h4>
+					</div>
+					<div className="row">
+						{this.state.routes.length ? <h5>Click on a route name for more info.</h5> : <h5>{this.state.name} has no routes on this feed</h5>}
 					</div>
 					<div className="row">
 		
@@ -241,12 +277,24 @@ class Info_Agency extends React.Component{
 										Description: <strong>{route.desc}</strong> <br/>
 										Type: {get_route_type(route.type)} <br/>
 										Trips: <strong>{route.trips}</strong> <br/>
-										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} <strong>{route.ridership}</strong></span> : null} <br/>
+										{ridership_num(this.state.is_gtfs_ride, route.ridership)} <br/>
 									</div>
 								</div>
 							</div>
 						)}
 						
+					</div>
+
+					<div className="row">
+						<h4 className="h4 mb-0 text-gray-800">Stops</h4>
+					</div>
+					<div className="row">
+						<h5>Go back to the <Link to="/info">feed-level info</Link> to see all stops</h5>
+					</div>
+					<div className="row">
+						We have decided to not list the stops by agency because it is slow (when testing, TriMet's feed took more than 3 minutes to list when filtered by agency but it took about 20 seconds to list all stops in the feed).
+						This is because getting stops by agency requires joining 4 different tables (agency, routes, trips, stops)
+						<br/>
 					</div>
 					
 				</div>

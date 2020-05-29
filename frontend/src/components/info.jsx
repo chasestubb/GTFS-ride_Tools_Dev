@@ -9,15 +9,39 @@ import Axios from 'axios';
 const HOST = "http://localhost:8080";
 const INFO_URL = "/info";
 const url = HOST + INFO_URL;
-const RIDERSHIP_TIME = "Weekly";
+const RIDERSHIP_TIME = "Total";
 
 const SERVER_CHECK_URL = "/server_check";
 
-function agency_plural(count){
-	if (count == 1){
-		return "agency";
-	} else {
-		return "agencies";
+/* displays ridership data
+
+   params:
+   - ride -- whether or not the feed is GTFS-ride (true = GTFS-ride, false = GTFS)
+   - num -- the ridership count
+
+   output format:
+   - nothing if ride is false
+   - "<time> ridership: missing board_alight.txt" if num == -1
+   - "<time> ridership: <num>" otherwise
+   <time> is the RIDERSHIP_TIME constant defined above
+*/
+function ridership_num (ride, num){
+	if (ride){
+		if (num == -1){ // missing board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <em>missing board_alight.txt</em>
+				</span>
+			)
+		} else { // have board_alight
+			return (
+				<span>
+					{RIDERSHIP_TIME} ridership: <strong>{num}</strong>
+				</span>
+			)
+		}
+	} else { // not GTFS-ride
+		return null
 	}
 }
 
@@ -75,10 +99,10 @@ class Info extends React.Component{
 				stop_list: res.data.stops,
 				num_trips: res.data.num_trips,
 				date: [date_formatter(res.data.date[0]), date_formatter(res.data.date[1])],
-			}).catch((err) => {
-				console.log("Error: " + err)
-				this.setState({status: res.status})
 			})
+		}).catch((err) => {
+			console.log("Error: " + err)
+			this.setState({status: err.status})
 		})
 	}
 
@@ -95,7 +119,7 @@ class Info extends React.Component{
 
 					{/* Content Row */}
 					<div className="row">
-						<h4>Click on an agency's name for more info.</h4><br/><br/>
+						<h4 className="h4 mb-0 text-gray-800">General Feed Information</h4><br/><br/>
 					</div>
 			
 					<div className="row">
@@ -204,6 +228,15 @@ class Info extends React.Component{
 
 
 					</div>
+
+					{/* Content Row */}
+					<div className="row">
+						<h4 className="h4 mb-0 text-gray-800">Agencies ({this.state.agency_list.length})</h4>
+					</div>
+					<div className="row">
+						<h5>Click on an agency's name for more info. Scroll down to see the list of stops.</h5><br/>
+					</div>
+					
 					
 					{/* Content Row */}
 					<div className="row">
@@ -219,7 +252,7 @@ class Info extends React.Component{
 								<div className="card-body">
 									Routes: <strong>{agency.routes}</strong><br/>
 									Service span: <strong>{agency.span}</strong><br/>
-									Weekly ridership: {this.state.is_gtfs_ride ? <strong>{agency.ridership}</strong> : <span><strong>no data</strong> (feed is not GTFS-ride)</span>}
+									{ridership_num(this.state.is_gtfs_ride, agency.ridership)}
 								</div>
 							</div>
 						</div>
@@ -228,7 +261,7 @@ class Info extends React.Component{
 					</div>
 
 					<div className="d-sm-flex align-items-center justify-content-between mb-4">
-						<h1 className="h3 mb-0 text-gray-800">Stops</h1>
+						<h4 className="h4 mb-0 text-gray-800">Stops ({this.state.stop_list.length})</h4>
 					</div>
 					<div className="row">
 		
@@ -250,7 +283,7 @@ class Info extends React.Component{
 										Location: {stop.pos ? <a href={"http://www.google.com/maps/place/" + stop.pos[0] + "," + stop.pos[1]} target="_blank" rel="noopener noreferrer"><strong>{stop.pos[0]}, {stop.pos[1]}</strong></a> : <em>no data</em>} <br/>
 										{/*                      ^ opens the coordinates on Google Maps                                       ^ opens it on a new tab */}
 										Description: {stop.desc ? <strong>{stop.desc}</strong> : <em>no data</em>} <br/>
-										{this.state.is_gtfs_ride ? <span>{RIDERSHIP_TIME + " ridership: "} {stop.ridership ? <strong>{stop.ridership}</strong> : <em>no data</em>} <br/></span> : null}
+										{ridership_num(this.state.is_gtfs_ride, stop.ridership)}
 									</div>
 								</div>
 							</div>
