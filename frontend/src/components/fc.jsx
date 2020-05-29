@@ -5,8 +5,8 @@ import * as Settings from './settings'
 
 const CHECK_DATE = Settings.CHECK_DATE
 
-const postURL = Settings.HOST + "/fc/params";
-const getURL = Settings.HOST + "/fc/getfile";
+const postURL = Settings.HOST + Settings.FC_POST_URL
+const getURL = Settings.HOST + Settings.FC_GET_URL
 
 /* ENUM VALUES
 

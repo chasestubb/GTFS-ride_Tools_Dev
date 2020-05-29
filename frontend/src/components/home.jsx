@@ -2,10 +2,11 @@
 
 import React from 'react'
 import Axios from 'axios'
+import * as Settings from './settings'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER HOST URL
-const HOST = "http://localhost:8080"
-const FILE_UPLOAD_URL = "/fileupload"
+const HOST = Settings.HOST
+const FILE_UPLOAD_URL = Settings.FILE_UPLOAD_URL
 const url = HOST + FILE_UPLOAD_URL;
 
 //const SERVER_CHECK_URL = "/server_check"

@@ -3,12 +3,13 @@
 import React from 'react';
 //import {Link, Route, useParams} from 'react-router-dom' // Route, useParams never used.
 import {Link} from 'react-router-dom';
+import * as Settings from './settings'
 
 import Axios from 'axios';
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const url = "http://localhost:8080/info/agency/";
-const RIDERSHIP_TIME = "Total";
+const url = Settings.HOST + Settings.INFO_AGENCY_URL
+const RIDERSHIP_TIME = Settings.RIDERSHIP_TIME
 
 // get the route type (route type is an enum on the standard)
 function get_route_type(type){

@@ -10,8 +10,11 @@ export const CHECK_DATE = true // set this to true if the program should prohibi
 export const SERVER_CHECK_URL = "/server_check"
 export const FILE_UPLOAD_URL = "/fileupload"
 export const INFO_URL = "/info"
+export const INFO_AGENCY_URL = "/info/agency"
+export const INFO_ROUTE_URL = "/info/route"
 export const FC_POST_URL = "/fc/params"
 export const FC_GET_URL = "/fc/getfile"
 export const LIST_AGENCY_URL = "/agencies"
 export const SPLIT_POST_URL = "/split/params"
 export const SPLIT_GET_URL = "/split/getfile"
+export const CLEAN
