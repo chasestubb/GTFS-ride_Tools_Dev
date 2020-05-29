@@ -162,7 +162,7 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">Upload a Feed</h5>
 							</div>
 							<div className="card-body">
-								{this.props.filename == "" ? <span><strong className="text-danger">You have not uploaded any feeds.</strong> Uploads are optional for Test Feed Creation.</span> : <span className="text-dark">You have uploaded <strong>{this.props.filename}</strong></span>}
+								{this.props.filename == "" ? <span><strong className="text-danger">You have not uploaded any feeds.</strong> Uploads are optional for Test Feed Creation.</span> : <span className="text-dark">You have uploaded <strong>{this.props.filename}</strong>. Upload another feed if you want to work on a different feed.</span>}
 								<br/>
 								<strong>1. Choose a feed file<br/></strong>
 								<input type="file" name="fileupload" accept=".zip" onChange={this.fileSelected}/><br/>

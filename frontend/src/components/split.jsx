@@ -59,7 +59,9 @@ class Split extends React.Component{
 	// if the HTML code looks like <input name="xyz" onChange={this.set}/>
 	// then this function modifies this.state.params.xyz
 	set(event){
-		this.setState({fileStatus: 0})
+		if (this.state.fileStatus > 0){
+			this.setState({fileStatus: 0})
+		}
 		if (event.target.value === ""){
 			this.setState({
 				[event.target.name]: null
@@ -72,7 +74,9 @@ class Split extends React.Component{
 		
 	}
 	setNumber(event){
-		this.setState({fileStatus: 0})
+		if (this.state.fileStatus > 0){
+			this.setState({fileStatus: 0})
+		}
 		this.setState({
 			[event.target.name]: Number(event.target.value)
 		})
@@ -106,7 +110,7 @@ class Split extends React.Component{
 			this.setState({
 				agencies: res.data
 			})
-			if (res.data.length == 0 || typeof res.data !== "array"){
+			if (res.data.length == 0){
 				this.setState({fileStatus: -3})
 			} else {
 				this.setState({fileStatus: 0})
@@ -248,7 +252,7 @@ class Split extends React.Component{
 			case -3:
 				return("You have not uploaded any valid feed. Please go to the home page and upload one.")
 			default:
-				return("Please fill out the form and click \"Generate Feed\".")
+				return("Please fill out the form and click \"Split " + this.props.filename + "\".")
 		}
 	}
 
@@ -323,7 +327,7 @@ class Split extends React.Component{
 									}
 									
 								</div>
-								<button onClick={this.submit} disabled={this.state.fileStatus == -1 || this.state.fileStatus == -3}>Split the feed</button>
+								<button onClick={this.submit} disabled={this.state.fileStatus == -1 || this.state.fileStatus == -3}>Split {this.props.filename}</button>
 								
 							</div>
 						</div>
@@ -335,7 +339,7 @@ class Split extends React.Component{
 						{/* Project Card Example */}
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
-								<h6 className="m-0 font-weight-bold text-primary">Output Status</h6>
+								<h6 className="m-0 font-weight-bold text-primary">Status</h6>
 							</div>
 							<div className="card-body">
 								{this.statusText()}

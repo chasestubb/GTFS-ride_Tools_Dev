@@ -93,6 +93,7 @@ class Info_Agency extends React.Component{
 			trips: 0,
 			err: null,
 		}
+		this.getInfo = this.getInfo.bind(this)
 	}
 
 	// get data from the server
@@ -102,9 +103,9 @@ class Info_Agency extends React.Component{
 			console.log(res)
 			this.setState(res.data) // store the agency data on the local state
 			this.setState({status: res.status, err: null})
-		}).catch(function(err){
+		}).catch((err) => {
 			console.log("Error: " + err)
-			this.setState({err: err})
+			//this.setState({err: err})
 		})
 	}
 
