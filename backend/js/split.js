@@ -83,6 +83,22 @@ module.exports = {
             }
         }
     },
+    removeAgencyFromRiderTrip: function(agency_id1){
+        for (var i = 0; i < rider_trip.length; i++){
+            if (rider_trip[i].agency_id != agency_id1){
+                rider_trip.splice(i, 1);
+                i = i - 1;
+            }
+        }
+    },
+    removeAgencyFromTripCapacity: function(agency_id1){
+        for (var i = 0; i < trip_capacity; i++){
+            if (trip_capacity[i].agency_id != agency_id1){
+                trip_capacity.splice(i,1);
+                i = i - 1;
+            }
+        }
+    },
 //DATE REMOVALS
     removeDateFromBoardAlight: function(service_date_start, service_date_end){
         for (var i = 0; i < board_alight.length; i++){
@@ -288,11 +304,15 @@ module.exports = {
                         j = j + 1;
                     }
                 }
-                for ( j = 0; j < stops.length; j++){
-                    this.removeFromRidership(stops[j].stop_id);
+                if (ridership != null){
+                    for ( j = 0; j < stops.length; j++){
+                        this.removeFromRidership(stops[j].stop_id);
+                    }
                 }
-                for ( i = 0; i < stop_times.length; i++){
-                    this.removeFromBoardAlight(stop_times[i].stop_id, stop_times[i].trip_id);
+                if (board_alight != null){
+                    for ( i = 0; i < stop_times.length; i++){
+                        this.removeFromBoardAlight(stop_times[i].stop_id, stop_times[i].trip_id);
+                    }
                 }
             }
         }
@@ -305,6 +325,10 @@ module.exports = {
                 }
             }
             this.removeFromRoutes(desired_agency);
+            if (rider_trip != null)
+                this.removeAgencyFromRiderTrip(desired_agency);
+            if (trip_capacity != null)
+                this.removeAgencyFromTripCapacity(desired_agency);
             for (var j = 0; j < routes.length; j++){
                 this.removeFromTrips(routes[j].route_id);
             }
@@ -315,10 +339,14 @@ module.exports = {
         }
         else if (split_options == 2){
             //DATE FILTER
-            this.removeDateFromBoardAlight(start_date_input, end_date_input);
-            this.removeDateFromRidership(start_date_input, end_date_input);
-            this.removeFromTripCapacity(start_date_input, end_date_input);
-            this.removeFromRiderTrip(start_date_input, end_date_input);
+            if (board_alight != null)
+                this.removeDateFromBoardAlight(start_date_input, end_date_input);
+            if (ridership != null)
+                this.removeDateFromRidership(start_date_input, end_date_input);
+            if (trip_capacity != null)
+                this.removeFromTripCapacity(start_date_input, end_date_input);
+            if (rider_trip != null)
+                this.removeFromRiderTrip(start_date_input, end_date_input);
             this.removeFromCalendar(start_date_input, end_date_input);
             this.removeFromCalendarDates(start_date_input, end_date_input);
 
