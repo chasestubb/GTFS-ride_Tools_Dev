@@ -6,6 +6,7 @@ var {execSync} = require('child_process')
 
 
 
+
 module.exports = {
 
     //will only work with globals?
@@ -37,6 +38,7 @@ module.exports = {
         }
     },
 //AGENCY REMOVALS
+//Removes all agencies other than the desired agency and their data 
     removeFromRoutes: function(agency_id1){
         for (var i = 0; i < routes.length; i++){
             if (routes[i].agency_id != agency_id1){
@@ -100,6 +102,10 @@ module.exports = {
         }
     },
 //DATE REMOVALS
+//Removes dates that are not within the specified range
+//Ex. Specified range 20200402 - 20200409
+//20200401 will be removed
+//20200409 will not be removed
     removeDateFromBoardAlight: function(service_date_start, service_date_end){
         for (var i = 0; i < board_alight.length; i++){
             if (board_alight[i].service_date < service_date_start){
@@ -284,14 +290,16 @@ module.exports = {
 
             }
             else{
+                //Removing stops
+                //Any stop that is not in stop_times needs to be removed from the feed
                 for (j = 0; j < stops.length;){
                     if (stop_times.length == stops.length){
-                        console.log("done");
+                       // console.log("done");
                         break;
                     }
                     for (i = 0; i < stop_times.length; i++){
-                        var found = 0;
-                        console.log("checking stop_times " + stop_times[i].stop_id + " and stop " + stops[j].stop_id);
+                        var found = 0; //Flag for finding stops that are within stop times
+                     //   console.log("checking stop_times " + stop_times[i].stop_id + " and stop " + stops[j].stop_id);
                         if (stop_times[i].stop_id == stops[j].stop_id){
                             found = 1;
                             break;                      
