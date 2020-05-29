@@ -17,4 +17,4 @@ export const FC_GET_URL = "/fc/getfile"
 export const LIST_AGENCY_URL = "/agencies"
 export const SPLIT_POST_URL = "/split/params"
 export const SPLIT_GET_URL = "/split/getfile"
-export const CLEAN
+export const CLEAN = "/clean"

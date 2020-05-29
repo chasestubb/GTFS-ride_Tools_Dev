@@ -124,7 +124,7 @@ class App extends React.Component{
 
 									{/* Split */}
 									<Route path="/split">
-										<Split/>
+										<Split filename={this.state.filename}/>
 									</Route>
 
 									{/* Merge */}

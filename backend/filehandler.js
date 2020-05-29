@@ -617,8 +617,8 @@ app.get(SPLIT_GET_URL, async(req, res) => {
 // GET AGENCY LIST FOR SPLIT
 app.get(LIST_AGENCY_URL, (req, res) => {
     console.log("LIST AGENCY")
+    var agency_list = []
     if (agencies){
-        var agency_list = []
         for (var a = 0; a < agencies.length; a++){
             agency_list.push({
                 id: agencies[a].agency_id,
@@ -626,14 +626,10 @@ app.get(LIST_AGENCY_URL, (req, res) => {
             })
             console.log(agencies[a].agency_id + " " + agencies[a].agency_name)
         }
-        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
-        res.write(JSON.stringify(agency_list))
-        res.send()
-    } else {
-        res.writeHead(400)
-        res.write("Could not find an agency on the feed")
-        res.send()
     }
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
+    res.write(JSON.stringify(agency_list))
+    res.send()
    
 })
 
