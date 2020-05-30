@@ -43,7 +43,7 @@ class Split extends React.Component{
 			start_date: null,
 			end_date: null,
 			agencies: [],
-			agency_id: null,
+			agency_id: "",
 			status: 0,
 			fileStatus: 0,
 			zip_filename: "split"
@@ -335,7 +335,7 @@ class Split extends React.Component{
 									{this.state.agencies.length > 1 ?
 										<div>
 											Desired agency
-											<select id="agency_id" name="agency_id">
+											<select id="agency_id" name="agency_id" onChange={this.set}>
 												{this.state.agencies.map(a => 
 													<option value={a.id} onChange={this.set}>{a.name}</option>
 												)}

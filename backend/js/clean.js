@@ -200,12 +200,23 @@ module.exports = {
         var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
         var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
-        var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
+        var calendarCSV = csvStringifySync(calendar, {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
         var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
+
+        // DELETE PREVIOUS FILES
+        try {
+            var out = execSync('rm ./clean/*') // delete all files in clean dir
+            console.log("File deletion output:")
+            console.log(out.toString())
+        } catch (e){ // rm will throw an error if the dir is empty, this statement will catch the error (preventing the server from breaking)
+            console.log("RM")
+            console.log(e)
+        }
 
         // copy everything from the original feed (some files will be overwritten with the cleaned version)
         try {
-            var out = execSync('cp \"./uploads/' + dir_name + '/*\" ./clean/')
+            var out = execSync('cp ./uploads/\"' + dir_name + '\"/* ./clean/')
+            console.log("File copy output:")
             console.log(out.toString())
         } catch (e){
             console.log("COPY")
@@ -226,6 +237,7 @@ module.exports = {
         try {
             //zip.zipSync("*.txt", FILENAME); // zip the files
             var out = execSync('zip -r -y clean_feed.zip *.txt')
+            console.log("File compression (zipping) output:")
             console.log(out.toString())
         } catch (e){
             console.log("ZIP")
