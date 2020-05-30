@@ -3,8 +3,6 @@ import Axios from 'axios';
 import * as Settings from './settings'
 //import fileDownload from 'js-file-download';
 
-const CHECK_DATE = Settings.CHECK_DATE
-
 const postURL = Settings.HOST + Settings.FC_POST_URL
 const getURL = Settings.HOST + Settings.FC_GET_URL
 
@@ -122,7 +120,7 @@ class FC extends React.Component{
 		} else {
 			var start = this.strDateToIntDate(this.state.params.start_date) // convert date representations to int
 			var end = this.strDateToIntDate(this.state.params.end_date);
-			if ((start > end) && CHECK_DATE){
+			if (start > end){
 				errmsg += "End date cannot be earlier than start date.\n";
 			}
 		}

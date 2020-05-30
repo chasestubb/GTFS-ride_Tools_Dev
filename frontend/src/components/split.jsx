@@ -73,6 +73,8 @@ class Split extends React.Component{
 		}
 		
 	}
+
+	// similar to set() but for numbers
 	setNumber(event){
 		if (this.state.fileStatus > 0){
 			this.setState({fileStatus: 0})
@@ -218,6 +220,23 @@ class Split extends React.Component{
 		})
 	}
 
+	/* Submits the form data to the server and wait for the server to respond
+	   Procedure:
+	   1.  User fills out form
+	   2.  User clicks "split"
+	   3.  Client transforms data
+	   4.  Client sends POST data to server
+	   5.  Server processes data
+	   6.  Server writes data to vars
+	   7.  Server starts splitting the feed
+	   7.  Server responds to POST
+	   8.  Client receives POST
+	   9.  Client sends GET
+	   10. Server waits until feed is done
+	   11. Server sends the resulting feed to the client
+	   12. Client receives the feed
+	   13. Client downloads the feed to the user's computer
+	*/
 	submit(event){
 		if (this.errCheck() === null){ // if there are no errors on the input
 			var params = { // add other parameters and rename some
@@ -242,7 +261,7 @@ class Split extends React.Component{
 			case 1:
 				return("Sending a request to the server...")
 			case 2:
-				return("The server is has received the request and is now generating the files.")
+				return("The server is has received the request and is now splitting the feed.")
 			case 3:
 				return("Your feed is ready. Check your browser's download section.")
 			case -1:
