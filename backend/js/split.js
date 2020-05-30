@@ -173,7 +173,8 @@ module.exports = {
     createFiles: function(
             agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
             frequencies, stop_times, feed_info,
-            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info){
+            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
+            dir_name){
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
         var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
         var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
@@ -188,6 +189,14 @@ module.exports = {
         var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
         var tripCapacityCSV = csvStringifySync(trip_capacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
 
+        // copy everything from the original feed (some files will be overwritten with the split version)
+        try {
+            var out = execSync('cp \"./uploads/' + dir_name + '/*\" ./split/')
+            console.log(out)
+        } catch (e){
+            console.log("COPY")
+            console.log(e)
+        }
 
         //console.log(process.cwd())
         // WRITE THE FILES =========================
@@ -211,7 +220,7 @@ module.exports = {
             agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
             frequencies, stop_times, feed_info,
             board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
-            split_options, arrival_limit, departure_limit, desired_agency, start_date_input, end_date_input
+            split_options, arrival_limit, departure_limit, desired_agency, start_date_input, end_date_input, dir_name
         ){
         //Parameters are bounds for the desired time
         //Ex. Desired arrival at 8:00 and departure at 8:05
@@ -363,7 +372,8 @@ module.exports = {
         this.createFiles(
             agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
             frequencies, stop_times, feed_info,
-            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info);
+            board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
+            dir_name);
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
         process.chdir(FILEPATH) // change dir
@@ -371,7 +381,7 @@ module.exports = {
         try {
             //zip.zipSync("*.txt", FILENAME); // zip the files
             var out = execSync('zip -r -y ' + FILENAME + ' *.txt')
-            console.log(out)
+            console.log(out.toString())
         } catch (e){
             console.log("ZIP")
             console.log(e)

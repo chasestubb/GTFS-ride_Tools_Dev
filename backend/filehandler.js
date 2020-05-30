@@ -82,25 +82,24 @@ async function feed_creation(params){
 
 async function split(split_by, arr_limit, dep_limit, agency_sel, start, end){
     console.log("Splitting feed...")
-    var clean_result = Clean.Clean(
-        agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
-        frequencies, stop_times, feed_info,
-        board_alight, trip_capacity, rider_trip, ridership, ride_feed_info
-    )
-    console.log("Feed clean succeeded")
-    return clean_result
-}
-
-async function clean(){
-    console.log("Splitting feed...")
     var split_filename = Split.Split(
         agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
         frequencies, stop_times, feed_info,
         board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
-        split_by, arr_limit, dep_limit, agency_sel, start, end
+        split_by, arr_limit, dep_limit, agency_sel, start, end, filename
     )
     console.log("Feed split succeeded")
     return split_filename
+}
+
+async function clean(){
+    console.log("Cleaning feed...")
+    var clean_result = Clean.Clean(
+        agencies, routes, trips, stops, stop_times, calendar, calendar_dates, stop_times,
+        filename
+    )
+    console.log("Feed clean succeeded")
+    return clean_result
 }
 
 
@@ -654,14 +653,56 @@ app.get(LIST_AGENCY_URL, (req, res) => {
 app.get(CLEAN_CONFIRM_URL, (req, res) => {
     console.log("CLEAN")
     if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){ // if the user has already uploaded a valid feed
-        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
-        res.write("TRUE")
-        res.end()
+        clean_promise = new Promise((resolve, reject) => {
+            res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+            res.write("Clean request received")
+            res.end()
+            resolve (clean()) // generate the feed file and resolve the promise when done
+        })
     } else {
         res.writeHead(400)
         res.write("No feed uploaded")
         res.end()
     }
+})
+// --------------------------------------------------------------------------------
+// CLEAN - FILE OUTPUT
+app.get(CLEAN_FILE_URL, async(req, res) => {
+    console.log("CLEAN FILE")
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
+    res.setHeader("Content-Type", "application/zip")
+
+    // wait for clean to finish
+    // promise will be an object containing filename and lists of removed items when resolved
+    var clean_output = await clean_promise
+    var clean_filename = clean_output.zip_filename
+    var clean_filepath = process.cwd() + "/" + clean_filename
+    res.download(clean_filepath, function(err){
+        if (err){
+            console.log("Error sending file: " + err)
+        } else {
+            console.log("File sent to client")
+        }
+        res.end() // res.end() is here to prevent the connection from being closed while the download is incomplete
+    })
+})
+// --------------------------------------------------------------------------------
+// CLEAN - REPORT
+app.get(CLEAN_REPORT_URL, async(req, res) => {
+    console.log("CLEAN REPORT")
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
+    res.setHeader("Content-Type", "application/zip")
+
+    // wait for clean to finish
+    // promise will be an object containing filename and lists of removed items when resolved
+    var clean_output = await clean_promise
+    var {zip_filename, ...clean_report} = clean_output
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
+    res.write(JSON.stringify(clean_report))
+    res.send()
+    
 })
 
 // --------------------------------------------------------------------------------

@@ -15,12 +15,59 @@ import * as Settings from './settings'
 
 */
 
+// format the date
+function date_formatter(date_int){
+	var date = String(date_int);
+	var year = date.substr(0, 4);
+	var month = date.substr(4, 2);
+	var day = date.substr(6, 2);
+
+	// feel free to edit the date format on the next line
+	var formatted_date = year + "-" + month + "-" + day;
+	// date and month will always be a 2-digit number, year will always be the complete year (e.g.: 2017)
+
+	return (formatted_date)
+}
+
+// displays a service pattern from a row in calendar.txt
+function service_pattern_disp(cal_entry){
+	var days = ""
+
+	cal_entry.sunday ? days += "S" : days += "-"
+	cal_entry.monday ? days += "M" : days += "-"
+	cal_entry.tuesday ? days += "T" : days += "-"
+	cal_entry.wednesday ? days += "W" : days += "-"
+	cal_entry.thursday ? days += "T" : days += "-"
+	cal_entry.friday ? days += "F" : days += "-"
+	cal_entry.saturday ? days += "S" : days += "-"
+
+	days += " from "
+	days += date_formatter(cal_entry.start_date)
+	days += " to "
+	days += date_formatter(cal_entry.end_date)
+
+	return days
+}
+
+// displays a service exception from a row in calendar_dates.txt
+function service_exception_disp(cdates_entry){
+	if (cdates_entry.exception_type == 1){
+		return ("service on " + date_formatter(cdates_entry.date))
+	} else if (cdates_entry.exception_type == 2){
+		return ("no service on " + date_formatter(cdates_entry.date))
+	}
+}
+
 class Clean extends React.Component {
 	constructor(props){
 		super(props)
 		this.state = {
 			fileStatus: 0,
-			report: "",
+			orphan_stops: [],
+			orphan_routes: [],
+			orphan_agencies: [],
+			orphan_cal_service: [],
+			orphan_cdates_service: [],
 			zip_filename: this.props.filename + "_cleaned"
 		}
 		this.submit = this.submit.bind(this);
@@ -115,7 +162,11 @@ class Clean extends React.Component {
 		Axios.get(Settings.HOST + Settings.CLEAN_REPORT_URL).then((res) => {
 			this.setState({
 				fileStatus: 3,
-				report: res.data
+				orphan_stops: res.data.orphan_stops,
+				orphan_routes: res.data.orphan_routes,
+				orphan_agencies: res.data.orphan_agencies,
+				orphan_cal_service: res.data.orphan_cal_service,
+				orphan_cdates_service: res.data.orphan_cdates_service,
 			})
 		}).catch((err) => {
 			console.log("ERROR " + err)
@@ -190,15 +241,66 @@ class Clean extends React.Component {
 							</div>
 						</div>
 
-						{this.state.report != ""
+						{this.state.fileStatus == 3
 						?
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
 								<h6 className="m-0 font-weight-bold text-primary">Cleaning Report</h6>
 							</div>
 							<div className="card-body">
-								Removed the following items from {this.props.filename}:
-								{this.state.report}
+								{ (this.state.orphan_agencies.length + this.state.orphan_stops.length + this.state.orphan_routes.length + this.state.orphan_cal_service.length + this.state.orphan_cdates_service.length) > 0
+								?
+								<span>Removed the following unused items from {this.props.filename}:</span>
+								:
+								<span>No unused items found on {this.props.filename}.</span>
+								}
+								<br/>
+								{this.state.orphan_agencies.length > 0
+								?
+								<span><strong>Agencies</strong>
+								<ul>
+									{this.state.orphan_agencies.map((a) => 
+										<li>{a.agency_name} ({a.agency_id})</li>
+									)}
+								</ul>
+								</span>
+								: null}
+
+								{this.state.orphan_routes.length > 0
+								?
+								<span><strong>Routes</strong>
+								<ul>
+									{this.state.orphan_routes.map((r) => 
+										<li>{r.route_short_name}{(r.route_short_name && r.route_long_name) ? " - " : null}{r.route_long_name} ({r.route_id})</li>
+									)}
+								</ul>
+								</span>
+								: null}
+
+								{this.state.orphan_stops.length > 0
+								?
+								<span><strong>Stops</strong>
+								<ul>
+									{this.state.orphan_stops.map((s) => 
+										<li>{s.stop_name} ({s.stop_id})</li>
+									)}
+								</ul>
+								</span>
+								: null}
+
+								{this.state.orphan_cal_service.length + this.state.orphan_cdates_service > 0
+								?
+								<span><strong>Service dates</strong>
+								<ul>
+									{this.state.orphan_cal_service.map((c) => 
+										<li>{c.service_id}: {service_pattern_disp(c)}</li>
+									)}
+									{this.state.orphan_cdates_service.map((d) => 
+										<li>{d.service_id}: {service_exception_disp(d)}</li>
+									)}
+								</ul>
+								</span>
+								: null}
 							</div>
 						</div>
 						: null}
