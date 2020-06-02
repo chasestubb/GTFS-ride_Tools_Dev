@@ -1179,11 +1179,29 @@ module.exports = {
         return board_alight;
     },
 
-    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, aggr_level, start_date, end_date, operation_days){
-        var num_riders = getRandomIntInclusive(min_riders, max_riders)
+    riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, num_agencies, aggr_level, start_date, end_date, operation_days){
+        var num_riders
         var rider_trips = [];
         var num_stops_per_route = num_stops / num_routes;
         var date = start_date
+
+        switch (aggr_level){
+            case 0: // stop
+                num_riders = getRandomIntInclusive(min_riders, max_riders) * num_stops
+                break;
+            case 1: // trip
+                num_riders = getRandomIntInclusive(min_riders, max_riders) * num_trips
+                break;
+            case 2: // route
+                num_riders = getRandomIntInclusive(min_riders, max_riders) * num_routes
+                break;
+            case 3: // agency
+                num_riders = getRandomIntInclusive(min_riders, max_riders) * num_agencies
+                break;
+            default: // feed
+                num_riders = getRandomIntInclusive(min_riders, max_riders)
+                break;
+        }
 
         for (var i = 0; i < num_riders; i++){
 
@@ -1426,7 +1444,7 @@ module.exports = {
         var feedInfo = this.feedInfoCreate(start_date, end_date);
         var rideFeedInfo = this.rideFeedInfoCreate(files, start_date, end_date);
 
-        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, aggr_level, start_service_date, end_date, operation_days);
+        var riderTrip = this.riderTripCreate(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stopTimes, num_agencies, aggr_level, start_service_date, end_date, operation_days);
         var boardAlight = this.boardAlightCreate(trips, stops, num_trips, num_stops, num_routes, stopTimes, user_source, riderTrip, start_service_date, end_date, operation_days);
         var ridership = this.ridershipCreate(operation_days, boardAlight, agencies, stops, trips, routes, start_service_date, end_date);
         var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies, routes);

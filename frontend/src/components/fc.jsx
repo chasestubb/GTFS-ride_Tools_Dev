@@ -416,6 +416,16 @@ class FC extends React.Component{
 								{this.statusText()}
 							</div>
 						</div>
+
+						<div className="card shadow mb-4">
+							<div className="card-header py-3">
+								<h6 className="m-0 font-weight-bold text-primary">Notice about aggregation level</h6>
+							</div>
+							<div className="card-body">
+								The ridership range is a basis used to randomly generate a feed.
+								Ridership values outside of the specified range may occur.
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
