@@ -831,7 +831,7 @@ module.exports = {
             randLat = parseFloat(randLatRaw.toFixed(6)); // round to six decimal points
  
             randLonRaw = (Math.random() * 360) - 180; // between -180 and 180
-            randLon = parseFloat(randLatRaw.toFixed(6)); // rount to six decimal points
+            randLon = parseFloat(randLonRaw.toFixed(6)); // rount to six decimal points
 
             temp_stop.stop_lat = randLat;
             temp_stop.stop_lon = randLon;
@@ -1530,7 +1530,7 @@ module.exports = {
         var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies, routes);
 
         // CSV STRINGIFY =========================
-        /*var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
+        var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
         
         if(calendar_type != 1)
             var calendarCSV = csvStringifySync([calendar], {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
@@ -1542,7 +1542,6 @@ module.exports = {
         var tripsCSV = csvStringifySync(trips, {header: true, columns: ["route_id", "service_id", "trip_id", "trip_short_name", "trip_headsign", "direction_id", "block_id", "shape_id", "bikes_allowed", "wheelchair_accessible", "trip_type", "drt_max_travel_time", "drt_avg_travel_time", "drt_advance_book_min", "drt_pickup_message", "drt_drop_off_message", "continuous_pickup_message", "continuous_drop_off_message"]})
         var stopTimesCSV = csvStringifySync(stopTimes, {header: true, columns: ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence", "stop_headsign", "pickup_type", "drop_off_type", "shape_dist_traveled", "timepoint", "start_service_area_id", "end_service_area_id", "start_service_area_radius", "end_service_area_radius", "continuous_pickup", "continuous_drop_off", "pickup_area_id", "drop_off_area_id", "pickup_service_area_radius", "drop_off_service_area_radius"]})
         var feedInfoCSV = csvStringifySync([feedInfo], {header: true, columns: ["feed_publisher_url", "feed_publisher_name", "feed_lang", "feed_version", "feed_license", "feed_contact_email", "feed_contact_url", "feed_start_date", "feed_end_date", "feed_id"]})
-        */
         
         var rideFeedInfoCSV = csvStringifySync([rideFeedInfo], {header: true, columns: ["ride_files","ride_start_date","ride_end_date","gtfs_feed_date","default_currency_type","ride_feed_version"]})
         if(files == 4 || files == 6)
@@ -1567,7 +1566,7 @@ module.exports = {
 
 
         // WRITE THE FILES =========================
-        /*fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
+        fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
         fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
         fs.writeFileSync(FILEPATH + "routes.txt", routesCSV);
         fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
@@ -1578,7 +1577,6 @@ module.exports = {
             fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
         if(calendar_type != 0)
             fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
-        */
 
         fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
         if(files == 4 || files == 6)

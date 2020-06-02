@@ -119,12 +119,12 @@ class App extends React.Component{
 
 									{/* Clean */}
 									<Route path="/clean">
-										<Clean/>
+										<Clean filename={this.state.filename}/>
 									</Route>
 
 									{/* Split */}
 									<Route path="/split">
-										<Split/>
+										<Split filename={this.state.filename}/>
 									</Route>
 
 									{/* Merge */}

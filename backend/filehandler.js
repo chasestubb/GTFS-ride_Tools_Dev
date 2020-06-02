@@ -13,7 +13,7 @@ var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into 
 var Info = require("./js/info");
 var Feed_Creation = require("./js/feed_creation");
 var Split = require("./js/split");
-//var Clean = require("./js/clean");
+var Clean = require("./js/clean");
 
 // express stuff
 var app = express()
@@ -37,7 +37,9 @@ const FC_GET_URL = '/fc/getfile'
 const LIST_AGENCY_URL = "/agencies"
 const SPLIT_POST_URL = "/split/params"
 const SPLIT_GET_URL = "/split/getfile"
-const CLEAN_URL = '/clean'
+const CLEAN_CONFIRM_URL = "/clean/confirm"
+const CLEAN_FILE_URL = "/clean/getfile"
+const CLEAN_REPORT_URL = "/clean/getreport"
 
 
 
@@ -61,9 +63,8 @@ var ride_feed_info = null
 
 var filename = ""
 
-
-var fc_promise
-var split_promise
+// promises, used to wait for the async functions
+var fc_promise, split_promise, clean_promise
 
 // asynchronously call Feed_Creation.Feed_Creation()
 // Feed_Creation.Feed_Creation() is completely synchronous so we only need to wait for one thing
@@ -85,10 +86,20 @@ async function split(split_by, arr_limit, dep_limit, agency_sel, start, end){
         agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
         frequencies, stop_times, feed_info,
         board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
-        split_by, arr_limit, dep_limit, agency_sel, start, end
+        split_by, arr_limit, dep_limit, agency_sel, start, end, filename
     )
     console.log("Feed split succeeded")
     return split_filename
+}
+
+async function clean(){
+    console.log("Cleaning feed...")
+    var clean_result = Clean.Clean(
+        agencies, routes, trips, stops, stop_times, calendar, calendar_dates, stop_times,
+        filename
+    )
+    console.log("Feed clean succeeded")
+    return clean_result
 }
 
 
@@ -254,7 +265,7 @@ app.post(UPLOAD_URL, (req, res) => {
 app.get(INFO_URL, (req, res) => {
     // general feed info
     console.log("FEED INFO")
-    if (agencies && routes && trips && stops && stop_times){
+    if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){
         // initialize object
         if (feed_info){
             var feed_info_ = {
@@ -335,7 +346,7 @@ app.get(INFO_URL, (req, res) => {
 // FEED_INFO -> AGENCY INFO
 app.get(INFO_AGENCY_URL, (req, res) => {
     console.log("FEED INFO -> AGENCY INFO")
-    if (agencies && routes && trips && stops && stop_times){
+    if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){
         var index = req.params.index
         console.log(index)
         var agency = agencies[index]
@@ -430,7 +441,7 @@ app.get(INFO_AGENCY_URL, (req, res) => {
 // FEED_INFO -> ROUTE INFO
 app.get(INFO_ROUTE_URL, (req, res) => {
     console.log("FEED INFO -> ROUTE INFO")
-    if (agencies && routes && trips && stops && stop_times){
+    if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){
         var index = req.params.index
         console.log(index)
         var route = routes[index]
@@ -568,6 +579,7 @@ app.get(FC_GET_URL, async (req, res) => {
     })
     
 })
+
 //---------------------------------------------------------------------------
 // SPLIT - PARAMETERS
 app.post(SPLIT_POST_URL, async (req, res) => {
@@ -576,17 +588,23 @@ app.post(SPLIT_POST_URL, async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", CORS);
     var params = req.body
     
-    // make promise for generating feed file (async)
-    // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
-    split_promise = new Promise((resolve, reject) => {
-        console.log("Params received")
-        res.writeHead(200)
-        res.write("Params received")
+    if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){ // if the user has already uploaded a valid feed
+        // make promise for generating feed file (async)
+        // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
+        split_promise = new Promise((resolve, reject) => {
+            console.log("Params received")
+            res.writeHead(200)
+            res.write("Params received")
+            res.end()
+            console.log("splitting feed with params:")
+            console.log(params)
+            resolve (split(params.split_by, params.dep_time, params.arr_time, params.start_date, params.end_date, params.agency_id)) // generate the feed file and resolve the promise when done
+        })
+    } else {
+        res.writeHead(400)
+        res.write("No feed uploaded")
         res.end()
-        console.log("splitting feed with params:")
-        console.log(params)
-        resolve (split(params.split_by, params.dep_time, params.arr_time, params.start_date, params.end_date, params.agency_id)) // generate the feed file and resolve the promise when done
-    })
+    }
 })
 //--------------------------------------------------------------------------------------------
 // SPLIT - OUTPUT
@@ -610,15 +628,12 @@ app.get(SPLIT_GET_URL, async(req, res) => {
     })
     
 })
-
-
-
 // --------------------------------------------------------------------------------
 // GET AGENCY LIST FOR SPLIT
 app.get(LIST_AGENCY_URL, (req, res) => {
     console.log("LIST AGENCY")
+    var agency_list = []
     if (agencies){
-        var agency_list = []
         for (var a = 0; a < agencies.length; a++){
             agency_list.push({
                 id: agencies[a].agency_id,
@@ -626,15 +641,68 @@ app.get(LIST_AGENCY_URL, (req, res) => {
             })
             console.log(agencies[a].agency_id + " " + agencies[a].agency_name)
         }
-        res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
-        res.write(JSON.stringify(agency_list))
-        res.send()
+    }
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
+    res.write(JSON.stringify(agency_list))
+    res.send()
+   
+})
+
+// --------------------------------------------------------------------------------
+// CLEAN - CONFIRMATION & START CLEANING
+app.get(CLEAN_CONFIRM_URL, (req, res) => {
+    console.log("CLEAN")
+    if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){ // if the user has already uploaded a valid feed
+        clean_promise = new Promise((resolve, reject) => {
+            res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
+            res.write("Clean request received")
+            res.end()
+            resolve (clean()) // generate the feed file and resolve the promise when done
+        })
     } else {
         res.writeHead(400)
-        res.write("Could not find an agency on the feed")
-        res.send()
+        res.write("No feed uploaded")
+        res.end()
     }
-   
+})
+// --------------------------------------------------------------------------------
+// CLEAN - FILE OUTPUT
+app.get(CLEAN_FILE_URL, async(req, res) => {
+    console.log("CLEAN FILE")
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
+    res.setHeader("Content-Type", "application/zip")
+
+    // wait for clean to finish
+    // promise will be an object containing filename and lists of removed items when resolved
+    var clean_output = await clean_promise
+    var clean_filename = clean_output.zip_filename
+    var clean_filepath = process.cwd() + "/" + clean_filename
+    res.download(clean_filepath, function(err){
+        if (err){
+            console.log("Error sending file: " + err)
+        } else {
+            console.log("File sent to client")
+        }
+        res.end() // res.end() is here to prevent the connection from being closed while the download is incomplete
+    })
+})
+// --------------------------------------------------------------------------------
+// CLEAN - REPORT
+app.get(CLEAN_REPORT_URL, async(req, res) => {
+    console.log("CLEAN REPORT")
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
+    res.setHeader("Content-Type", "application/zip")
+
+    // wait for clean to finish
+    // promise will be an object containing filename and lists of removed items when resolved
+    var clean_output = await clean_promise
+    var {zip_filename, ...clean_report} = clean_output
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'application/json'})
+    res.write(JSON.stringify(clean_report))
+    res.send()
+    
 })
 
 // --------------------------------------------------------------------------------

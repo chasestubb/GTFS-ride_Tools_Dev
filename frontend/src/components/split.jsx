@@ -12,6 +12,15 @@ const getURL = Settings.HOST + Settings.SPLIT_GET_URL
 	1 = agency
 	2 = date
 
+	fileStatus:
+	0 = no requests sent
+	1 = sending request to server
+	2 = server received the request and is now processing it
+	3 = file ready
+	-1 = server unreachable
+	-2 = other errors
+	-3 = no feed
+
 */
 
 // returns " hidden" if a != b, returns null if a == b
@@ -34,21 +43,25 @@ class Split extends React.Component{
 			start_date: null,
 			end_date: null,
 			agencies: [],
-			agency_id: null,
+			agency_id: "",
 			status: 0,
+			fileStatus: 0,
 			zip_filename: "split"
 		}
 		this.set = this.set.bind(this)
 		this.setNumber = this.setNumber.bind(this)
 		this.errCheck = this.errCheck.bind(this);
 		this.submit = this.submit.bind(this);
+		this.statusText = this.statusText.bind(this);
 	}
 
 	// sets a parameter based on the name attribute on the HTML element
 	// if the HTML code looks like <input name="xyz" onChange={this.set}/>
 	// then this function modifies this.state.params.xyz
 	set(event){
-		this.setState({fileStatus: 0})
+		if (this.state.fileStatus > 0){
+			this.setState({fileStatus: 0})
+		}
 		if (event.target.value === ""){
 			this.setState({
 				[event.target.name]: null
@@ -60,8 +73,12 @@ class Split extends React.Component{
 		}
 		
 	}
+
+	// similar to set() but for numbers
 	setNumber(event){
-		this.setState({fileStatus: 0})
+		if (this.state.fileStatus > 0){
+			this.setState({fileStatus: 0})
+		}
 		this.setState({
 			[event.target.name]: Number(event.target.value)
 		})
@@ -87,6 +104,7 @@ class Split extends React.Component{
 		return intTime;
 	}
 
+	// get the agencies, also functions as a server check
 	getAgencies(){
 		var url = Settings.HOST + Settings.LIST_AGENCY_URL
 		Axios.get(url).then((res) => {
@@ -94,6 +112,14 @@ class Split extends React.Component{
 			this.setState({
 				agencies: res.data
 			})
+			if (res.data.length == 0){
+				this.setState({fileStatus: -3})
+			} else {
+				this.setState({fileStatus: 0})
+			}
+		}).catch((err) => {
+			console.log(err)
+			this.setState({fileStatus: -1})
 		})
 	}
 
@@ -194,6 +220,23 @@ class Split extends React.Component{
 		})
 	}
 
+	/* Submits the form data to the server and wait for the server to respond
+	   Procedure:
+	   1.  User fills out form
+	   2.  User clicks "split"
+	   3.  Client transforms data
+	   4.  Client sends POST data to server
+	   5.  Server processes data
+	   6.  Server writes data to vars
+	   7.  Server starts splitting the feed
+	   7.  Server responds to POST
+	   8.  Client receives POST
+	   9.  Client sends GET
+	   10. Server waits until feed is done
+	   11. Server sends the resulting feed to the client
+	   12. Client receives the feed
+	   13. Client downloads the feed to the user's computer
+	*/
 	submit(event){
 		if (this.errCheck() === null){ // if there are no errors on the input
 			var params = { // add other parameters and rename some
@@ -209,6 +252,26 @@ class Split extends React.Component{
 				this.setState({fileStatus: 2})
 				this.sendGet() // GET request should only be called after POST request has received a response
 			})
+		}
+	}
+
+	// changes the status text displayed on the "output status" card
+	statusText(){
+		switch (Number(this.state.fileStatus)){
+			case 1:
+				return("Sending a request to the server...")
+			case 2:
+				return("The server is has received the request and is now splitting the feed.")
+			case 3:
+				return("Your feed is ready. Check your browser's download section.")
+			case -1:
+				return("Server unreachable.")
+			case -2:
+				return this.state.err
+			case -3:
+				return("You have not uploaded any valid feed. Please go to the home page and upload one.")
+			default:
+				return("Please fill out the form and click \"Split " + this.props.filename + "\".")
 		}
 	}
 
@@ -232,7 +295,7 @@ class Split extends React.Component{
 								<h6 className="m-0 font-weight-bold text-primary">Parameters</h6>
 							</div>
 							<div className="card-body">
-								<label for="split_by">Split by</label>
+								<label for="split_by">Split <strong className="text-dark">{this.props.filename}</strong> by</label>
 								<select id="split_by" name="split_by" onChange={this.set}>
 									<option value={2}>Date</option>
 									<option value={0}>Time</option>
@@ -272,7 +335,7 @@ class Split extends React.Component{
 									{this.state.agencies.length > 1 ?
 										<div>
 											Desired agency
-											<select id="agency_id" name="agency_id">
+											<select id="agency_id" name="agency_id" onChange={this.set}>
 												{this.state.agencies.map(a => 
 													<option value={a.id} onChange={this.set}>{a.name}</option>
 												)}
@@ -283,8 +346,22 @@ class Split extends React.Component{
 									}
 									
 								</div>
-								<button onClick={this.submit}>Split the feed</button>
+								<button onClick={this.submit} disabled={this.state.fileStatus == -1 || this.state.fileStatus == -3}>Split {this.props.filename}</button>
 								
+							</div>
+						</div>
+					</div>
+
+					{/* Content Column */}
+					<div className="col-lg-6 mb-4">
+
+						{/* Project Card Example */}
+						<div className="card shadow mb-4">
+							<div className="card-header py-3">
+								<h6 className="m-0 font-weight-bold text-primary">Status</h6>
+							</div>
+							<div className="card-body">
+								{this.statusText()}
 							</div>
 						</div>
 					</div>

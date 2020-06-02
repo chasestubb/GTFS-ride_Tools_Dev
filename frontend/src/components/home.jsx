@@ -2,10 +2,11 @@
 
 import React from 'react'
 import Axios from 'axios'
+import * as Settings from './settings'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER HOST URL
-const HOST = "http://localhost:8080"
-const FILE_UPLOAD_URL = "/fileupload"
+const HOST = Settings.HOST
+const FILE_UPLOAD_URL = Settings.FILE_UPLOAD_URL
 const url = HOST + FILE_UPLOAD_URL;
 
 //const SERVER_CHECK_URL = "/server_check"
@@ -161,7 +162,7 @@ class Home extends React.Component{
 								<h5 className="m-0 font-weight-bold text-primary">Upload a Feed</h5>
 							</div>
 							<div className="card-body">
-								{this.props.filename == "" ? <span><strong className="text-danger">You have not uploaded any feeds.</strong> Uploads are optional for Test Feed Creation.</span> : <span className="text-dark">You have uploaded <strong>{this.props.filename}</strong></span>}
+								{this.props.filename == "" ? <span><strong className="text-danger">You have not uploaded any feeds.</strong> Uploads are optional for Test Feed Creation.</span> : <span className="text-dark">You have uploaded <strong>{this.props.filename}</strong>. Upload another feed if you want to work on a different feed.</span>}
 								<br/>
 								<strong>1. Choose a feed file<br/></strong>
 								<input type="file" name="fileupload" accept=".zip" onChange={this.fileSelected}/><br/>

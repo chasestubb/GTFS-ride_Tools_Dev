@@ -37,3 +37,10 @@ yarn-error.log*
 
 # ignore the feeds created by feed creation
 /backend/feed_creation/* 
+
+# ignore the split feeds
+/backend/split/*
+
+# ignore the cleaned feeds
+/backend/clean/*
+

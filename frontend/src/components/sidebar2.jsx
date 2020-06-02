@@ -14,7 +14,8 @@ const navoptions = [
 	{id: "ns",    name: "Network State",      icon: "fas fa-project-diagram"},
 	{id: "diff",  name: "Difference",         icon: "fas fa-not-equal"},
 	{id: "clean", name: "Clean",              icon: "fas fa-broom"},
-	{id: "split", name: "Split",              icon: "fas fa-copy"},
+	//{id: "split", name: "Split",              icon: "fas fa-copy"},
+	{id: "split", name: "Split",              icon: "fas fa-filter"},
 	//{id: "tm",  name: "Time Merge",         icon: "fas fa-calendar-alt"}, // now in merge
 	{id: "merge", name: "Merge",              icon: "fas fa-object-group"},
 	//{id: "as",  name: "Agency Split",       icon: "fas fa-landmark"}, // now in split

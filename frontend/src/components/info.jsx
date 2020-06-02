@@ -4,12 +4,13 @@ import React from 'react';
 //import {Link, Switch, Route, useParams} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import Axios from 'axios';
+import * as Settings from './settings'
 
 // FOR PRODUCTION, CHANGE THIS URL TO THE SERVER URL
-const HOST = "http://localhost:8080";
-const INFO_URL = "/info";
-const url = HOST + INFO_URL;
-const RIDERSHIP_TIME = "Total";
+const HOST = Settings.HOST
+const INFO_URL = Settings.INFO_URL
+const url = HOST + INFO_URL
+const RIDERSHIP_TIME = Settings.RIDERSHIP_TIME
 
 const SERVER_CHECK_URL = "/server_check";
 
