@@ -1,5 +1,6 @@
 import React from 'react'
 import Axios from 'axios'
+import {Link} from 'react-router-dom'
 import * as Settings from './settings'
 
 /* ENUM VALUES
@@ -196,118 +197,139 @@ class Clean extends React.Component {
 	}
 
 	render(){
-		return (
-			<div>
-				{/* Page Heading */}
-				{/*<div className="d-sm-flex align-items-center justify-content-between mb-4">
-					<h1 className="h3 mb-0 text-gray-800"><br />GTFS-ride Info</h1>
-				</div>*/}
-				
-				{/* Content Row */}
+		if (this.state.fileStatus == -3){
+			return(
 				<div className="row">
-
 					{/* Content Column */}
 					<div className="col-lg-6 mb-4">
-
+		
 						{/* Project Card Example */}
 						<div className="card shadow mb-4">
 							<div className="card-header py-3">
-								<h6 className="m-0 font-weight-bold text-primary">Confirmation</h6>
+								<h6 className="m-0 font-weight-bold text-primary">No Feed Uploaded</h6>
 							</div>
 							<div className="card-body">
-								Click on the button below to clean <strong className="text-dark">{this.props.filename}</strong>.
-								Cleaning will return a copy of the feed with these removed:
-								<ul>
-									<li>Stops without trips</li>
-									<li>Routes without trips</li>
-									<li>Agencies without routes</li>
-									<li>Unused service dates and exceptions</li>
-								</ul>
-								<button onClick={this.submit}>Clean {this.props.filename}</button>
+								Please <Link to="/">go to the home page</Link> and upload a feed.
 							</div>
 						</div>
 					</div>
-
-					{/* Content Column */}
-					<div className="col-lg-6 mb-4">
-
-						{/* Project Card Example */}
-						<div className="card shadow mb-4">
-							<div className="card-header py-3">
-								<h6 className="m-0 font-weight-bold text-primary">Status</h6>
-							</div>
-							<div className="card-body">
-								{this.statusText()}
-							</div>
-						</div>
-
-						{this.state.fileStatus == 3
-						?
-						<div className="card shadow mb-4">
-							<div className="card-header py-3">
-								<h6 className="m-0 font-weight-bold text-primary">Cleaning Report</h6>
-							</div>
-							<div className="card-body">
-								{ (this.state.orphan_agencies.length + this.state.orphan_stops.length + this.state.orphan_routes.length + this.state.orphan_cal_service.length + this.state.orphan_cdates_service.length) > 0
-								?
-								<span>Removed the following unused items from {this.props.filename}:</span>
-								:
-								<span>No unused items found on {this.props.filename}.</span>
-								}
-								<br/>
-								{this.state.orphan_agencies.length > 0
-								?
-								<span><strong>Agencies</strong>
-								<ul>
-									{this.state.orphan_agencies.map((a) => 
-										<li>{a.agency_name} ({a.agency_id})</li>
-									)}
-								</ul>
-								</span>
-								: null}
-
-								{this.state.orphan_routes.length > 0
-								?
-								<span><strong>Routes</strong>
-								<ul>
-									{this.state.orphan_routes.map((r) => 
-										<li>{r.route_short_name}{(r.route_short_name && r.route_long_name) ? " - " : null}{r.route_long_name} ({r.route_id})</li>
-									)}
-								</ul>
-								</span>
-								: null}
-
-								{this.state.orphan_stops.length > 0
-								?
-								<span><strong>Stops</strong>
-								<ul>
-									{this.state.orphan_stops.map((s) => 
-										<li>{s.stop_name} ({s.stop_id})</li>
-									)}
-								</ul>
-								</span>
-								: null}
-
-								{this.state.orphan_cal_service.length + this.state.orphan_cdates_service > 0
-								?
-								<span><strong>Service dates</strong>
-								<ul>
-									{this.state.orphan_cal_service.map((c) => 
-										<li>{c.service_id}: {service_pattern_disp(c)}</li>
-									)}
-									{this.state.orphan_cdates_service.map((d) => 
-										<li>{d.service_id}: {service_exception_disp(d)}</li>
-									)}
-								</ul>
-								</span>
-								: null}
+				</div>
+			)
+		} else {
+			return (
+				<div>
+					{/* Page Heading */}
+					{/*<div className="d-sm-flex align-items-center justify-content-between mb-4">
+						<h1 className="h3 mb-0 text-gray-800"><br />GTFS-ride Info</h1>
+					</div>*/}
+					
+					{/* Content Row */}
+					<div className="row">
+	
+						{/* Content Column */}
+						<div className="col-lg-6 mb-4">
+	
+							{/* Project Card Example */}
+							<div className="card shadow mb-4">
+								<div className="card-header py-3">
+									<h6 className="m-0 font-weight-bold text-primary">Confirmation</h6>
+								</div>
+								<div className="card-body">
+									Click on the button below to clean <strong className="text-dark">{this.props.filename}</strong>.
+									Cleaning will return a copy of the feed with these removed:
+									<ul>
+										<li>Stops without trips</li>
+										<li>Routes without trips</li>
+										<li>Agencies without routes</li>
+										<li>Unused service dates and exceptions</li>
+									</ul>
+									<button onClick={this.submit}>Clean {this.props.filename}</button>
+								</div>
 							</div>
 						</div>
-						: null}
-					</div>
-				</div>				
-			</div>
-		)
+	
+						{/* Content Column */}
+						<div className="col-lg-6 mb-4">
+	
+							{/* Project Card Example */}
+							<div className="card shadow mb-4">
+								<div className="card-header py-3">
+									<h6 className="m-0 font-weight-bold text-primary">Status</h6>
+								</div>
+								<div className="card-body">
+									{this.statusText()}
+								</div>
+							</div>
+	
+							{this.state.fileStatus == 3
+							?
+							<div className="card shadow mb-4">
+								<div className="card-header py-3">
+									<h6 className="m-0 font-weight-bold text-primary">Cleaning Report</h6>
+								</div>
+								<div className="card-body">
+									{ (this.state.orphan_agencies.length + this.state.orphan_stops.length + this.state.orphan_routes.length + this.state.orphan_cal_service.length + this.state.orphan_cdates_service.length) > 0
+									?
+									<span>Removed the following unused items from {this.props.filename}:</span>
+									:
+									<span>No unused items found on {this.props.filename}.</span>
+									}
+									<br/>
+									{this.state.orphan_agencies.length > 0
+									?
+									<span><strong>Agencies</strong>
+									<ul>
+										{this.state.orphan_agencies.map((a) => 
+											<li>{a.agency_name} ({a.agency_id})</li>
+										)}
+									</ul>
+									</span>
+									: null}
+	
+									{this.state.orphan_routes.length > 0
+									?
+									<span><strong>Routes</strong>
+									<ul>
+										{this.state.orphan_routes.map((r) => 
+											<li>{r.route_short_name}{(r.route_short_name && r.route_long_name) ? " - " : null}{r.route_long_name} ({r.route_id})</li>
+										)}
+									</ul>
+									</span>
+									: null}
+	
+									{this.state.orphan_stops.length > 0
+									?
+									<span><strong>Stops</strong>
+									<ul>
+										{this.state.orphan_stops.map((s) => 
+											<li>{s.stop_name} ({s.stop_id})</li>
+										)}
+									</ul>
+									</span>
+									: null}
+	
+									{this.state.orphan_cal_service.length + this.state.orphan_cdates_service > 0
+									?
+									<span><strong>Service dates</strong>
+									<ul>
+										{this.state.orphan_cal_service.map((c) => 
+											<li>{c.service_id}: {service_pattern_disp(c)}</li>
+										)}
+										{this.state.orphan_cdates_service.map((d) => 
+											<li>{d.service_id}: {service_exception_disp(d)}</li>
+										)}
+									</ul>
+									</span>
+									: null}
+								</div>
+							</div>
+							: null}
+						</div>
+					</div>				
+				</div>
+			)
+		}
+		
 	}
 	
 }
