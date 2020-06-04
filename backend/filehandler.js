@@ -92,11 +92,11 @@ async function split(split_by, arr_limit, dep_limit, agency_sel, start, end){
     return split_filename
 }
 
-async function clean(){
+async function clean(clean_by){
     console.log("Cleaning feed...")
     var clean_result = Clean.Clean(
         agencies, routes, trips, stops, stop_times, calendar, calendar_dates, stop_times,
-        filename
+        filename, clean_by
     )
     console.log("Feed clean succeeded")
     return clean_result
@@ -647,7 +647,31 @@ app.get(LIST_AGENCY_URL, (req, res) => {
     res.send()
    
 })
-
+//CLEAN - PARAMETERS
+app.post(CLEAN_POST_URL, async (req, res) => {
+    console.log("CLEAN PARAMS")
+    console.log(req.url)
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    var params = req.body
+    
+    if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){ // if the user has already uploaded a valid feed
+        // make promise for generating feed file (async)
+        // we need to call feed creation before sending the response so that the client will wait instead of receiving nothing
+        clean_promise = new Promise((resolve, reject) => {
+            console.log("Params received")
+            res.writeHead(200)
+            res.write("Params received")
+            res.end()
+            console.log("splitting feed with params:")
+            console.log(params)
+            resolve (clean(params.clean_by)) // generate the feed file and resolve the promise when done
+        })
+    } else {
+        res.writeHead(400)
+        res.write("No feed uploaded")
+        res.end()
+    }
+})
 // --------------------------------------------------------------------------------
 // CLEAN - CONFIRMATION & START CLEANING
 app.get(CLEAN_CONFIRM_URL, (req, res) => {
