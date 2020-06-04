@@ -176,33 +176,40 @@ module.exports = {
     },
     Clean: function(
         agencies, routes, trips, stops, stop_times, calendar, calendar_dates, stop_times,
-        dir_name
+        dir_name, clean_options
     ){
+        //CLEAN_OPTIONS - 
+        //0: ALL FILES
+        //1: CALENDARS
+        //2: STOPS/ROUTES/AGENCIES
         orphanStops = [];
         orphanRoutes = [];
         orphanAgencies = [];
         orphanCalServiceIds = [];
         orphanCDServiceIds = [];        
         //Removes orphan stops (stops that are never visited on a trip)
-        this.removeOrphanStops(stops, stop_times);
-        console.log(stops);
-        //Remove routes with no trip
-        this.removeOrphanRoutes(routes, trips);
-        console.log(routes);
-        //Removes agencies with no routes
-        this.removeOrphanAgencies(agencies, routes);
-        console.log(agencies);
-        if (calendar != null)
-            this.removeOrphanCalendar(calendar, trips);
-        if (calendar_dates != null)
-            this.removeOrphanCalendarDate(calendar_dates, trips);
+        if (clean_options == 0 || clean_options == 2){
+            this.removeOrphanStops(stops, stop_times);
+            console.log(stops);
+            //Remove routes with no trip
+            this.removeOrphanRoutes(routes, trips);
+            console.log(routes);
+            //Removes agencies with no routes
+            this.removeOrphanAgencies(agencies, routes);
+            console.log(agencies);
+        }
+        if (clean_options == 0 || clean_options == 1){
+            if (calendar != null)
+                this.removeOrphanCalendar(calendar, trips);
+            if (calendar_dates != null)
+                this.removeOrphanCalendarDate(calendar_dates, trips);
+        }
         //CREATE UPDATED STOPS FILE
         var stopsCSV = csvStringifySync(stops, {header: true, columns: ["stop_id", "stop_code", "stop_name", "stop_desc", "stop_lat", "stop_lon", "zone_id", "stop_url", "location_type", "parent_station", "stop_timezone", "wheelchair_boarding", "level_id", "platform_code"]})
         var routesCSV = csvStringifySync(routes, {header: true, columns: ["agency_id","route_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_color","route_text_color","route_sort_order","min_headway_minutes","eligibility_restricted"]})
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
         var calendarCSV = csvStringifySync(calendar, {header: true, columns: ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]})
         var calendarDatesCSV = csvStringifySync(calendar_dates, {header: true, columns: ["service_id","date","exception_type"]})
-
         // DELETE PREVIOUS FILES
         try {
             var out = execSync('rm ./clean/*') // delete all files in clean dir
