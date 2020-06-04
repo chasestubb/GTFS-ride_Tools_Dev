@@ -4,6 +4,23 @@ var fs = require('fs');
 var csvStringifySync = require('csv-stringify/lib/sync');
 var {execSync} = require('child_process')
 
+var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
+var routes = csv_parse(fs.readFileSync("../testFeeds/albany/routes.txt"), {columns: true}) 
+var stops = csv_parse(fs.readFileSync("../testFeeds/albany/stops.txt"), {columns: true})
+var stop_times = csv_parse(fs.readFileSync("../testFeeds/albany/stop_times.txt"), {columns: true})
+var trips = csv_parse(fs.readFileSync("../testFeeds/albany/trips.txt"), {columns: true})
+var agencies = csv_parse(fs.readFileSync("../testFeeds/albany/agency.txt"), {columns: true})
+var frequencies =''
+var feed_info = ''
+var board_alight =''
+var trip_capacity=''
+var rider_trip=''
+var ridership=''
+var ride_feed_info=''
+var calendar=''
+var calendar_dates = ''
+
+
 module.exports = {
 
     //will only work with globals?
@@ -44,13 +61,28 @@ module.exports = {
             }
         }
     },
-    removeFromTrips: function(route_id1, trips){
-        for (var i = 0; i < trips.length; i++){
-            if (trips[i].route_id != route_id1){
-                trips.splice(i, 1);
-                i = i - 1;
-            }
-        }
+    removeFromTrips: function(routes, trips){
+        for (j = 0; j < trips.length;){
+            //      console.log("removeFromStopTimes(): j=" + j)
+                  if (trips.length == routes.length){
+                      console.log("done");
+                      break;
+                  }
+                  for (i = 0; i < routes.length; i++){
+                      var found = 0;
+                      if (routes[i].route_id == trips[j].route_id){
+                          found = 1;
+                          break;                      
+                      }
+                  }
+                  if (found == 0){
+                      trips.splice(j, 1)
+                  }
+                  else if (found == 1){
+                      j = j + 1;
+                  }
+              }
+          
     },
     removeFromStopTimes: function(trips, stop_times){
         for (j = 0; j < stop_times.length;){
@@ -393,17 +425,15 @@ module.exports = {
                 console.log("REMOVE FROM TRIP_CAPACITY")
                 this.removeAgencyFromTripCapacity(desired_agency, trip_capacity);
             }
-            for (var j = 0; j < routes.length; j++){
-                console.log("REMOVE FROM TRIPS " + j)
-                this.removeFromTrips(routes[j].route_id, trips);
-            }
-     //       for (j = 0; j < stop_times.length; j++){
-            console.log("REMOVE FROM STOP_TIMES " + j)
+            console.log("REMOVE FROM TRIPS ")
+            this.removeFromTrips(routes, trips);
+            console.log(trips.length);
+            console.log("REMOVE FROM STOP_TIMES ")
             this.removeFromStopTimes(trips,stop_times);
-       //     }
             console.log("REMOVE FROM STOPS")
             this.removeFromStops(stops, stop_times);
             console.log("we made it!");
+            return;
         }
         else if (split_options == 2){
             console.log("date")
@@ -449,7 +479,7 @@ module.exports = {
 
 //module.exports.Split(2, "6:00:00", "6:00:00", "TEST", 20100401, 20100405);
 //module.exports.Split(0, "5:10:00", "5:15:00", 0);
-/*module.exports.Split( agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+module.exports.Split( agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
     frequencies, stop_times, feed_info,
     board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
-    2, "9:00:00", "10:00:00", 457, 20150101, 20210202, "albany")*/
+    1, "9:00:00", "10:00:00", 456, 20150101, 20210202, "albany")
