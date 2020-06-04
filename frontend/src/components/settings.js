@@ -6,6 +6,7 @@ export const RIDERSHIP_TIME = "Total"
 // Paths -- CHANGING THIS REQUIRES A CHANGE ON backend/filehandler.js
 export const SERVER_CHECK_URL = "/server_check"
 export const FILE_UPLOAD_URL = "/fileupload"
+export const RESET_URL = "/reset"
 export const INFO_URL = "/info"
 export const INFO_AGENCY_URL = "/info/agency/"
 export const INFO_ROUTE_URL = "/info/route/"

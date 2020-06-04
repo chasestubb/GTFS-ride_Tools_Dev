@@ -598,7 +598,7 @@ app.post(SPLIT_POST_URL, async (req, res) => {
             res.end()
             console.log("splitting feed with params:")
             console.log(params)
-            resolve (split(params.split_by, params.dep_time, params.arr_time, params.start_date, params.end_date, params.agency_id)) // generate the feed file and resolve the promise when done
+            resolve (split(params.split_by, params.arr_time, params.dep_time, params.agency_id, params.start_date, params.end_date)) // generate the feed file and resolve the promise when done
         })
     } else {
         res.writeHead(400)
