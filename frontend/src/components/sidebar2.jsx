@@ -11,13 +11,13 @@ import {Link, NavLink} from 'react-router-dom';
 const navoptions = [
 	{id: "info",  name: "Feed Info",          icon: "fas fa-info-circle"},
 	{id: "fc",    name: "Test Feed Creation", icon: "fas fa-file-archive"},
-	{id: "ns",    name: "Network State",      icon: "fas fa-project-diagram"},
-	{id: "diff",  name: "Difference",         icon: "fas fa-not-equal"},
 	{id: "clean", name: "Clean",              icon: "fas fa-broom"},
 	//{id: "split", name: "Split",              icon: "fas fa-copy"},
 	{id: "split", name: "Split",              icon: "fas fa-filter"},
 	//{id: "tm",  name: "Time Merge",         icon: "fas fa-calendar-alt"}, // now in merge
 	{id: "merge", name: "Merge",              icon: "fas fa-object-group"},
+	{id: "diff",  name: "Difference",         icon: "fas fa-not-equal"},
+	{id: "ns",    name: "Network State",      icon: "fas fa-project-diagram"},
 	//{id: "as",  name: "Agency Split",       icon: "fas fa-landmark"}, // now in split
 	//{id: "ra",  name: "Ridership Anomaly",  icon: "fas fa-search"}, // not a priority
 	//{id: "sc",  name: "Service Changes",    icon: "fas fa-edit"}, // not a priority

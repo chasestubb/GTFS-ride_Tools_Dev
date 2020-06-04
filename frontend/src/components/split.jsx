@@ -316,7 +316,7 @@ class Split extends React.Component{
 								</div>
 								<div className="card-body">
 									<label for="split_by">Split <strong className="text-dark">{this.props.filename}</strong> by</label>
-									<select id="split_by" name="split_by" onChange={this.set}>
+									<select id="split_by" name="split_by" onChange={this.setNumber}>
 										<option value={2}>Date</option>
 										<option value={0}>Time</option>
 										<option value={1}>Agency</option>
