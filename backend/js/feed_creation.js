@@ -67,6 +67,16 @@
 
 */
 
+// time limits for functions (in milliseconds)
+const STOP_TIMES_TIME_LIMIT = 30000
+const BOARD_ALIGHT_TIME_LIMIT = 45000
+const BOARD_ALIGHT_MEM_LIMIT = 1000000000
+const RIDERSHIP_TOTAL_TIME_LIMIT = 90000
+const RIDERSHIP_AGENCY_TIME_LIMIT = 45000
+const RIDERSHIP_ROUTE_TIME_LIMIT = 30000
+const RIDERSHIP_TRIP_TIME_LIMIT = 30000
+const RIDERSHIP_STOP_TIME_LIMIT = 30000
+
 var randomLastName = require('random-lastname');
 var randordinal_converter = require('number-to-words'); // ex ordinal_converter.toOrdinal(21); => “21st”
 var csvStringify = require('csv-stringify');
@@ -78,9 +88,11 @@ var {execSync} = require('child_process')
 
 var Info = require("./info")
 
-var FILEPATH = "feed_creation/";
-var FILENAME = "fc.zip";
+//var filepath = "feed_creation/";
+//var filename = "fc.zip";
 //var FILEPATH = "./"
+
+var log_output = ""
 
 // GET RANDOM INT INCLUSIVE ================
 function getRandomIntInclusive (min, max) {
@@ -94,6 +106,36 @@ function pad(num) {
     var s = num + "";
     while (s.length < 2) s = "0" + s;
     return s;
+}
+
+// prints str to the console and adds the same str to the global var log_output
+function log(str){
+    log_output += (str + "\n")
+    console.log(str)
+}
+
+// prints "Generating <str>...", use at the start of a function
+function log_start(str){
+    log("Generating " + str + "...")
+}
+
+// prints "<str> done [in <time> ms]"", use at the end of a function
+function log_end(str, time){
+    if (time < 0){
+        log(str + " completed.")
+    } else {
+        log(str + " completed in " + time + " milliseconds.")
+    }
+}
+
+// prints "<str> stopped after <time> ms, length is <length>", use when a function is stopped due to time limits
+function log_stopped(str, time, length){
+    log(str + " stopped after " + time + " milliseconds, resulting output contains " + length + " lines.")
+}
+
+// prints "<str> not generated because the user chose not to"
+function log_none(str){
+    log("Cancelled -- the user has selected to not use " + str)
 }
 
 
@@ -284,6 +326,9 @@ module.exports = {
     //   agency_timezone | static - always "America/Los_Angeles"
 
     agencyCreate: function(num_agencies){
+        log_start("agencies")
+        var start = Date.now()
+
         var agencies = [];
         var temp_agency = {
             agency_id: "",
@@ -305,6 +350,7 @@ module.exports = {
             temp_agency.agency_timezone = "America/Los_Angeles";
             agencies.push(temp_agency);
         }
+        log_end("agencies", Date.now() - start)
         return agencies;  
     },
 
@@ -325,6 +371,7 @@ module.exports = {
     //   end_date         | static - always "20500101" = Jan 1, 2050
 
     calendarCreate: function(operation_days, start_date_input, end_date_input, calendar_type){
+        log_start("calendar")
         // var calendar = {
         //     service_id: "WEEKEND_CALENDAR",
         //     monday: 0,
@@ -351,10 +398,12 @@ module.exports = {
         // }
         if (calendar_type == 1){
             //if the user selected not to use calendar.txt
+            log_none("calendar.txt")
             return;
         }
         else{
             if (operation_days == 0){
+                log_end("calendar (weekend)", -1)
                 return {
                     service_id: "WEEKEND_CALENDAR",
                     monday: 0,
@@ -369,6 +418,7 @@ module.exports = {
                 }
             }
             if (operation_days == 1){
+                log_end("calendar (weekday)", -1)
                 return {
                     service_id: "WEEKDAY_CALENDAR",
                     monday: 1,
@@ -383,6 +433,7 @@ module.exports = {
                 }
             }
             if (operation_days == 2){
+                log_end("calendar (weekday + sat)", -1)
                 return {
                     service_id: "SATURDAY_CALENDAR",
                     monday: 1,
@@ -397,6 +448,7 @@ module.exports = {
                 }
             }
             if (operation_days == 3){
+                log_end("calendar (weekday + sun)", -1)
                 return {
                     service_id: "SUNDAY_CALENDAR",
                     monday: 1,
@@ -411,6 +463,7 @@ module.exports = {
                 };
             }
             if (operation_days == 4){
+                log_end("calendar (all days)", -1)
                 return {
                     service_id: "ALL_CALENDAR",
                     monday: 1,
@@ -441,9 +494,11 @@ module.exports = {
     //   exception_type   | static - always "2" for remove (as opposed to add)
 
     calendarDatesCreate: function(calendar, operation_days, start_date_input, end_date_input, calendar_type){
-    
+        log_start("calendar_dates")
+        var start = Date.now()
         if (calendar_type == 0){
             //do not use calendar_dates
+            log_none("calendar_dates.txt")
             return;
         }
         else if (calendar_type == 2){
@@ -470,6 +525,7 @@ module.exports = {
                 calendar_dates.push(christmas_date);
             }
 
+            log_end("calendar_dates", Date.now() - start)
             return calendar_dates;
         }
         else{
@@ -684,8 +740,8 @@ module.exports = {
                 console.log(calendar_dates[j]);
             }*/
             console.log("Number of days in this calendar: " + calendar_dates.length)
-            
-           return calendar_dates;
+            log_end("calendar_dates", Date.now() - start)
+            return calendar_dates;
         }
     },
 
@@ -707,6 +763,8 @@ module.exports = {
     //   feed_version         | static - always "1.0.0"    
 
     feedInfoCreate: function(feed_start_date1, feed_end_date1){
+        log_start("feed_info")
+        log_end("feed_info", -1)
         return {
             feed_publisher_name: "Test Transit",
             feed_publisher_url: "https://github.com/ODOT-PTS/GTFS-ride/",
@@ -745,6 +803,8 @@ module.exports = {
     //   route_type       | static - always "3" (= Bus)
 
     routesCreate: function(num_routes, num_agencies, agencies){
+        log_start("routes")
+        var start = Date.now()
         routes = [];
         var temp_route = {
             route_id: "",
@@ -770,6 +830,7 @@ module.exports = {
             temp_route.route_type = 3;
             routes.push(temp_route);
         }
+        log_end("routes", Date.now() - start)
         return routes;
     },
 
@@ -802,6 +863,8 @@ module.exports = {
     //   stop_lon   | random - see description above
 
     stopsCreate: function(num_stops){
+        log_start("stops")
+        var start = Date.now()
         var stops = [];
         var temp_stop = {
             stop_id: "",
@@ -837,6 +900,7 @@ module.exports = {
             temp_stop.stop_lon = randLon;
             stops.push(temp_stop);
         }
+        log_end("stops", Date.now() - start)
         return stops;
     },
     
@@ -877,6 +941,8 @@ module.exports = {
     //   stop_sequence   | algorithm - see desc above
 
     stopTimesCreate: function(num_trips, trips, num_stops, num_routes, num_trips_per_route){
+        log_start("stop_times")
+        var start = Date.now()
         var stop_times = [];
         var stop_sequence_list = [];
         // var stop_time_entry = {
@@ -944,13 +1010,19 @@ module.exports = {
                     // stop_time_entry.stop_sequence = c; // the stop sequence #
 
                     // PUSH LINE TO ARRAY
-                    stop_times.push(stop_time_entry); 
+                    stop_times.push(stop_time_entry);
+
+                    if (Date.now() - start >= 45000){
+                        log_stopped("stop_times", 45000, stop_times.length)
+                        return stop_times
+                    }
                 }
 
                 count = count + 1; // account for a new trip
             }
         }
         //console.log("Stop times " + stop_times.length)
+        log_end("stop_times", Date.now() - start)
         return stop_times;
     },
 
@@ -976,6 +1048,8 @@ module.exports = {
     //                           included because it is referenced in GTFS-ride
 
     tripsCreate: function(num_routes, num_trips_per_route){
+        log_start("trips")
+        var start = Date.now()
         var trips = [];
         var trips_counter = 1;
         var temp_trip = {
@@ -1003,8 +1077,8 @@ module.exports = {
 
                 trips.push(temp_trip);
             }
-
         }
+        log_end("trips", Date.now() - start)
         return trips;
     },
 
@@ -1048,6 +1122,7 @@ module.exports = {
     //   ride_feed_version     | STATIC -- 1.0.0
             
     rideFeedInfoCreate: function(files, feed_start_date, feed_end_date){
+        log_start("ride_feed_info")
         var ride_feed_info = {
             ride_files : files, // INT for specific combination of files
             ride_start_date : feed_start_date,
@@ -1060,6 +1135,7 @@ module.exports = {
             //defaults to all files if not speciified
             ride_feed_info.ride_files = 6;
         }
+        log_end("ride_feed_info", -1)
         return ride_feed_info;
     },
 
@@ -1098,9 +1174,15 @@ module.exports = {
 
     // POSSIBLE DECLARATION boardAlightCreate: function(trips, stops, num_trips, num_stops, stop_times,relationship, loadcount, loadtype, rackdown,bikeboardings,bikealightings,rampused,rampboardings,rampalightings,user_source){
     boardAlightCreate: function(trips, stops, num_trips, num_stops, num_routes, stop_times, user_source, rider_trip, start_date, end_date, operation_days){
+        log_start("board_alight")
+        var start = Date.now()
+        var start_op
+
         var board_alight = [];
 
         var d = start_date
+        log("    Reading stop_times and copying its contents for every service day...")
+        start_op = Date.now()
         while (d <= end_date){ // for every day on the feed
             for (var st = 0; st < stop_times.length; st++){ // fill the board_alight array with info from stop_times, no ridership info yet
                 board_alight.push ({
@@ -1125,21 +1207,41 @@ module.exports = {
                     service_departure_time : stop_times[st].departure_time,
                     source : user_source,  
                 })
+                if (process.memoryUsage().rss >= BOARD_ALIGHT_MEM_LIMIT){ // if total memory usage for this node process is at least 512 MiB
+                    log("No more rows added to board_alight due to memory limit. Last row on board_alight is row " + board_alight.length + " (trip " + stop_times[st].trip_id + " at stop " + stop_times[st].stop_id + " on " + d + ").")
+
+                    // break out of 2 levels of loops at once
+                    d = end_date + 1 // the while loop
+                    break // the for loop
+                }
+                if (Date.now() - start_op >= BOARD_ALIGHT_TIME_LIMIT){
+                    log("No more rows added to board_alight due to time limit. Last row on board_alight is row " + board_alight.length + " (trip " + stop_times[st].trip_id + " at stop " + stop_times[st].stop_id + " on " + d + ").")
+                    
+                    // break out of 2 levels of loops at once
+                    d = end_date + 1 // the while loop
+                    break // the for loop
+                }
             }
             // increment the date
             //d = tomorrow(d)
             d = next_service_day(d, operation_days, true)
         }
+        log("    board_alight array generated in " + (Date.now() - start_op) + " milliseconds with no riderships")
 
         // sort the rider_trip array by service_date
         /* this WILL change the final array and the exported file
            to undo this, sort the rider_trip array by rider_id,
            but tools should not fail due to the ordering of the rows
         */
+        log("    Sorting rider_trip by date...")
+        start_op = Date.now()
         rider_trip.sort(function(a, b){
             return a.service_date - b.service_date
         })
+        log("    rider_trip sorted in " + (Date.now() - start_op) + " milliseconds.")
 
+        log("    Filling board_alight with ridership data...")
+        start_op = Date.now()
         // fill the board_alight array with ridership data
         var num_stops_per_route = num_stops / num_routes;
         var last_date = start_date // the date of the previous row in rider_trip
@@ -1158,9 +1260,18 @@ module.exports = {
             var alighting_index = trip_start_index + rider_trip[r].alighting_stop_sequence - 1 // the index where alighting occurs
 
             // increment the boardings and alightings
-            board_alight[boarding_index].boardings++
-            board_alight[alighting_index].alightings++
+            if (boarding_index < board_alight.length){
+                board_alight[boarding_index].boardings++
+            }
+            if (alighting_index < board_alight.length){
+                board_alight[alighting_index].alightings++
+            }
+            
         }
+        log("    board_alight filled with ridership data in " + (Date.now() - start_op) +" milliseconds.")
+
+        start_op = Date.now()
+        log("    Calculating vehicle load...")
 
         // do another run-through of the board_alight array to set the load_count field
         var max_load = 60 // the maximum load, used for current_load
@@ -1175,11 +1286,15 @@ module.exports = {
             }
             board_alight[b].current_load = Math.round(board_alight[b].load_count * 100 / max_load) // current_load is a percentage of the load (how full the vehicle is)
         }
+        log("    Vehicle load calculated in " + (Date.now() - start_op) + " milliseconds.")
         
+        log_end("board_alight", Date.now() - start)
         return board_alight;
     },
 
     riderTripCreate: function(min_riders, max_riders, trips, num_trips, num_stops, routes, num_routes, stop_times, num_agencies, aggr_level, start_date, end_date, operation_days){
+        log_start("rider_trip")
+        var start = Date.now()
         var num_riders
         var rider_trips = [];
         var num_stops_per_route = num_stops / num_routes;
@@ -1255,6 +1370,7 @@ module.exports = {
             }
         }
 
+        log_end("rider_trip", Date.now() - start)
         return rider_trips;
     },
 
@@ -1271,6 +1387,9 @@ module.exports = {
     //   temp_ridership
 
     ridershipCreate: function(operation_days, board_alight, agency, stops, trips, routes, start_date, end_date){
+        log_start("ridership")
+        var start = Date.now()
+        var start_op
         var ridership = [];
         var weekday = Number(operation_days !== 0) // converted to number so that true is 1 and false is 0 (instead of "true" and "false")
         var saturday = Number(operation_days === 0 || operation_days === 2 || operation_days === 4)
@@ -1297,113 +1416,163 @@ module.exports = {
                 break
         }
 
-        // agency-level ridership
-        for (var a = 0; a < agency.length; a++){
-            var agency_ridership = Info.countAgencyRiders(agency[a], board_alight, trips, routes);
-            ridership.push({
-                total_boardings : agency_ridership,
-                total_alightings : agency_ridership,
-                ridership_start_date : start_date,
-                ridership_end_date : end_date,
-                ridership_start_time : "",
-                ridership_end_time : "",
-                service_id: service_pattern,
-                monday: weekday,
-                tuesday: weekday,
-                wednesday: weekday,
-                thursday: weekday,
-                friday: weekday,
-                saturday: saturday,
-                sunday: sunday,
-                agency_id : agency[a].agency_id,
-                route_id : "",
-                direction_id : "" ,
-                trip_id : "",
-                stop_id : "",
-            })
+        // stop-level ridership
+        log("    Calculating ridership per stop...")
+        start_op = Date.now()
+        for (var s = 0; s < stops.length; s++){
+            if (Date.now() - start_op <= RIDERSHIP_STOP_TIME_LIMIT){
+                ridership.push({
+                    total_boardings : Info.countStopRiders(board_alight, stops[s]),
+                    total_alightings : Info.countStopAlightings(board_alight, stops[s]),
+                    ridership_start_date : start_date,
+                    ridership_end_date : end_date,
+                    ridership_start_time : "",
+                    ridership_end_time : "",
+                    service_id: service_pattern,
+                    monday: weekday,
+                    tuesday: weekday,
+                    wednesday: weekday,
+                    thursday: weekday,
+                    friday: weekday,
+                    saturday: saturday,
+                    sunday: sunday,
+                    agency_id : "",
+                    route_id : "",
+                    direction_id : "",
+                    trip_id : "",
+                    stop_id : stops[s].stop_id,
+                })
+            } else {
+                log_stopped("    Ridership per stop calculation", RIDERSHIP_STOP_TIME_LIMIT, ridership.length)
+                break
+            }
         }
-
-        // route-level ridership
-        for (var r = 0; r < routes.length; r++){
-            var route_ridership = Info.countRouteRiders(routes[r], board_alight, trips);
-            ridership.push({
-                total_boardings : route_ridership,
-                total_alightings : route_ridership,
-                ridership_start_date : start_date,
-                ridership_end_date : end_date,
-                ridership_start_time : "",
-                ridership_end_time : "",
-                service_id: service_pattern,
-                monday: weekday,
-                tuesday: weekday,
-                wednesday: weekday,
-                thursday: weekday,
-                friday: weekday,
-                saturday: saturday,
-                sunday: sunday,
-                agency_id : "",
-                route_id : routes[r].route_id,
-                direction_id : "" ,
-                trip_id : "",
-                stop_id : "",
-            })
-        }
+        log_end("    Ridership per stop calculation", Date.now() - start_op)
 
         // trip-level ridership
-        for (var t = 0; t < trips.length; t++){
-            var trip_ridership = Info.countTripRiders(board_alight, trips[t]);
-            ridership.push({
-                total_boardings : trip_ridership,
-                total_alightings : trip_ridership,
-                ridership_start_date : start_date,
-                ridership_end_date : end_date,
-                ridership_start_time : "",
-                ridership_end_time : "",
-                service_id: service_pattern,
-                monday: weekday,
-                tuesday: weekday,
-                wednesday: weekday,
-                thursday: weekday,
-                friday: weekday,
-                saturday: saturday,
-                sunday: sunday,
-                agency_id : "",
-                route_id : "",
-                direction_id : trips[t].direction_id,
-                trip_id : trips[t].trip_id,
-                stop_id : "",
-            })
-        }
-
-        // stop-level ridership
-        for (var s = 0; s < stops.length; s++){
-            ridership.push({
-                total_boardings : Info.countStopRiders(board_alight, stops[s]),
-                total_alightings : Info.countStopAlightings(board_alight, stops[s]),
-                ridership_start_date : start_date,
-                ridership_end_date : end_date,
-                ridership_start_time : "",
-                ridership_end_time : "",
-                service_id: service_pattern,
-                monday: weekday,
-                tuesday: weekday,
-                wednesday: weekday,
-                thursday: weekday,
-                friday: weekday,
-                saturday: saturday,
-                sunday: sunday,
-                agency_id : "",
-                route_id : "",
-                direction_id : "",
-                trip_id : "",
-                stop_id : stops[s].stop_id,
-            })
+        log("    Calculating ridership per trip...")
+        start_op = Date.now()
+        if (Date.now() - start < RIDERSHIP_TOTAL_TIME_LIMIT){
+            for (var t = 0; t < trips.length; t++){
+                if (Date.now() - start_op <= RIDERSHIP_TRIP_TIME_LIMIT){
+                    var trip_ridership = Info.countTripRiders(board_alight, trips[t]);
+                    ridership.push({
+                        total_boardings : trip_ridership,
+                        total_alightings : trip_ridership,
+                        ridership_start_date : start_date,
+                        ridership_end_date : end_date,
+                        ridership_start_time : "",
+                        ridership_end_time : "",
+                        service_id: service_pattern,
+                        monday: weekday,
+                        tuesday: weekday,
+                        wednesday: weekday,
+                        thursday: weekday,
+                        friday: weekday,
+                        saturday: saturday,
+                        sunday: sunday,
+                        agency_id : "",
+                        route_id : "",
+                        direction_id : trips[t].direction_id,
+                        trip_id : trips[t].trip_id,
+                        stop_id : "",
+                    })
+                } else {
+                    log_stopped("    Ridership per trip calculation", RIDERSHIP_TRIP_TIME_LIMIT, ridership.length)
+                    break
+                }
+            }
+            log_end("    Ridership per trip calculation", Date.now() - start_op)
+        } else {
+            log("    Not enough time to calculate ridership by route")
         }
         
+
+        // route-level ridership
+        log("    Calculating ridership per route...")
+        start_op = Date.now()
+        if (Date.now() - start < RIDERSHIP_TOTAL_TIME_LIMIT){
+            for (var r = 0; r < routes.length; r++){
+                if (Date.now() - start_op <= RIDERSHIP_ROUTE_TIME_LIMIT){
+                    var route_ridership = Info.countRouteRiders(routes[r], board_alight, trips);
+                    ridership.push({
+                        total_boardings : route_ridership,
+                        total_alightings : route_ridership,
+                        ridership_start_date : start_date,
+                        ridership_end_date : end_date,
+                        ridership_start_time : "",
+                        ridership_end_time : "",
+                        service_id: service_pattern,
+                        monday: weekday,
+                        tuesday: weekday,
+                        wednesday: weekday,
+                        thursday: weekday,
+                        friday: weekday,
+                        saturday: saturday,
+                        sunday: sunday,
+                        agency_id : "",
+                        route_id : routes[r].route_id,
+                        direction_id : "" ,
+                        trip_id : "",
+                        stop_id : "",
+                    })
+                } else {
+                    log_stopped("    Ridership per route calculation", RIDERSHIP_ROUTE_TIME_LIMIT, ridership.length)
+                    break
+                }
+            }
+            log_end("    Ridership per route calculation", Date.now() - start_op)
+        } else {
+            log("    Not enough time to calculate ridership by route")
+        }
+        
+
+        // agency-level ridership
+        log("    Calculating ridership per agency...")
+        start_op = Date.now()
+        if (Date.now() - start < RIDERSHIP_TOTAL_TIME_LIMIT){
+            for (var a = 0; a < agency.length; a++){
+                if (Date.now() - start_op <= RIDERSHIP_AGENCY_TIME_LIMIT){
+                    var agency_ridership = Info.countAgencyRiders(agency[a], board_alight, trips, routes);
+                    ridership.push({
+                        total_boardings : agency_ridership,
+                        total_alightings : agency_ridership,
+                        ridership_start_date : start_date,
+                        ridership_end_date : end_date,
+                        ridership_start_time : "",
+                        ridership_end_time : "",
+                        service_id: service_pattern,
+                        monday: weekday,
+                        tuesday: weekday,
+                        wednesday: weekday,
+                        thursday: weekday,
+                        friday: weekday,
+                        saturday: saturday,
+                        sunday: sunday,
+                        agency_id : agency[a].agency_id,
+                        route_id : "",
+                        direction_id : "" ,
+                        trip_id : "",
+                        stop_id : "",
+                    })
+                } else {
+                    log_stopped("    Ridership per agency calculation", RIDERSHIP_AGENCY_TIME_LIMIT, ridership.length)
+                    break
+                }
+            }
+            log_end("    Ridership per agency calculation", Date.now() - start_op)
+        } else {
+            log("    Not enough time to calculate ridership by agency")
+        }
+        
+        
+        log_end("ridership", Date.now() - start)
         return ridership;
     },
 
     tripCapacityCreate: function(trips, num_trips, agencies, num_agencies, routes){
+        log_start("trip_capacity")
+        //var start = Date.now()
         var trip_capacities = [];
   
         for (var i = 0; i < num_trips; i++){
@@ -1418,6 +1587,7 @@ module.exports = {
                 bike_capacity : 2,
             });
         }
+        log_end("trip_capacity", -1)
         return trip_capacities;
     },
 
@@ -1428,7 +1598,7 @@ module.exports = {
         num_agencies, num_routes, num_stops, num_trips, num_trips_per_route,
         start_date, end_date, feed_date, operation_days,
         user_source, min_riders, max_riders, aggr_level,
-        calendar_type, files){
+        calendar_type, files, filepath, filename){
 
         // ridership should start on the next service day if feed does not start on a service day
         // example case: service is only available on weekdays, but feed starts on Saturday
@@ -1450,6 +1620,10 @@ module.exports = {
         var tripCapacity = this.tripCapacityCreate(trips, num_trips, agencies, num_agencies, routes);
 
         // CSV STRINGIFY =========================
+
+        log("Stringifying data... (converting internal objects to CSV text)")
+        var start = Date.now()
+
         var agencyCSV = csvStringifySync(agencies, {header: true, columns: ["agency_id", "agency_name", "agency_url", "agency_timezone", "agency_lang", "agency_phone", "agency_fare_url", "agency_email"]})
         
         if(calendar_type != 1)
@@ -1469,57 +1643,61 @@ module.exports = {
             var riderTripCSV = csvStringifySync(riderTrip, {header: true, columns: ["rider_id","agency_id","trip_id","boarding_stop_id","boarding_stop_sequence","alighting_stop_id","alighting_stop_sequence","service_date","boarding_time","alighting_time","rider_type","rider_type_description","fare_paid","transaction_type","fare_media","accompanying_device","transfer_status"]})
         var ridershipCSV = csvStringifySync(ridership, {header: true, columns: ["total_boardings","total_alightings","ridership_start_date","ridership_end_date","ridership_start_time","ridership_end_time","service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","agency_id","route_id","direction_id","trip_id","stop_id"]})
         var tripCapacityCSV = csvStringifySync(tripCapacity, {header: true, columns: ["agency_id","trip_id","service_date","vehicle_description","seated_capacity","standing_capacity","wheelchair_capacity","bike_capacity"]})
-
+        
+        log_end("Stringify", Date.now() - start)
 
         //console.log(process.cwd())
 
         // DELETE PREVIOUS FILES
         try {
             var out = execSync('rm ./feed_creation/*') // delete all files in feed_creation dir
-            console.log("File deletion output:")
-            console.log(out.toString())
+            log("File deletion output:")
+            log(out.toString())
         } catch (e){ // rm will throw an error if the dir is empty, this statement will catch the error (preventing the server from breaking)
-            console.log("RM error:")
-            console.log(e)
+            log("RM error:")
+            log(e)
         }
 
 
         // WRITE THE FILES =========================
-        fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
-        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
-        fs.writeFileSync(FILEPATH + "routes.txt", routesCSV);
-        fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
-        fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
-        fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
+        log("Writing text to files...")
+        start = Date.now()
+        fs.writeFileSync(filepath + "agency.txt", agencyCSV);
+        fs.writeFileSync(filepath + "stops.txt", stopsCSV);
+        fs.writeFileSync(filepath + "routes.txt", routesCSV);
+        fs.writeFileSync(filepath + "trips.txt", tripsCSV);
+        fs.writeFileSync(filepath + "stop_times.txt", stopTimesCSV);
+        fs.writeFileSync(filepath + "feed_info.txt", feedInfoCSV);
 
         if(calendar_type != 1)
-            fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+            fs.writeFileSync(filepath + "calendar.txt", calendarCSV);
         if(calendar_type != 0)
-            fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+            fs.writeFileSync(filepath + "calendar_dates.txt", calendarDatesCSV);
 
-        fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
+        fs.writeFileSync(filepath + "ride_feed_info.txt", rideFeedInfoCSV);
         if(files == 4 || files == 6)
-            fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
+            fs.writeFileSync(filepath + "board_alight.txt", boardAlightCSV)
         if(files == 6)
-            fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
-        fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV) // always generated
-        fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
+            fs.writeFileSync(filepath + "rider_trip.txt", riderTripCSV)
+        fs.writeFileSync(filepath + "ridership.txt", ridershipCSV) // always generated
+        fs.writeFileSync(filepath + "trip_capacity.txt", tripCapacityCSV)
+        log_end("Writing files", Date.now() - start)
 
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
-        process.chdir(FILEPATH); // change dir
+        process.chdir(filepath); // change dir
         try {
-            var out = execSync('zip -r -y fc.zip *.txt') // zip the files
-            console.log("File compression (zipping) output:")
-            console.log(out.toString())
+            var out = execSync('zip -r -y ' + filename + ' *.txt') // zip the files
+            log("File compression (zipping) output:")
+            log(out.toString())
         } catch (e){
-            console.log("ZIP error:")
-            console.log(e)
+            log("ZIP error:")
+            log(e)
         }
         process.chdir(current_dir); // undo change dir
 
-        // RETURN THE ZIP FILENAME
-        return (FILEPATH + FILENAME); 
+        // RETURN THE LOG OUTPUT
+        return (log_output);
     },
 
     // this function generates GTFS-ride files from a GTFS feed
@@ -1584,29 +1762,29 @@ module.exports = {
 
 
         // WRITE THE FILES =========================
-        fs.writeFileSync(FILEPATH + "agency.txt", agencyCSV);
-        fs.writeFileSync(FILEPATH + "stops.txt", stopsCSV);
-        fs.writeFileSync(FILEPATH + "routes.txt", routesCSV);
-        fs.writeFileSync(FILEPATH + "trips.txt", tripsCSV);
-        fs.writeFileSync(FILEPATH + "stop_times.txt", stopTimesCSV);
-        fs.writeFileSync(FILEPATH + "feed_info.txt", feedInfoCSV);
+        fs.writeFileSync(filepath + "agency.txt", agencyCSV);
+        fs.writeFileSync(filepath + "stops.txt", stopsCSV);
+        fs.writeFileSync(filepath + "routes.txt", routesCSV);
+        fs.writeFileSync(filepath + "trips.txt", tripsCSV);
+        fs.writeFileSync(filepath + "stop_times.txt", stopTimesCSV);
+        fs.writeFileSync(filepath + "feed_info.txt", feedInfoCSV);
 
         if(calendar_type != 1)
-            fs.writeFileSync(FILEPATH + "calendar.txt", calendarCSV);
+            fs.writeFileSync(filepath + "calendar.txt", calendarCSV);
         if(calendar_type != 0)
-            fs.writeFileSync(FILEPATH + "calendar_dates.txt", calendarDatesCSV);
+            fs.writeFileSync(filepath + "calendar_dates.txt", calendarDatesCSV);
 
-        fs.writeFileSync(FILEPATH + "ride_feed_info.txt", rideFeedInfoCSV);
+        fs.writeFileSync(filepath + "ride_feed_info.txt", rideFeedInfoCSV);
         if(files == 4 || files == 6)
-            fs.writeFileSync(FILEPATH + "board_alight.txt", boardAlightCSV)
+            fs.writeFileSync(filepath + "board_alight.txt", boardAlightCSV)
         if(files == 6)
-            fs.writeFileSync(FILEPATH + "rider_trip.txt", riderTripCSV)
-        fs.writeFileSync(FILEPATH + "ridership.txt", ridershipCSV) // always generated
-        fs.writeFileSync(FILEPATH + "trip_capacity.txt", tripCapacityCSV)
+            fs.writeFileSync(filepath + "rider_trip.txt", riderTripCSV)
+        fs.writeFileSync(filepath + "ridership.txt", ridershipCSV) // always generated
+        fs.writeFileSync(filepath + "trip_capacity.txt", tripCapacityCSV)
 
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
-        process.chdir(FILEPATH); // change dir
+        process.chdir(filepath); // change dir
         try {
             var out = execSync('zip -r -y fc.zip *.txt') // zip the files
             console.log("File compression (zipping) output:")
@@ -1618,7 +1796,7 @@ module.exports = {
         process.chdir(current_dir); // undo change dir
 
         // RETURN THE ZIP FILENAME
-        return (FILEPATH + FILENAME); 
+        return (filepath + filename); 
     } 
 }; 
 
