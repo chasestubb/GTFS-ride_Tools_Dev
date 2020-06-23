@@ -44,7 +44,7 @@ module.exports = {
                 j = j + 1;
             }
         }
-        console.log(stops)
+        //console.log(stops)
     },
     removeOrphanRoutes: function(routes, trips){
         var i, j;
@@ -68,7 +68,7 @@ module.exports = {
                 j = j + 1;
             }
         }
-        console.log(routes)
+        //console.log(routes)
     },
     countAgencies:function(routes){
         //Helper function to find how many different agencies are found in routes.
@@ -190,13 +190,13 @@ module.exports = {
         //Removes orphan stops (stops that are never visited on a trip)
         if (clean_options == 0 || clean_options == 2){
             this.removeOrphanStops(stops, stop_times);
-            console.log(stops);
+            //console.log(stops);
             //Remove routes with no trip
             this.removeOrphanRoutes(routes, trips);
-            console.log(routes);
+            //console.log(routes);
             //Removes agencies with no routes
             this.removeOrphanAgencies(agencies, routes);
-            console.log(agencies);
+            //console.log(agencies);
         }
         if (clean_options == 0 || clean_options == 1){
             if (calendar != null)
