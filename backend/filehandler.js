@@ -41,6 +41,9 @@ const CLEAN_CONFIRM_URL = "/clean/confirm"
 const CLEAN_FILE_URL = "/clean/getfile"
 const CLEAN_REPORT_URL = "/clean/getreport"
 
+// the file paths
+const FC_FILEPATH = "feed_creation/"
+const FC_FILENAME = "fc.zip"
 
 
 // parsed files go here
@@ -75,7 +78,7 @@ async function feed_creation(params){
         params.agencies, params.routes, params.stops, params.trips, params.trips_per_route,
         params.start_date, params.end_date, params.feed_date, params.operation_days,
         params.user_source, params.min_riders, params.max_riders, params.aggr_level,
-        params.calendar_type, params.files)
+        params.calendar_type, params.files, FC_FILEPATH, FC_FILENAME)
     console.log("Feed successfully created")
     return fc_filename
 }
@@ -565,10 +568,10 @@ app.get(FC_GET_URL, async (req, res) => {
     res.setHeader("Content-Type", "application/zip")
 
     // wait for feed creation to finish
-    // promise will be filename when resolved
+    // promise will be log when resolved
     // feed creation needs to be called before response is sent to the client because fc_promise will be empty (i.e. not a promise) otherwise
-    var fc_filename = await fc_promise
-    var fc_filepath = process.cwd() + "/" + fc_filename
+    var log = await fc_promise // TODO: send this log to the front-end
+    var fc_filepath = process.cwd() + "/" + FC_FILEPATH + FC_FILENAME
     res.download(fc_filepath, function(err){
         if (err){
             console.log("Error sending file: " + err)
