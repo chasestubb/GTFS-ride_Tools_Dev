@@ -76,6 +76,7 @@ class FC extends React.Component{
 			fileStatus: 0, // see the "enum values" section above
 			zip_filename: "fc", // the resulting zip file name (without extension)
 			err: "",
+			report: "",
 		}
 		this.setNumber = this.setNumber.bind(this);
 		this.set = this.set.bind(this);
@@ -205,12 +206,12 @@ class FC extends React.Component{
 	}
 
 	// sendGet sends a GET request and the server responds with a zip file when it has finished generating the feed
-	async sendGet(){
+	async sendGetFile(){
 		Axios.get(getURL, {
 			responseType: "arraybuffer" // response is a binary file, do not parse as string
 		}).then((res) => {
-			console.log("Response from sendGet:")
-			console.log(res)
+			//console.log("Response from sendGet:")
+			//console.log(res)
 			this.setState({fileStatus: 3})
 			let blob = new Blob([res.data], {type:res.headers['Content-Type']})
 			if (blob){
@@ -232,6 +233,19 @@ class FC extends React.Component{
 		}).catch((err) => {
 			console.log("ERROR " + err)
 			this.setState({err: err, fileStatus: -2})
+		})
+	}
+
+	// request the report for what is completed and what failed, sent after sendRequest has received a response
+	async sendGetReport(){
+		Axios.get(Settings.HOST + Settings.FC_REPORT_URL).then((res) => {
+			this.setState({
+				fileStatus: 3,
+				report: res.data
+			})
+		}).catch((err) => {
+			console.log("ERROR " + err)
+			this.setState({fileStatus: -2})
 		})
 	}
 
@@ -266,7 +280,8 @@ class FC extends React.Component{
 			console.log(params)
 			this.sendPost(params).then(() => { // send params then get file
 				this.setState({fileStatus: 2})
-				this.sendGet() // GET request should only be called after POST request has received a response
+				this.sendGetFile() // GET request should only be called after POST request has received a response
+				this.sendGetReport()
 			})
 		}
 	}
@@ -402,6 +417,17 @@ class FC extends React.Component{
 								<button onClick={this.submit} disabled={this.state.fileStatus === 1 || this.state.fileStatus === 2}>Generate Feed</button>
 							</div>
 						</div>
+
+						<div className="card shadow mb-4">
+							<div className="card-header py-3">
+								<h6 className="m-0 font-weight-bold text-primary">Notice about size and time limits</h6>
+							</div>
+							<div className="card-body">
+							Once the feed generation is complete, you will receive a detailed report on each step of the process.<br/><br/>
+							Since GTFS-ride feeds can get very large, the size of the feed has been limited to what can be generated in 2 minutes and 30 seconds (or just above 2:30).<br/><br/>
+							If certain aspects of the feed generation process must be cut off early, the report will specify how much was able to be completed. (for example: only the first one million lines of board_alight.txt being generated).
+							</div>
+						</div>
 					</div>
 
 					{/* Content Column */}
@@ -413,7 +439,16 @@ class FC extends React.Component{
 								<h6 className="m-0 font-weight-bold text-primary">Output Status</h6>
 							</div>
 							<div className="card-body">
-								{this.statusText()}
+								{this.statusText()}<br/>
+								{this.state.report
+								?
+								<div>
+									<br/><div>Server log output for the last feed:</div>
+									<div className="force-newlines">{this.state.report}</div>
+								</div>
+								:
+								null}
+								
 							</div>
 						</div>
 

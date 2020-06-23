@@ -68,9 +68,10 @@
 */
 
 // time limits for functions (in milliseconds)
-const STOP_TIMES_TIME_LIMIT = 30000
-const BOARD_ALIGHT_TIME_LIMIT = 45000
-const BOARD_ALIGHT_MEM_LIMIT = 1000000000
+const STOP_TIMES_TIME_LIMIT = 30000 // not used
+const RIDER_TRIP_TIME_LIMIT = 45000
+const BOARD_ALIGHT_TIME_LIMIT = 60000
+const BOARD_ALIGHT_MEM_LIMIT = 1000000000 // in bytes
 const RIDERSHIP_TOTAL_TIME_LIMIT = 90000
 const RIDERSHIP_AGENCY_TIME_LIMIT = 45000
 const RIDERSHIP_ROUTE_TIME_LIMIT = 30000
@@ -320,7 +321,7 @@ module.exports = {
     //   number of agencies
     //
     // Attributes: 
-    //   agency_id       | static - always "AGENCY#"          
+    //   agency_id       | static - always "AGENCY#"---       
     //   agency_name     | static - always "Test Transit #"
     //   agency_url      | static - always points to "https://www.gtfs-ride.org"
     //   agency_timezone | static - always "America/Los_Angeles"
@@ -365,7 +366,7 @@ module.exports = {
     //   service_id: set based on days of operation
     //
     // Attributes: 
-    //   service_id       | static - always ""          
+    //   service_id       | static - always ""---       
     //   monday...sunday  | static - each is set to "1"
     //   start_date       | static - always "20000101" = Jan 1, 2000
     //   end_date         | static - always "20500101" = Jan 1, 2050
@@ -489,7 +490,7 @@ module.exports = {
     //   none. each agency will have the same service days.
     //
     // Attributes: 
-    //   service_id       | static - always "BASE_CALENDAR"          
+    //   service_id       | static - always "BASE_CALENDAR"---       
     //   date             | static - based on holiday represented
     //   exception_type   | static - always "2" for remove (as opposed to add)
 
@@ -756,11 +757,11 @@ module.exports = {
     //
     // Attributes: 
     //   feed_publisher_name  | static - always "Test Transit"
-    //   feed_publisher_url   | static - always "https://github.com/ODOT-PTS/GTFS-ride/"         
+    //   feed_publisher_url   | static - always "https://github.com/ODOT-PTS/GTFS-ride/"---      
     //   feed_lang            | static - always "en"
     //   feed_start_date      | user-defined
     //   feed_end_date        | user-defined
-    //   feed_version         | static - always "1.0.0"    
+    //   feed_version         | static - always "1.0.0"--- 
 
     feedInfoCreate: function(feed_start_date1, feed_end_date1){
         log_start("feed_info")
@@ -796,7 +797,7 @@ module.exports = {
     //   number of agencies (for purpose of randomly assigning routes)
     //
     // Attributes: 
-    //   route_id         | static - always "ROUTE#"          
+    //   route_id         | static - always "ROUTE#"---       
     //   agency_id        | random - chosen from number of agencies | example "AGENCY#"
     //   route_long_name  | random - chosen with random-lastname npm module. There are 500
     //                               since each long_name is two names with a hyphen 
@@ -856,7 +857,7 @@ module.exports = {
     //     number of stops 
     //
     // Attributes: 
-    //   stop_id    | static - always "STOP#"          
+    //   stop_id    | static - always "STOP#"---       
     //   stop_name  | random - chosen with random-lastname npm module.
     //                         potentially not unique, but this is fine.
     //   stop_lat   | random - see description above
@@ -934,7 +935,7 @@ module.exports = {
     // TODO :: add variable from user for max stops per route
     //
     // Attributes: 
-    //   trip_id         | static - always "TRIP#"          
+    //   trip_id         | static - always "TRIP#"---       
     //   arrival_time    | static - incremented in a pattern. see desc above
     //   departure_time  | static - incremented in a pattern. see desc above
     //   stop_id         | static - references a stop (randomized)
@@ -1181,7 +1182,7 @@ module.exports = {
         var board_alight = [];
 
         var d = start_date
-        log("    Reading stop_times and copying its contents for every service day...")
+        log("--- Reading stop_times and copying its contents for every service day...")
         start_op = Date.now()
         while (d <= end_date){ // for every day on the feed
             for (var st = 0; st < stop_times.length; st++){ // fill the board_alight array with info from stop_times, no ridership info yet
@@ -1208,14 +1209,14 @@ module.exports = {
                     source : user_source,  
                 })
                 if (process.memoryUsage().rss >= BOARD_ALIGHT_MEM_LIMIT){ // if total memory usage for this node process is at least 512 MiB
-                    log("No more rows added to board_alight due to memory limit. Last row on board_alight is row " + board_alight.length + " (trip " + stop_times[st].trip_id + " at stop " + stop_times[st].stop_id + " on " + d + ").")
+                    log("--- No more rows added to board_alight due to memory limit. Last row on board_alight is row " + board_alight.length + " (trip " + stop_times[st].trip_id + " at stop " + stop_times[st].stop_id + " on " + d + ").")
 
                     // break out of 2 levels of loops at once
                     d = end_date + 1 // the while loop
                     break // the for loop
                 }
                 if (Date.now() - start_op >= BOARD_ALIGHT_TIME_LIMIT){
-                    log("No more rows added to board_alight due to time limit. Last row on board_alight is row " + board_alight.length + " (trip " + stop_times[st].trip_id + " at stop " + stop_times[st].stop_id + " on " + d + ").")
+                    log("--- No more rows added to board_alight due to time limit. Last row on board_alight is row " + board_alight.length + " (trip " + stop_times[st].trip_id + " at stop " + stop_times[st].stop_id + " on " + d + ").")
                     
                     // break out of 2 levels of loops at once
                     d = end_date + 1 // the while loop
@@ -1226,21 +1227,21 @@ module.exports = {
             //d = tomorrow(d)
             d = next_service_day(d, operation_days, true)
         }
-        log("    board_alight array generated in " + (Date.now() - start_op) + " milliseconds with no riderships")
+        log("--- board_alight array generated in " + (Date.now() - start_op) + " milliseconds (ridership data not yet filled in)")
 
         // sort the rider_trip array by service_date
         /* this WILL change the final array and the exported file
            to undo this, sort the rider_trip array by rider_id,
            but tools should not fail due to the ordering of the rows
         */
-        log("    Sorting rider_trip by date...")
+        log("--- Sorting rider_trip by date...")
         start_op = Date.now()
         rider_trip.sort(function(a, b){
             return a.service_date - b.service_date
         })
-        log("    rider_trip sorted in " + (Date.now() - start_op) + " milliseconds.")
+        log("--- rider_trip sorted in " + (Date.now() - start_op) + " milliseconds.")
 
-        log("    Filling board_alight with ridership data...")
+        log("--- Filling board_alight with ridership data...")
         start_op = Date.now()
         // fill the board_alight array with ridership data
         var num_stops_per_route = num_stops / num_routes;
@@ -1268,10 +1269,10 @@ module.exports = {
             }
             
         }
-        log("    board_alight filled with ridership data in " + (Date.now() - start_op) +" milliseconds.")
+        log("--- board_alight filled with ridership data in " + (Date.now() - start_op) +" milliseconds.")
 
         start_op = Date.now()
-        log("    Calculating vehicle load...")
+        log("--- Calculating vehicle load...")
 
         // do another run-through of the board_alight array to set the load_count field
         var max_load = 60 // the maximum load, used for current_load
@@ -1286,7 +1287,7 @@ module.exports = {
             }
             board_alight[b].current_load = Math.round(board_alight[b].load_count * 100 / max_load) // current_load is a percentage of the load (how full the vehicle is)
         }
-        log("    Vehicle load calculated in " + (Date.now() - start_op) + " milliseconds.")
+        log("--- Vehicle load calculated in " + (Date.now() - start_op) + " milliseconds.")
         
         log_end("board_alight", Date.now() - start)
         return board_alight;
@@ -1319,6 +1320,13 @@ module.exports = {
         }
 
         for (var i = 0; i < num_riders; i++){
+
+            //console.log(i)
+
+            if (Date.now() - start >= RIDER_TRIP_TIME_LIMIT){
+                log("--- No more rows added to rider_trip due to time limit. Last row on rider_trip is row " + rider_trip.length + ".")
+                break // the for loop
+            }
 
             // get a random trip
             var rand_trip = getRandomIntInclusive(0, num_trips-1);
@@ -1417,7 +1425,7 @@ module.exports = {
         }
 
         // stop-level ridership
-        log("    Calculating ridership per stop...")
+        log("--- Calculating ridership per stop...")
         start_op = Date.now()
         for (var s = 0; s < stops.length; s++){
             if (Date.now() - start_op <= RIDERSHIP_STOP_TIME_LIMIT){
@@ -1443,14 +1451,14 @@ module.exports = {
                     stop_id : stops[s].stop_id,
                 })
             } else {
-                log_stopped("    Ridership per stop calculation", RIDERSHIP_STOP_TIME_LIMIT, ridership.length)
+                log_stopped("--- Ridership per stop calculation", RIDERSHIP_STOP_TIME_LIMIT, ridership.length)
                 break
             }
         }
-        log_end("    Ridership per stop calculation", Date.now() - start_op)
+        log_end("--- Ridership per stop calculation", Date.now() - start_op)
 
         // trip-level ridership
-        log("    Calculating ridership per trip...")
+        log("--- Calculating ridership per trip...")
         start_op = Date.now()
         if (Date.now() - start < RIDERSHIP_TOTAL_TIME_LIMIT){
             for (var t = 0; t < trips.length; t++){
@@ -1478,18 +1486,18 @@ module.exports = {
                         stop_id : "",
                     })
                 } else {
-                    log_stopped("    Ridership per trip calculation", RIDERSHIP_TRIP_TIME_LIMIT, ridership.length)
+                    log_stopped("--- Ridership per trip calculation", RIDERSHIP_TRIP_TIME_LIMIT, ridership.length)
                     break
                 }
             }
-            log_end("    Ridership per trip calculation", Date.now() - start_op)
+            log_end("--- Ridership per trip calculation", Date.now() - start_op)
         } else {
-            log("    Not enough time to calculate ridership by route")
+            log("--- Not enough time to calculate ridership by route")
         }
         
 
         // route-level ridership
-        log("    Calculating ridership per route...")
+        log("--- Calculating ridership per route...")
         start_op = Date.now()
         if (Date.now() - start < RIDERSHIP_TOTAL_TIME_LIMIT){
             for (var r = 0; r < routes.length; r++){
@@ -1517,18 +1525,18 @@ module.exports = {
                         stop_id : "",
                     })
                 } else {
-                    log_stopped("    Ridership per route calculation", RIDERSHIP_ROUTE_TIME_LIMIT, ridership.length)
+                    log_stopped("--- Ridership per route calculation", RIDERSHIP_ROUTE_TIME_LIMIT, ridership.length)
                     break
                 }
             }
-            log_end("    Ridership per route calculation", Date.now() - start_op)
+            log_end("--- Ridership per route calculation", Date.now() - start_op)
         } else {
-            log("    Not enough time to calculate ridership by route")
+            log("--- Not enough time to calculate ridership by route")
         }
         
 
         // agency-level ridership
-        log("    Calculating ridership per agency...")
+        log("--- Calculating ridership per agency...")
         start_op = Date.now()
         if (Date.now() - start < RIDERSHIP_TOTAL_TIME_LIMIT){
             for (var a = 0; a < agency.length; a++){
@@ -1556,13 +1564,13 @@ module.exports = {
                         stop_id : "",
                     })
                 } else {
-                    log_stopped("    Ridership per agency calculation", RIDERSHIP_AGENCY_TIME_LIMIT, ridership.length)
+                    log_stopped("--- Ridership per agency calculation", RIDERSHIP_AGENCY_TIME_LIMIT, ridership.length)
                     break
                 }
             }
-            log_end("    Ridership per agency calculation", Date.now() - start_op)
+            log_end("--- Ridership per agency calculation", Date.now() - start_op)
         } else {
-            log("    Not enough time to calculate ridership by agency")
+            log("--- Not enough time to calculate ridership by agency")
         }
         
         
@@ -1599,6 +1607,9 @@ module.exports = {
         start_date, end_date, feed_date, operation_days,
         user_source, min_riders, max_riders, aggr_level,
         calendar_type, files, filepath, filename){
+
+        // clear the log output
+        log_output = ""
 
         // ridership should start on the next service day if feed does not start on a service day
         // example case: service is only available on weekdays, but feed starts on Saturday
@@ -1649,12 +1660,14 @@ module.exports = {
         //console.log(process.cwd())
 
         // DELETE PREVIOUS FILES
+        log("Deleting old files...")
         try {
             var out = execSync('rm ./feed_creation/*') // delete all files in feed_creation dir
             log("File deletion output:")
             log(out.toString())
+            log("Old files deleted")
         } catch (e){ // rm will throw an error if the dir is empty, this statement will catch the error (preventing the server from breaking)
-            log("RM error:")
+            log("File deletion error (can happen if there are no old files):")
             log(e)
         }
 
@@ -1681,20 +1694,24 @@ module.exports = {
             fs.writeFileSync(filepath + "rider_trip.txt", riderTripCSV)
         fs.writeFileSync(filepath + "ridership.txt", ridershipCSV) // always generated
         fs.writeFileSync(filepath + "trip_capacity.txt", tripCapacityCSV)
-        log_end("Writing files", Date.now() - start)
+        log_end("Writing text files", Date.now() - start)
 
         // ZIP ALL FILES =========================
         var current_dir = process.cwd(); // save current working dir
         process.chdir(filepath); // change dir
+        log("Compressing (zipping) files...")
         try {
             var out = execSync('zip -r -y ' + filename + ' *.txt') // zip the files
             log("File compression (zipping) output:")
             log(out.toString())
+            log("Text files compressed in a single zip file.")
         } catch (e){
-            log("ZIP error:")
+            log("File compression error:")
             log(e)
         }
         process.chdir(current_dir); // undo change dir
+
+        log("Feed successfully created.")
 
         // RETURN THE LOG OUTPUT
         return (log_output);

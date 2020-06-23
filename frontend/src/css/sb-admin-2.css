@@ -11051,3 +11051,7 @@ img {
 .hidden{
   display: none;
 }
+
+.force-newlines{
+  white-space: pre-line;
+}

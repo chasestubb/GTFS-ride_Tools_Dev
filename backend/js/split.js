@@ -5,7 +5,7 @@ var csvStringifySync = require('csv-stringify/lib/sync');
 var {execSync} = require('child_process')
 
 var csv_parse = require('csv-parse/lib/sync') // converting CSV text input into arrays or objects
-var routes = csv_parse(fs.readFileSync("../testFeeds/albany/routes.txt"), {columns: true}) 
+/*var routes = csv_parse(fs.readFileSync("../testFeeds/albany/routes.txt"), {columns: true}) 
 var stops = csv_parse(fs.readFileSync("../testFeeds/albany/stops.txt"), {columns: true})
 var stop_times = csv_parse(fs.readFileSync("../testFeeds/albany/stop_times.txt"), {columns: true})
 var trips = csv_parse(fs.readFileSync("../testFeeds/albany/trips.txt"), {columns: true})
@@ -19,7 +19,7 @@ var ridership=''
 var ride_feed_info=''
 var calendar=''
 var calendar_dates = ''
-
+*/
 
 module.exports = {
 
@@ -479,7 +479,8 @@ module.exports = {
 
 //module.exports.Split(2, "6:00:00", "6:00:00", "TEST", 20100401, 20100405);
 //module.exports.Split(0, "5:10:00", "5:15:00", 0);
-module.exports.Split( agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
+/*module.exports.Split( agencies, routes, trips, stops, stop_times, calendar, calendar_dates,
     frequencies, stop_times, feed_info,
     board_alight, trip_capacity, rider_trip, ridership, ride_feed_info,
     1, "9:00:00", "10:00:00", 456, 20150101, 20210202, "albany")
+    */

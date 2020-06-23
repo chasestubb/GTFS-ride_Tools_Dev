@@ -34,6 +34,7 @@ const INFO_AGENCY_URL = '/info/agency/:index';
 const INFO_ROUTE_URL = '/info/route/:index';
 const FC_POST_URL = '/fc/params'
 const FC_GET_URL = '/fc/getfile'
+const FC_REPORT_URL = "/fc/getreport"
 const LIST_AGENCY_URL = "/agencies"
 const SPLIT_POST_URL = "/split/params"
 const SPLIT_GET_URL = "/split/getfile"
@@ -583,6 +584,23 @@ app.get(FC_GET_URL, async (req, res) => {
     
 })
 
+// --------------------------------------------------------------------------------s
+// FEED CREATION - REPORT
+app.get(FC_REPORT_URL, async(req, res) => {
+    console.log("FC REPORT")
+    res.setHeader("Access-Control-Allow-Origin", CORS);
+    res.setHeader("Content-Disposition", "attachment; filename=split.zip")
+    res.setHeader("Content-Type", "application/zip")
+
+    // wait for feed creation to finish
+    // promise will be a string containing reports on which parts got completed
+    var log = await fc_promise
+    res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'})
+    res.write(log)
+    res.send()
+    
+})
+
 //---------------------------------------------------------------------------
 // SPLIT - PARAMETERS
 app.post(SPLIT_POST_URL, async (req, res) => {
@@ -650,8 +668,10 @@ app.get(LIST_AGENCY_URL, (req, res) => {
     res.send()
    
 })
-//CLEAN - PARAMETERS
-app.post(CLEAN_POST_URL, async (req, res) => {
+
+// --------------------------------------------------------------------------------
+// CLEAN - PARAMETERS
+/*app.get(CLEAN_CONFIRM_URL, async (req, res) => {
     console.log("CLEAN PARAMS")
     console.log(req.url)
     res.setHeader("Access-Control-Allow-Origin", CORS);
@@ -667,24 +687,26 @@ app.post(CLEAN_POST_URL, async (req, res) => {
             res.end()
             console.log("splitting feed with params:")
             console.log(params)
-            resolve (clean(params.clean_by)) // generate the feed file and resolve the promise when done
+            resolve (clean(params.option)) // generate the feed file and resolve the promise when done
         })
     } else {
         res.writeHead(400)
         res.write("No feed uploaded")
         res.end()
     }
-})
+})*/
 // --------------------------------------------------------------------------------
 // CLEAN - CONFIRMATION & START CLEANING
-app.get(CLEAN_CONFIRM_URL, (req, res) => {
+app.post(CLEAN_CONFIRM_URL, (req, res) => {
     console.log("CLEAN")
+    var params = req.body
+    console.log(params)
     if (agencies && routes && trips && stops && stop_times && (calendar || calendar_dates)){ // if the user has already uploaded a valid feed
         clean_promise = new Promise((resolve, reject) => {
             res.writeHead(200, {"Access-Control-Allow-Origin": CORS, 'Content-Type': 'text/plain'});
             res.write("Clean request received")
             res.end()
-            resolve (clean()) // generate the feed file and resolve the promise when done
+            resolve (clean(params.option)) // generate the feed file and resolve the promise when done
         })
     } else {
         res.writeHead(400)
