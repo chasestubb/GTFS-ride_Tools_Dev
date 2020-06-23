@@ -69,6 +69,7 @@ class Clean extends React.Component {
 			orphan_agencies: [],
 			orphan_cal_service: [],
 			orphan_cdates_service: [],
+			option: 0,
 			zip_filename: this.props.filename + "_cleaned"
 		}
 		this.submit = this.submit.bind(this);
@@ -77,6 +78,41 @@ class Clean extends React.Component {
 		this.sendRequest = this.sendRequest.bind(this)
 		this.sendGetFile = this.sendGetFile.bind(this)
 		this.sendGetReport = this.sendGetReport.bind(this)
+		this.setNumber = this.setNumber.bind(this)
+		this.cleanList = this.cleanList.bind(this)
+	}
+
+	setNumber(event){
+		if (this.state.fileStatus > 0){
+			this.setState({fileStatus: 0})
+		}
+		this.setState({
+			[event.target.name]: Number(event.target.value)
+		})
+	}
+
+	cleanList(){
+		switch (this.state.option){
+			case 1:
+				return (<ul>
+					<li>Unused service dates and exceptions</li>
+				</ul>)
+
+			case 2:
+				return (<ul>
+					<li>Stops without trips</li>
+					<li>Routes without trips</li>
+					<li>Agencies without routes</li>
+				</ul>)
+
+			default:
+				return (<ul>
+					<li>Stops without trips</li>
+					<li>Routes without trips</li>
+					<li>Agencies without routes</li>
+					<li>Unused service dates and exceptions</li>
+				</ul>)
+		}
 	}
 
 	statusText(){
@@ -118,9 +154,11 @@ class Clean extends React.Component {
 	}
 
 	// sends a request when the user clicks the clean button
-	async sendRequest(){
-		Axios.get(Settings.HOST + Settings.CLEAN_CONFIRM_URL).then((res) => {
+	async sendRequest(json){
+		console.log("sendRequest")
+		Axios.post(Settings.HOST + Settings.CLEAN_CONFIRM_URL, {...json}).then((res) => {
 			this.setState({fileStatus: 2})
+			console.log("sendRequest received a response")
 		}).catch((err) => {
 			console.log("ERROR " + err)
 			this.setState({fileStatus: -2})
@@ -129,6 +167,7 @@ class Clean extends React.Component {
 
 	// request the cleaned file, sent after sendRequest has received a response
 	async sendGetFile(){
+		console.log("sendGetFile")
 		Axios.get(Settings.HOST + Settings.CLEAN_FILE_URL, {
 			responseType: "arraybuffer" // response is a binary file, do not parse as string
 		}).then((res) => {
@@ -160,6 +199,7 @@ class Clean extends React.Component {
 
 	// request the report for what got removed, sent after sendRequest has received a response
 	async sendGetReport(){
+		console.log("sendGetReport")
 		Axios.get(Settings.HOST + Settings.CLEAN_REPORT_URL).then((res) => {
 			this.setState({
 				fileStatus: 3,
@@ -188,9 +228,9 @@ class Clean extends React.Component {
 	   9.  Client receives the cleaned feed and the report
 	   10. Client downloads the feed to the user's computer and displays the report
 	*/
-	submit(){
+	submit(event){
 		this.setState({fileStatus: 1})
-		this.sendRequest().then(() => {
+		this.sendRequest({option: this.state.option}).then(() => {
 			this.sendGetFile()
 			this.sendGetReport()
 		})
@@ -235,14 +275,15 @@ class Clean extends React.Component {
 									<h6 className="m-0 font-weight-bold text-primary">Confirmation</h6>
 								</div>
 								<div className="card-body">
-									Click on the button below to clean <strong className="text-dark">{this.props.filename}</strong>.
-									Cleaning will return a copy of the feed with these removed:
-									<ul>
-										<li>Stops without trips</li>
-										<li>Routes without trips</li>
-										<li>Agencies without routes</li>
-										<li>Unused service dates and exceptions</li>
-									</ul>
+									Clean unused 
+									<select name="option" value={this.state.option} onChange={this.setNumber}>
+										<option value={0}>calendar entries, stops, routes, and agencies</option>
+										<option value={1}>calendar entries</option>
+										<option value={2}>stops, routes, and agencies</option>
+									</select>
+									from <strong className="text-dark">{this.props.filename}</strong>.<br/>
+									Click on the button below to return a copy of the feed with these removed:
+									{this.cleanList()}
 									<button onClick={this.submit}>Clean {this.props.filename}</button>
 								</div>
 							</div>
