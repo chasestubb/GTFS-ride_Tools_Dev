@@ -16,7 +16,7 @@
     "express": "^4.17.1",
     "extract-zip": "^1.6.7",
     "formidable": "^1.2.1",
-    "mocha": "^7.1.2",
+    "mocha": "^10.2.0",
     "nan": "^2.14.0",
     "number-to-words": "^1.2.4",
     "random-lastname": "^1.0.1"
